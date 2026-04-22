@@ -205,13 +205,12 @@ class MarkoAutoloader
     }
 }
 
-$corePackagesPath = dirname(__DIR__) . '/core-packages';
-$myPackagesPath = dirname(__DIR__) . '/my-packages';
+$corePackagesPath = dirname(__DIR__) . '/packages';
+$myPackagesPath = dirname(__DIR__) . '/packages';
 $modulesPath = dirname(__DIR__) . '/modules';
 $basePath = dirname(__DIR__);
 
 $autoloader = new MarkoAutoloader($corePackagesPath, $basePath);
-$autoloader->addPath($myPackagesPath);
 $autoloader->addPath($modulesPath);
 $autoloader->build();
 $autoloader->register();
