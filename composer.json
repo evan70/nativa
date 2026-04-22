@@ -22,8 +22,7 @@
         "marko/validation": "*@dev",
         "marko/errors": "*@dev",
         "marko/errors-simple": "*@dev",
-        "marko/session-database": "dev-main",
-        "marko/session-file": "dev-main"
+        "marko/session-database": "dev-main"
     },
     "require-dev": {
         "pestphp/pest": "^4.0",

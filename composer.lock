@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "64d8a73c65ff2f3a556d057bf75b6fcc",
+    "content-hash": "fb50ad1d09680064570d151af0e080d5",
     "packages": [
         {
             "name": "marko/cli",
@@ -445,48 +445,6 @@
             "description": "Database session driver for Marko Framework",
             "support": {
                 "source": "https://github.com/marko-php/marko-session-database/tree/develop"
-            },
-            "time": "2026-03-25T17:53:35+00:00"
-        },
-        {
-            "name": "marko/session-file",
-            "version": "dev-main",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/marko-php/marko-session-file.git",
-                "reference": "843672d5ab391374803598b2745621192c5e5855"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/marko-php/marko-session-file/zipball/843672d5ab391374803598b2745621192c5e5855",
-                "reference": "843672d5ab391374803598b2745621192c5e5855",
-                "shasum": ""
-            },
-            "require": {
-                "marko/session": "self.version",
-                "php": "^8.5"
-            },
-            "require-dev": {
-                "marko/testing": "self.version"
-            },
-            "type": "marko-module",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\Session\\File\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "description": "File-based session driver for Marko Framework",
-            "support": {
-                "source": "https://github.com/marko-php/marko-session-file/tree/develop"
             },
             "time": "2026-03-25T17:53:35+00:00"
         },
@@ -4637,7 +4595,6 @@
         "marko/hashing": 20,
         "marko/routing": 20,
         "marko/session-database": 20,
-        "marko/session-file": 20,
         "marko/testing": 20,
         "marko/validation": 20
     },
