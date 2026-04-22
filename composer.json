@@ -24,7 +24,8 @@
         "marko/errors-simple": "*@dev"
     },
     "require-dev": {
-        "pestphp/pest": "^4.0"
+        "pestphp/pest": "^4.0",
+        "marko/testing": "*@dev"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
