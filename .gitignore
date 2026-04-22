@@ -2,16 +2,19 @@
 # Dependencies
 vendor/
 
-# Logs and temp files
+# Logs
 *.log
-*.tmp
 
 # Environment
 .env
 .env.local
 *.env.*
 
-# Editor/IDE
+# Cache
+.cache/
+.phpunit.result.cache
+
+# IDE
 .vscode/
 .idea/
 *.swp
@@ -24,83 +27,5 @@ Thumbs.db
 # Build artifacts
 dist/
 build/
-target/
-*.o
-*.obj
-*.exe
-*.dll
-*.so
-*.a
-*.out
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-*.pyc
-*.pyo
-*.pyd
-*.so
-*.egg-info/
-.eggs/
-.coverage
-coverage/
-htmlcov/
-.mypy_cache/
-.pytest_cache/
-.tox/
-.coverage
-.nox/
-
-# Node.js
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Java
-*.class
-*.jar
-*.war
-*.ear
-hs_err_pid*
-.recommenders
-
-# C/C++
-*.i
-*.ii
-*.s
-*.su
-*.lo
-
-# Ruby
-*.gem
-*.rbc
-.bundle/
-.jruby-lint-cache
-
-# Go
-*.exe
-*.dll
-*.so
-*.dylib
-
-# Rust
-Cargo.lock
-*.rlib
-target/
-
-# PHP
-composer.lock
-vendor/
-
-# Compiled and build artifacts
-*.pyc
-pycache/
-*.o
-*.obj
-dist/
-build/
+*.phar
 ```
