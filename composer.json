@@ -1,0 +1,34 @@
+{
+    "name": "marko/skeleton",
+    "description": "Marko Framework - Application Skeleton",
+    "license": "MIT",
+    "type": "project",
+    "repositories": [
+        {
+            "type": "path",
+            "url": "packages/*",
+            "canonical": true
+        }
+    ],
+    "require": {
+        "php": "^8.5",
+        "marko/env": "*@dev",
+        "marko/core": "*@dev",
+        "marko/cli": "*@dev",
+        "marko/config": "*@dev",
+        "marko/database": "*@dev",
+        "marko/hashing": "*@dev",
+        "marko/routing": "*@dev",
+        "marko/validation": "*@dev",
+        "marko/errors": "*@dev",
+        "marko/errors-simple": "*@dev"
+    },
+    "require-dev": {
+        "pestphp/pest": "^4.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    }
+}

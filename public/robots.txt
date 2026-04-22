@@ -1,0 +1,25 @@
+# Nativa PHP Svelte Boot - Robots.txt
+# https://responsive.sk/robots.txt
+
+User-agent: *
+
+# Explicitly allow only public routes
+Allow: /$
+Allow: /blog
+Allow: /blog/
+Allow: /portfolio
+Allow: /contact
+Allow: /docs
+Allow: /tag/
+Allow: /search
+Allow: /form/
+Allow: /sitemap.xml
+
+# Implicitly block everything else (... api, internal routes ...)
+# No need to list disallowed paths - security by obscurity
+
+# Sitemap location
+Sitemap: https://responsive.sk/sitemap.xml
+
+# Crawl-delay (optional, polite crawling)
+Crawl-delay: 1

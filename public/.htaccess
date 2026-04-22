@@ -1,0 +1,223 @@
+# =============================================================================
+# Apache Configuration for Nativa CMS
+# Production-ready: Gzip, Brotli, Security, Performance
+# =============================================================================
+
+# Enable rewrite engine
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    
+    # Redirect trailing slashes for non-existent files
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+    
+    # Handle Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+# If mod_rewrite is not available
+<IfModule !mod_rewrite.c>
+    # Fallback to index.php
+    DirectoryIndex index.php
+</IfModule>
+
+# =============================================================================
+# COMPRESSION - Gzip & Brotli
+# =============================================================================
+
+# Brotli Compression (BEST - 80-90% compression)
+<IfModule mod_brotli.c>
+    AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css application/javascript application/json image/svg+xml
+    BrotliCompressionLevel 5
+    BrotliCompressionQuality 5
+</IfModule>
+
+# Gzip Compression (GOOD - 70-80% compression, fallback for Brotli)
+<IfModule mod_deflate.c>
+    # Compress text, HTML, JavaScript, CSS, SVG
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/json
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE image/svg+xml
+    
+    # Don't compress images (already compressed)
+    SetEnvIfNoCase Request_URI \.(?:gif|jpe?g|png|webp|ico|woff2?)$ no-gzip
+    
+    # Don't compress already compressed files
+    SetEnvIfNoCase Request_URI \.(?:gz|bz2|zip|7z|rar)$ no-gzip
+    
+    # Netscape 4.x has some problems
+    BrowserMatch ^Mozilla/4 gzip-only-text/html
+    
+    # Netscape 4.08 has a bug
+    BrowserMatch ^Mozilla/4\.0[678] no-gzip
+    
+    # MSIE masquerades as Netscape, but it is fine
+    BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+</IfModule>
+
+# =============================================================================
+# SECURITY HEADERS
+# =============================================================================
+
+<IfModule mod_headers.c>
+    # Prevent clickjacking
+    Header always set X-Frame-Options "DENY"
+    
+    # Prevent MIME type sniffing
+    Header always set X-Content-Type-Options "nosniff"
+    
+    # XSS Protection
+    Header always set X-XSS-Protection "1; mode=block"
+    
+    # Referrer Policy
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # Content Security Policy (adjust for your needs)
+    # Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self';"
+    
+    # Permissions Policy
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+    
+    # Remove server signature
+    Header always unset X-Powered-By
+    Header always unset Server
+</IfModule>
+
+# Hide server information
+ServerTokens Prod
+ServerSignature Off
+
+# =============================================================================
+# CACHING - Browser Cache
+# =============================================================================
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    
+    # Images - cache for 1 year
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+    
+    # Fonts - cache for 1 year
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType application/font-woff "access plus 1 year"
+    
+    # CSS and JavaScript - cache for 1 month
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+    
+    # HTML - cache for 1 hour
+    ExpiresByType text/html "access plus 1 hour"
+    
+    # JSON - cache for 1 hour
+    ExpiresByType application/json "access plus 1 hour"
+    
+    # Default - cache for 1 week
+    ExpiresDefault "access plus 1 week"
+</IfModule>
+
+# Cache-Control headers (fallback for mod_expires)
+<IfModule mod_headers.c>
+    # 1 YEAR - static assets
+    <FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico|woff2|woff|ttf|eot)$">
+        Header set Cache-Control "max-age=31536000, public, immutable"
+    </FilesMatch>
+    
+    # 1 MONTH - CSS and JS
+    <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "max-age=2592000, public"
+    </FilesMatch>
+    
+    # 1 HOUR - HTML and JSON
+    <FilesMatch "\.(html|htm|json)$">
+        Header set Cache-Control "max-age=3600, public, must-revalidate"
+    </FilesMatch>
+</IfModule>
+
+# =============================================================================
+# PROTECT SENSITIVE FILES
+# =============================================================================
+
+# Deny access to .htaccess and .htpasswd
+<FilesMatch "^\.ht">
+    Require all denied
+</FilesMatch>
+
+# Deny access to .git directory
+<IfModule mod_alias.c>
+    RedirectMatch 404 /\.git
+</IfModule>
+
+# Deny access to .env files
+<FilesMatch "^\.env">
+    Require all denied
+</FilesMatch>
+
+# Deny access to composer files
+<FilesMatch "^(composer\.json|composer\.lock)$">
+    Require all denied
+</FilesMatch>
+
+# Deny access to markdown files
+<FilesMatch "\.(md|markdown)$">
+    Require all denied
+</FilesMatch>
+
+# =============================================================================
+# UTF-8 ENCODING
+# =============================================================================
+
+AddDefaultCharset UTF-8
+AddType text/html .html .htm
+AddType text/css .css
+AddType application/javascript .js
+AddType application/json .json
+AddType image/svg+xml .svg
+
+# =============================================================================
+# PREVENT DIRECTORY LISTING
+# =============================================================================
+
+Options -Indexes
+
+# =============================================================================
+# ERROR PAGES (Optional - customize as needed)
+# =============================================================================
+
+# ErrorDocument 400 /errors/400.html
+# ErrorDocument 401 /errors/401.html
+# ErrorDocument 403 /errors/403.html
+# ErrorDocument 404 /errors/404.html
+# ErrorDocument 500 /errors/500.html
+
+# =============================================================================
+# PHP SETTINGS (PHP-FPM via Apache)
+# Note: Some settings may not work on shared hosting
+# =============================================================================
+
+<IfModule mod_php.c>
+    # This only works with mod_php, not PHP-FPM
+    # PHP-FPM settings must be set in php.ini or pool config
+</IfModule>
+
+# For PHP-FPM, use .user.ini instead
+# Create public/.user.ini with:
+# memory_limit = 256M
+# max_execution_time = 300
+# session.cookie_httponly = 1
+# session.cookie_secure = 1
