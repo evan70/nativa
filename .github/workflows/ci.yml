@@ -44,26 +44,6 @@ jobs:
     - name: Install Root Dependencies
       run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-    - name: Install Package Dependencies (Parallel)
-      run: |
-        for dir in packages/*/; do
-          if [ -f "$dir/composer.json" ]; then
-            echo "Installing dependencies in $dir"
-            (cd "$dir" && composer install --no-interaction --prefer-dist --optimize-autoloader) &
-          fi
-        done
-        wait
-
-    - name: Install Module Dependencies (Parallel)
-      run: |
-        for dir in modules/*/; do
-          if [ -f "$dir/composer.json" ]; then
-            echo "Installing dependencies in $dir"
-            (cd "$dir" && composer install --no-interaction --prefer-dist --optimize-autoloader) &
-          fi
-        done
-        wait
-
     - name: Verify Autoload Generation
       run: |
         php -r "require 'bootstrap/autoload.php'; echo 'Autoload OK';" || exit 1
