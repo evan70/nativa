@@ -37,7 +37,7 @@ if (!is_dir($rootDir . '/vendor')) {
 echo "📂 Preparing production artifacts...\n";
 
 // Copy source code directories
-$sourceDirs = ['app', 'bootstrap', 'modules', 'packages', 'config', 'routes'];
+$sourceDirs = ['app', 'bootstrap', 'modules', 'packages', 'config', 'database', 'routes'];
 foreach ($sourceDirs as $dir) {
     if (is_dir($rootDir . '/' . $dir)) {
         echo "   Copying $dir...\n";
@@ -47,6 +47,10 @@ foreach ($sourceDirs as $dir) {
     }
 }
 
+copyVendorMarkoPackages($rootDir, $distDir);
+writeRuntimeManifest($distDir);
+removeComposerFiles($distDir);
+
 // Create a minimal .gitignore for dist
 file_put_contents($distDir . '/.gitignore', "*\n!.gitignore\n");
 
@@ -54,7 +58,146 @@ echo "✅ Build complete! Production ready files are in './dist'\n";
 echo "ℹ️  The 'dist' folder contains:\n";
 echo "   - Bootstrap autoloader resolving packages/ directly\n";
 echo "   - Source code (app, modules, packages)\n";
+echo "   - All required marko/* runtime packages moved into packages/\n";
 echo "   - NO vendor directory\n";
 echo "   - NO root composer.json / composer.lock\n";
-echo "   - Package composer.json manifests kept for runtime discovery\n";
+echo "   - NO package composer.json files (runtime manifest generated)\n";
 echo "\n📦 Deploy the contents of './dist' to production.\n";
+
+/**
+ * Copy marko packages that still live only under vendor/marko into dist/packages.
+ */
+function copyVendorMarkoPackages(
+    string $rootDir,
+    string $distDir,
+): void {
+    $vendorMarkoDir = $rootDir . '/vendor/marko';
+    $distPackagesDir = $distDir . '/packages';
+
+    if (!is_dir($vendorMarkoDir) || !is_dir($distPackagesDir)) {
+        return;
+    }
+
+    foreach (scandir($vendorMarkoDir) ?: [] as $packageName) {
+        if ($packageName === '.' || $packageName === '..') {
+            continue;
+        }
+
+        $sourcePath = $vendorMarkoDir . '/' . $packageName;
+        $targetPath = $distPackagesDir . '/' . $packageName;
+
+        if (!is_dir($sourcePath) || file_exists($targetPath)) {
+            continue;
+        }
+
+        echo "   Copying vendor/marko/$packageName into packages/...\n";
+        copyDirectory($sourcePath, $targetPath);
+    }
+}
+
+/**
+ * Generate a runtime manifest so production does not depend on composer.json files.
+ */
+function writeRuntimeManifest(
+    string $distDir,
+): void {
+    $manifest = [];
+
+    foreach (findFilesByName($distDir, 'composer.json') as $composerFile) {
+        $contents = file_get_contents($composerFile);
+
+        if ($contents === false) {
+            continue;
+        }
+
+        $decoded = json_decode($contents, true);
+
+        if (!is_array($decoded)) {
+            continue;
+        }
+
+        $modulePath = dirname($composerFile);
+        $relativePath = ltrim(str_replace(str_replace('\\', '/', $distDir), '', str_replace('\\', '/', $modulePath)), '/');
+        $manifest[$relativePath] = $decoded;
+    }
+
+    ksort($manifest);
+
+    $manifestFile = $distDir . '/bootstrap/runtime-manifest.php';
+    $export = var_export($manifest, true);
+    file_put_contents($manifestFile, "<?php\n\ndeclare(strict_types=1);\n\nreturn $export;\n");
+}
+
+/**
+ * Remove composer metadata from dist after runtime-manifest.php has been generated.
+ */
+function removeComposerFiles(
+    string $distDir,
+): void {
+    foreach (findFilesByName($distDir, 'composer.json') as $composerFile) {
+        unlink($composerFile);
+    }
+
+    foreach (findFilesByName($distDir, 'composer.lock') as $composerLockFile) {
+        unlink($composerLockFile);
+    }
+}
+
+/**
+ * @return array<string>
+ */
+function findFilesByName(
+    string $directory,
+    string $filename,
+): array {
+    if (!is_dir($directory)) {
+        return [];
+    }
+
+    $files = [];
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS),
+    );
+
+    foreach ($iterator as $file) {
+        if ($file->isFile() && $file->getFilename() === $filename) {
+            $files[] = $file->getPathname();
+        }
+    }
+
+    return $files;
+}
+
+function copyDirectory(
+    string $source,
+    string $target,
+): void {
+    $resolvedSource = is_link($source) ? realpath($source) : $source;
+
+    if ($resolvedSource === false || !is_dir($resolvedSource)) {
+        return;
+    }
+
+    if (!is_dir($target)) {
+        mkdir($target, 0755, true);
+    }
+
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($resolvedSource, RecursiveDirectoryIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::SELF_FIRST,
+    );
+
+    foreach ($iterator as $item) {
+        $destinationPath = $target . '/' . $iterator->getSubPathName();
+
+        if ($item->isDir()) {
+            if (!is_dir($destinationPath)) {
+                mkdir($destinationPath, 0755, true);
+            }
+
+            continue;
+        }
+
+        copy($item->getPathname(), $destinationPath);
+    }
+}

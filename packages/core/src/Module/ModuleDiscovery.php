@@ -125,26 +125,7 @@ readonly class ModuleDiscovery
     private function isMarkoModule(
         string $path,
     ): bool {
-        $composerPath = $path . '/composer.json';
-
-        if (!is_file($composerPath)) {
-            return false;
-        }
-
-        $contents = file_get_contents($composerPath);
-
-        if ($contents === false) {
-            return false;
-        }
-
-        $data = json_decode($contents, true);
-
-        if (!is_array($data)) {
-            return false;
-        }
-
-        return isset($data['extra']['marko']['module'])
-            && $data['extra']['marko']['module'] === true;
+        return $this->parser->isMarkoModule($path);
     }
 
     /**
