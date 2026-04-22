@@ -1,0 +1,96 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        php-version: ['8.3']
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-version }}
+        extensions: mbstring, xml, curl, zip, json, dom
+        tools: composer:v2
+        coverage: none
+
+    - name: Get Composer Cache Directory
+      id: composer-cache
+      run: |
+        echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+    - name: Cache Composer dependencies
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-composer-
+
+    - name: Install Root Dependencies
+      run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+    - name: Install Package Dependencies (Parallel)
+      run: |
+        for dir in packages/*/; do
+          if [ -f "$dir/composer.json" ]; then
+            echo "Installing dependencies in $dir"
+            (cd "$dir" && composer install --no-interaction --prefer-dist --optimize-autoloader) &
+          fi
+        done
+        wait
+
+    - name: Install Module Dependencies (Parallel)
+      run: |
+        for dir in modules/*/; do
+          if [ -f "$dir/composer.json" ]; then
+            echo "Installing dependencies in $dir"
+            (cd "$dir" && composer install --no-interaction --prefer-dist --optimize-autoloader) &
+          fi
+        done
+        wait
+
+    - name: Verify Autoload Generation
+      run: |
+        php -r "require 'bootstrap/autoload.php'; echo 'Autoload OK';" || exit 1
+
+    - name: Run Static Analysis (PHPStan/Psalm - Optional)
+      run: |
+        # Uncomment if you have PHPStan or Psalm configured
+        # vendor/bin/phpstan analyse --memory-limit=1G
+        # vendor/bin/psalm
+        echo "Static analysis skipped (configure as needed)"
+
+    - name: Run Tests (PHPUnit/Pest - Optional)
+      run: |
+        # Uncomment if you have tests
+        # vendor/bin/phpunit
+        # vendor/bin/pest
+        echo "Tests skipped (add your test suite)"
+
+    - name: Build Production Artifact (No Composer in Prod)
+      run: |
+        echo "🚀 Building production artifact..."
+        php build.php
+        echo "✅ Build complete. Contents of ./dist are ready for deployment."
+        ls -la dist/
+
+    - name: Upload Production Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: marko-production-build
+        path: dist/
+        retention-days: 5
+        if-no-files-found: error

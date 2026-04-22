@@ -1,23 +1,9 @@
 ```
-# Dependencies
-vendor/
-composer.lock
+# Build artifacts
+build/
 
-# Environment
+# Environment files
 .env
 .env.local
 *.env.*
-
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-
-# Editors
-.vscode/
-.idea/
-
-# OS
-.DS_Store
-Thumbs.db
 ```
