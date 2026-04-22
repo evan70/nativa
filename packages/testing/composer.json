@@ -1,0 +1,42 @@
+{
+    "name": "marko/testing",
+    "description": "Testing utilities for the Marko framework - fakes, assertions, and Pest integration",
+    "license": "MIT",
+    "type": "marko-module",
+    "require": {
+        "php": "^8.5",
+        "marko/core": "self.version",
+        "marko/config": "self.version",
+        "marko/mail": "self.version",
+        "marko/queue": "self.version",
+        "marko/session": "self.version",
+        "marko/log": "self.version",
+        "marko/authentication": "self.version"
+    },
+    "require-dev": {
+        "pestphp/pest": "^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Marko\\Testing\\": "src/"
+        },
+        "files": [
+            "src/Pest/Expectations.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Marko\\Testing\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "extra": {
+        "marko": {
+            "module": true
+        }
+    }
+}
