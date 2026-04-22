@@ -1,0 +1,26 @@
+{
+    "name": "marko/session",
+    "description": "Session interfaces and infrastructure for Marko Framework",
+    "type": "marko-module",
+    "license": "MIT",
+    "require": {
+        "php": "^8.5",
+        "marko/core": "self.version",
+        "marko/config": "self.version"
+    },
+    "autoload": {
+        "psr-4": {
+            "Marko\\Session\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Marko\\Session\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "marko": {
+            "module": true
+        }
+    }
+}

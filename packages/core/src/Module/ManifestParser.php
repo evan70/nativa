@@ -16,6 +16,20 @@ use ParseError;
 class ManifestParser
 {
     /**
+     * Check whether a path is a Marko module using either runtime manifest
+     * metadata or composer.json during development.
+     */
+    public function isMarkoModule(
+        string $modulePath,
+    ): bool {
+        $composerData = $this->loadComposerMetadata($modulePath);
+
+        return is_array($composerData)
+            && isset($composerData['extra']['marko']['module'])
+            && $composerData['extra']['marko']['module'] === true;
+    }
+
+    /**
      * Parse a module directory containing composer.json and optionally module.php.
      *
      * @param string $modulePath Path to the module directory
@@ -52,6 +66,12 @@ class ManifestParser
     private function parseComposerJson(
         string $modulePath,
     ): array {
+        $manifestComposerData = $this->loadComposerMetadata($modulePath);
+
+        if ($manifestComposerData !== null) {
+            return $manifestComposerData;
+        }
+
         $composerPath = $modulePath . '/composer.json';
 
         if (!is_file($composerPath)) {
@@ -87,6 +107,66 @@ class ManifestParser
         }
 
         return $data;
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function loadComposerMetadata(
+        string $modulePath,
+    ): ?array {
+        [$basePath, $runtimeManifest] = $this->loadRuntimeManifest($modulePath);
+
+        if ($basePath === '' || $runtimeManifest === []) {
+            return null;
+        }
+
+        $normalizedBase = rtrim(str_replace('\\', '/', $basePath), '/');
+        $normalizedPath = str_replace('\\', '/', $modulePath);
+
+        if (!str_starts_with($normalizedPath, $normalizedBase . '/')) {
+            return null;
+        }
+
+        $relativePath = substr($normalizedPath, strlen($normalizedBase) + 1);
+        $composerData = $runtimeManifest[$relativePath] ?? null;
+
+        return is_array($composerData) ? $composerData : null;
+    }
+
+    /**
+     * @return array{0: string, 1: array<string, mixed>}
+     */
+    private function loadRuntimeManifest(
+        string $path,
+    ): array {
+        static $cache = [];
+
+        $current = is_dir($path) ? $path : dirname($path);
+
+        while (true) {
+            $candidate = $current . '/bootstrap/runtime-manifest.php';
+
+            if (is_file($candidate)) {
+                if (!isset($cache[$candidate])) {
+                    $manifest = require $candidate;
+                    $cache[$candidate] = [
+                        $current,
+                        is_array($manifest) ? $manifest : [],
+                    ];
+                }
+
+                return $cache[$candidate];
+            }
+
+            $parent = dirname($current);
+
+            if ($parent === $current) {
+                return ['', []];
+            }
+
+            $current = $parent;
+        }
     }
 
     /**

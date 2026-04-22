@@ -3,6 +3,10 @@
 declare(strict_types=1);
 
 $composerAutoload = __DIR__ . '/../vendor/autoload.php';
+$runtimeManifestFile = __DIR__ . '/runtime-manifest.php';
+$runtimeManifest = is_file($runtimeManifestFile)
+    ? require $runtimeManifestFile
+    : [];
 
 if (is_file($composerAutoload)) {
     require_once $composerAutoload;
@@ -16,6 +20,7 @@ class MarkoAutoloader
     public function __construct(
         private string $packagesPath,
         private string $basePath,
+        private array $runtimeManifest = [],
     ) {
         $this->additionalPaths = [$packagesPath];
     }
@@ -64,19 +69,34 @@ class MarkoAutoloader
         }
 
         foreach ($packages as $packageDir) {
-            $composerFile = $packageDir . '/composer.json';
-            if (!file_exists($composerFile)) {
-                continue;
-            }
-
-            $composer = json_decode(file_get_contents($composerFile), true);
-            if (!$composer) {
+            $composer = $this->packageMetadata($packageDir);
+            if ($composer === null) {
                 continue;
             }
 
             $this->registerPackage($packageDir, $composer);
             $this->loadModule($packageDir);
         }
+    }
+
+    private function packageMetadata(string $packageDir): ?array
+    {
+        $relativePath = $this->relativePath($packageDir);
+
+        if ($relativePath !== null && isset($this->runtimeManifest[$relativePath])) {
+            $metadata = $this->runtimeManifest[$relativePath];
+
+            return is_array($metadata) ? $metadata : null;
+        }
+
+        $composerFile = $packageDir . '/composer.json';
+        if (!is_file($composerFile)) {
+            return null;
+        }
+
+        $composer = json_decode(file_get_contents($composerFile), true);
+
+        return is_array($composer) ? $composer : null;
     }
 
     private function registerPackage(string $packageDir, array $composer): void
@@ -186,6 +206,18 @@ class MarkoAutoloader
         }
     }
 
+    private function relativePath(string $absolutePath): ?string
+    {
+        $normalizedBase = rtrim(str_replace('\\', '/', $this->basePath), '/');
+        $normalizedPath = str_replace('\\', '/', $absolutePath);
+
+        if (!str_starts_with($normalizedPath, $normalizedBase . '/')) {
+            return null;
+        }
+
+        return substr($normalizedPath, strlen($normalizedBase) + 1);
+    }
+
     public function loadClass(string $className): bool
     {
         if (isset($this->classMap[$className])) {
@@ -213,7 +245,7 @@ $corePackagesPath = dirname(__DIR__) . '/packages';
 $modulesPath = dirname(__DIR__) . '/modules';
 $basePath = dirname(__DIR__);
 
-$autoloader = new MarkoAutoloader($corePackagesPath, $basePath);
+$autoloader = new MarkoAutoloader($corePackagesPath, $basePath, is_array($runtimeManifest) ? $runtimeManifest : []);
 $autoloader->addPath($modulesPath);
 $autoloader->build();
 $autoloader->register();
