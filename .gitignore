@@ -1,6 +1,5 @@
-```
 # Dependencies
-#vendor/
+vendor/
 
 # Logs
 *.log
@@ -12,6 +11,7 @@
 
 # Cache
 .cache/
+.phpunit.cache/
 .phpunit.result.cache
 
 # IDE
@@ -24,8 +24,15 @@
 .DS_Store
 Thumbs.db
 
+# Local tooling
+.codex/
+.codex
+.kilo/
+
+# Local database
+database/*.sqlite
+
 # Build artifacts
 dist/
 build/
 *.phar
-```
