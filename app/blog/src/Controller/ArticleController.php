@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Blog\Controller;
 
+use App\Controllers\View;
 use App\Blog\Repository\ArticleRepository;
+use App\Blog\Entity\Article;
 use Marko\Routing\Attributes\Get;
 use Marko\Routing\Attributes\Post;
 use Marko\Routing\Http\Response;
@@ -16,47 +18,42 @@ class ArticleController
     ) {}
 
     #[Get('/blog')]
-    public function index(): string
+    public function index(): Response
     {
         $articles = $this->repository->findAll();
-        
-        $html = "<h1>Blog</h1>\n";
-        $html .= "<a href='/articles/new'>New Article</a>\n<ul>\n";
-        
-        foreach ($articles as $article) {
-            $html .= "  <li><a href='/blog/{$article->id}'>{$article->title}</a></li>\n";
-        }
-        
-        $html .= "</ul>";
-        
-        return $html;
+
+        return Response::html(View::render('blog/index.phtml', [
+            'title' => 'Blog',
+            'message' => 'Read existing posts or publish a new one.',
+            'articles' => $articles,
+        ]));
     }
 
     #[Get('/blog/{id}')]
-    public function show(int $id): string
+    public function show(int $id): Response
     {
         $article = $this->repository->find($id);
-        
+
         if ($article === null) {
-            return "Article not found";
+            return Response::html(View::render('blog/not-found.phtml', [
+                'title' => 'Article Not Found',
+                'message' => 'The requested article does not exist.',
+            ]), 404);
         }
-        
-        return "<h1>{$article->title}</h1>
-<p>{$article->content}</p>
-<p><small>Created: {$article->createdAt}</small></p>
-<a href='/blog'>Back</a>";
+
+        return Response::html(View::render('blog/show.phtml', [
+            'title' => $article->title,
+            'article' => $article,
+        ]));
     }
 
     #[Get('/articles/new')]
-    public function create(): string
+    public function create(): Response
     {
-        return "<h1>New Article</h1>
-<form action='/blog' method='POST'>
-  <p><label>Title: <input type='text' name='title' required></label></p>
-  <p><label>Content: <textarea name='content' required></textarea></label></p>
-  <p><button type='submit'>Create</button></p>
-</form>
-<a href='/blog'>Back</a>";
+        return Response::html(View::render('blog/create.phtml', [
+            'title' => 'New Article',
+            'message' => 'Draft something worth keeping.',
+        ]));
     }
 
     #[Post('/blog')]
@@ -64,13 +61,13 @@ class ArticleController
     {
         $title = $_POST['title'] ?? '';
         $content = $_POST['content'] ?? '';
-        
-        $article = new \App\Blog\Entity\Article();
+
+        $article = new Article();
         $article->title = $title;
         $article->content = $content;
-        
+
         $this->repository->save($article);
-        
+
         return new Response('', 302, ['Location' => '/blog']);
     }
 }
