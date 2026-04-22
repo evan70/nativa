@@ -1,0 +1,11 @@
+{
+    "name": "marko/psr-container-shim",
+    "description": "Runtime PSR container interfaces for vendorless Marko builds",
+    "license": "MIT",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Psr\\Container\\": "src/"
+        }
+    }
+}

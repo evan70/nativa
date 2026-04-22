@@ -71,7 +71,14 @@ readonly class CliKernel
         }
 
         // Load the project's autoloader
-        require_once $projectRoot . '/vendor/autoload.php';
+        $bootstrapAutoload = $projectRoot . '/bootstrap/autoload.php';
+        $composerAutoload = $projectRoot . '/vendor/autoload.php';
+
+        if (is_file($bootstrapAutoload)) {
+            require_once $bootstrapAutoload;
+        } elseif (is_file($composerAutoload)) {
+            require_once $composerAutoload;
+        }
 
         // Create and boot the application
         $app = ($this->applicationFactory)($projectRoot);

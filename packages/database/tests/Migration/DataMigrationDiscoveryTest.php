@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/Helpers.php';
+
 use Marko\Core\Path\ProjectPaths;
 use Marko\Database\Migration\DataMigrationDiscovery;
 use Marko\Database\Tests\Migration\Helpers;
@@ -35,6 +37,24 @@ describe('DataMigrationDiscovery', function (): void {
                 '001_insert_statuses',
                 '002_insert_categories',
             ]);
+    });
+
+    it('discovers data migrations in flat packages/*/Data/', function (): void {
+        $packagePath = $this->tempDir . '/packages/blog/Data';
+        mkdir($packagePath, 0777, true);
+
+        file_put_contents($packagePath . '/001_insert_statuses.php', '<?php return new class {};');
+
+        $paths = new ProjectPaths($this->tempDir);
+        $discovery = new DataMigrationDiscovery($paths);
+
+        $migrations = $discovery->discover();
+
+        expect($migrations)
+            ->toHaveCount(1)
+            ->and($migrations[0]['name'])->toBe('001_insert_statuses')
+            ->and($migrations[0]['path'])->toBe($packagePath . '/001_insert_statuses.php')
+            ->and($migrations[0]['source'])->toBe('vendor');
     });
 
     it('discovers data migrations in modules/*/*/Data/', function (): void {

@@ -61,13 +61,10 @@ readonly class DataMigrationDiscovery
      */
     private function discoverFromVendor(): array
     {
-        if (!is_dir($this->vendorPath)) {
-            return [];
-        }
-
-        $pattern = $this->vendorPath . '/*/*/Data/*.php';
-
-        return $this->discoverFromPattern($pattern, 'vendor');
+        return $this->discoverFromPatterns([
+            $this->vendorPath . '/*/*/Data/*.php',
+            $this->vendorPath . '/*/Data/*.php',
+        ], 'vendor');
     }
 
     /**
@@ -77,13 +74,9 @@ readonly class DataMigrationDiscovery
      */
     private function discoverFromModules(): array
     {
-        if (!is_dir($this->modulesPath)) {
-            return [];
-        }
-
-        $pattern = $this->modulesPath . '/*/*/Data/*.php';
-
-        return $this->discoverFromPattern($pattern, 'modules');
+        return $this->discoverFromPatterns([
+            $this->modulesPath . '/*/*/Data/*.php',
+        ], 'modules');
     }
 
     /**
@@ -93,13 +86,9 @@ readonly class DataMigrationDiscovery
      */
     private function discoverFromApp(): array
     {
-        if (!is_dir($this->appPath)) {
-            return [];
-        }
-
-        $pattern = $this->appPath . '/*/Data/*.php';
-
-        return $this->discoverFromPattern($pattern, 'app');
+        return $this->discoverFromPatterns([
+            $this->appPath . '/*/Data/*.php',
+        ], 'app');
     }
 
     /**
@@ -122,5 +111,32 @@ readonly class DataMigrationDiscovery
             'path' => $file,
             'source' => $source,
         ], $files);
+    }
+
+    /**
+     * @param array<string> $patterns
+     * @return array<array{name: string, path: string, source: string}>
+     */
+    private function discoverFromPatterns(
+        array $patterns,
+        string $source,
+    ): array {
+        $migrations = [];
+        $seen = [];
+
+        foreach ($patterns as $pattern) {
+            $files = $this->discoverFromPattern($pattern, $source);
+
+            foreach ($files as $migration) {
+                if (isset($seen[$migration['path']])) {
+                    continue;
+                }
+
+                $seen[$migration['path']] = true;
+                $migrations[] = $migration;
+            }
+        }
+
+        return $migrations;
     }
 }
