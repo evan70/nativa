@@ -193,6 +193,29 @@ PHP;
         }
     });
 
+    it('discovers seeders in flat packages/*/Seed/', function (): void {
+        $tempDir = sys_get_temp_dir() . '/marko_test_' . uniqid();
+        $packagesPath = $tempDir . '/packages/blog/Seed';
+        mkdir($packagesPath, 0755, true);
+
+        createSeederFile(
+            $packagesPath . '/PackageSeeder.php',
+            'PackagesBlog' . uniqid(),
+            'PackageSeeder',
+            'package-seeder',
+        );
+
+        try {
+            $discovery = new SeederDiscovery(new ClassFileParser());
+            $seeders = $discovery->discoverInVendor($tempDir . '/packages');
+
+            expect($seeders)->toHaveCount(1)
+                ->and($seeders[0]->name)->toBe('package-seeder');
+        } finally {
+            cleanupDir($tempDir);
+        }
+    });
+
     it('discovers seeders in modules/*/*/Seed/', function (): void {
         $tempDir = sys_get_temp_dir() . '/marko_test_' . uniqid();
         $modulesPath = $tempDir . '/modules/acme/blog/Seed';

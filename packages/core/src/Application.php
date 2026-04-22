@@ -85,6 +85,7 @@ class Application
         public private(set) readonly string $vendorPath = '',
         public private(set) readonly string $modulesPath = '',
         public private(set) readonly string $appPath = '',
+        public private(set) readonly string $basePath = '',
     ) {}
 
     /**
@@ -97,9 +98,10 @@ class Application
         }
 
         $app = new self(
-            vendorPath: $basePath . '/vendor',
+            vendorPath: ProjectPaths::resolvePackagesRoot($basePath),
             modulesPath: $basePath . '/modules',
             appPath: $basePath . '/app',
+            basePath: $basePath,
         );
 
         $app->initialize();
@@ -114,8 +116,7 @@ class Application
     {
         // Load environment variables if marko/env is installed
         if (class_exists(EnvLoader::class)) {
-            $basePath = dirname($this->vendorPath);
-            (new EnvLoader())->load($basePath);
+            (new EnvLoader())->load($this->resolveBasePath());
         }
 
         $parser = new ManifestParser();
@@ -147,8 +148,7 @@ class Application
         $bindingRegistry = new BindingRegistry($this->container);
 
         // Register ProjectPaths for dependency injection (base path derived from vendor path)
-        $basePath = dirname($this->vendorPath);
-        $this->container->instance(ProjectPaths::class, new ProjectPaths($basePath));
+        $this->container->instance(ProjectPaths::class, new ProjectPaths($this->resolveBasePath()));
 
         // Register bindings from all modules
         foreach ($this->modules as $module) {
@@ -195,8 +195,7 @@ class Application
     private function registerAutoloaders(): void
     {
         foreach ($this->modules as $module) {
-            // Skip vendor modules - they're already handled by Composer
-            if ($module->source === 'vendor') {
+            if ($this->shouldSkipAutoloaderRegistration($module)) {
                 continue;
             }
 
@@ -232,6 +231,26 @@ class Application
                 require_once $file;
             }
         });
+    }
+
+    private function resolveBasePath(): string
+    {
+        return $this->basePath !== ''
+            ? $this->basePath
+            : dirname($this->vendorPath);
+    }
+
+    private function shouldSkipAutoloaderRegistration(
+        ModuleManifest $module,
+    ): bool {
+        if ($module->source !== 'vendor') {
+            return false;
+        }
+
+        $composerVendorRoot = $this->resolveBasePath() . '/vendor';
+
+        return is_file($composerVendorRoot . '/autoload.php')
+            && str_starts_with($module->path, $composerVendorRoot . '/');
     }
 
     /**

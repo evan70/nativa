@@ -19,6 +19,7 @@ return function (
         vendorPath: $vendorPath,
         modulesPath: $modulesPath,
         appPath: $appPath,
+        basePath: dirname($vendorPath),
     );
 
     $app->initialize();

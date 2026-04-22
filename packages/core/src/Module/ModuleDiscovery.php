@@ -39,21 +39,21 @@ readonly class ModuleDiscovery
             return $modules;
         }
 
-        // Scan vendor/*/
-        $vendorNames = $this->scanDirectory($vendorDir);
+        foreach ($this->scanDirectory($vendorDir) as $entryName) {
+            $entryPath = $vendorDir . '/' . $entryName;
 
-        foreach ($vendorNames as $vendorName) {
-            $vendorPath = $vendorDir . '/' . $vendorName;
-
-            if (!is_dir($vendorPath)) {
+            if (!is_dir($entryPath)) {
                 continue;
             }
 
-            // Scan vendor/vendor-name/*/
-            $packageNames = $this->scanDirectory($vendorPath);
+            if ($this->isMarkoModule($entryPath)) {
+                $manifest = $this->parser->parse($entryPath);
+                $modules[] = $this->withPathAndSource($manifest, $entryPath, 'vendor');
+                continue;
+            }
 
-            foreach ($packageNames as $packageName) {
-                $packagePath = $vendorPath . '/' . $packageName;
+            foreach ($this->scanDirectory($entryPath) as $packageName) {
+                $packagePath = $entryPath . '/' . $packageName;
 
                 if ($this->isMarkoModule($packagePath)) {
                     $manifest = $this->parser->parse($packagePath);

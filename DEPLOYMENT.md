@@ -2,20 +2,19 @@
 
 ## 📦 Build Process
 
-The framework uses a build-based deployment strategy to eliminate `composer.json` and heavy `vendor/` directories from production.
+The framework uses a build-based deployment strategy to eliminate the root Composer setup and the `vendor/` directory from production.
 
 ### How It Works
 
 1. **Development**: Full source code with `composer.json` files for dependency management.
 2. **Build**: Run `php build.php` to generate an optimized production artifact.
-3. **Production**: Deploy only the `dist/` folder contents (no Composer, no .git, minimal vendor).
+3. **Production**: Deploy only the `dist/` folder contents (no Composer toolchain, no `vendor/`, no `.git`).
 
 ### Build Script Features
 
-- ✅ Generates **classmap-authoritative** autoloader (fastest possible)
 - ✅ Copies only runtime-necessary files
-- ✅ Removes `composer.json`, `composer.lock`, tests, docs
-- ✅ Creates minimal `vendor/` (only `autoload.php` + `composer/*.php`)
+- ✅ Excludes the root `composer.json` and `composer.lock`
+- ✅ Boots directly from `packages/`
 - ✅ Preserves `app/`, `modules/`, `packages/`, `bootstrap/`
 
 ## 🚀 GitHub Actions Workflow
@@ -24,7 +23,7 @@ The CI/CD pipeline automatically:
 
 1. Installs dependencies for root, packages, and modules
 2. Runs tests and static analysis (if configured)
-3. Executes `php build.php` to create production artifact
+3. Executes `php build.php` to create a vendorless production artifact
 4. Uploads `dist/` as a deployable artifact
 
 ### Deployment Steps
@@ -49,15 +48,9 @@ Use the uploaded artifact from GitHub Actions in your deployment tool (e.g., Dep
 
 ```
 /var/www/marko-app/
-├── vendor/
-│   ├── autoload.php          # Optimized autoloader
-│   └── composer/             # Classmap files only
-│       ├── autoload_classmap.php
-│       ├── autoload_files.php
-│       └── ...
 ├── app/                      # Your application code
 ├── modules/                  # Custom modules
-├── packages/                 # Framework packages
+├── packages/                 # Framework/runtime packages
 ├── bootstrap/                # Bootstrap files
 ├── config/                   # Configuration
 ├── routes/                   # Route definitions
@@ -67,14 +60,15 @@ Use the uploaded artifact from GitHub Actions in your deployment tool (e.g., Dep
 ## ⚡ Performance Benefits
 
 - **No Composer overhead**: Cannot run `composer install` in production
-- **Authoritative classmap**: Zero filesystem scans for classes
-- **Smaller footprint**: ~80% smaller than full vendor directory
-- **Faster boot time**: Direct class-to-file mapping
+- **No vendor directory**: Runtime code lives in `packages/`
+- **Smaller footprint**: Production artifact contains only runtime code
+
+Note: `packages/*/composer.json` files remain in the artifact because Marko uses them as runtime manifests for autoloading and module discovery.
 
 ## 🔒 Security Notes
 
 - `.env` file is NOT included in build (create on server)
-- `composer.json` removed (no dependency tampering)
+- Root `composer.json` removed from the artifact
 - Test files excluded from production
 - Ensure `storage/` directory is writable by web server
 
@@ -86,7 +80,7 @@ php build.php
 
 # Test the build
 cd dist
-php -r "require 'vendor/autoload.php'; echo 'OK';"
+php -r "require 'bootstrap/autoload.php'; echo 'OK';"
 
 # Run your application
 php bootstrap/app.php
@@ -98,7 +92,7 @@ php bootstrap/app.php
 - **Solution**: Ensure all classes are properly namespaced and included in autoload paths
 
 **Issue**: Missing dependencies
-- **Solution**: Run `composer install` before building to ensure vendor is complete
+- **Solution**: Run `composer install` before building so the local build environment has dev/runtime dependencies available
 
 **Issue**: Permissions error
 - **Solution**: Set proper ownership on `storage/` and `bootstrap/cache/`

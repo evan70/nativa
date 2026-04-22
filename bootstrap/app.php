@@ -3,15 +3,16 @@
 declare(strict_types=1);
 
 use Marko\Core\Application;
+use Marko\Core\Path\ProjectPaths;
 
 $basePath = dirname(__DIR__);
-$vendorPath = dirname(__DIR__) . '/vendor';
 $appPath = dirname(__DIR__) . '/app';
 
 $app = new Application(
-    vendorPath: $vendorPath,
+    vendorPath: ProjectPaths::resolvePackagesRoot($basePath),
     modulesPath: dirname(__DIR__) . '/modules',
     appPath: $appPath,
+    basePath: $basePath,
 );
 
 $app->initialize();

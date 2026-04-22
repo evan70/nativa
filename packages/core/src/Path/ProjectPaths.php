@@ -17,6 +17,8 @@ readonly class ProjectPaths
 
     public string $vendor;
 
+    public string $packages;
+
     public string $modules;
 
     public string $app;
@@ -29,10 +31,29 @@ readonly class ProjectPaths
         ?string $basePath = null,
     ) {
         $this->base = $basePath ?? getcwd();
-        $this->vendor = $this->base . '/vendor';
+        $this->packages = self::resolvePackagesRoot($this->base);
+        $this->vendor = $this->packages;
         $this->modules = $this->base . '/modules';
         $this->app = $this->base . '/app';
         $this->config = $this->base . '/config';
         $this->database = $this->base . '/database';
+    }
+
+    public static function resolvePackagesRoot(
+        string $basePath,
+    ): string {
+        $vendorRoot = $basePath . '/vendor';
+
+        if (is_dir($vendorRoot . '/marko/core')) {
+            return $vendorRoot;
+        }
+
+        $packagesRoot = $basePath . '/packages';
+
+        if (is_dir($packagesRoot)) {
+            return $packagesRoot;
+        }
+
+        return $vendorRoot;
     }
 }

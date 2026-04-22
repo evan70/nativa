@@ -113,6 +113,22 @@ it('discovers entities in vendor path', function (): void {
         ->and($entities[0])->toBe($expected);
 });
 
+it('discovers entities in flat packages path', function (): void {
+    $expected = createUniqueEntityFile(
+        $this->tempDir . '/packages/blog/src/Entity/Post.php',
+        'Packages\Blog\Entity',
+        'Post',
+        'posts',
+        $this->uniqueId,
+    );
+
+    $entities = $this->discovery->discoverInVendor($this->tempDir . '/packages');
+
+    expect($entities)
+        ->toHaveCount(1)
+        ->and($entities[0])->toBe($expected);
+});
+
 it('discovers entities in modules path', function (): void {
     $expected = createUniqueEntityFile(
         $this->tempDir . '/modules/acme/custom/src/Entity/Widget.php',

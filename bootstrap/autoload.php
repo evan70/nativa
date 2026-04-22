@@ -2,7 +2,11 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../vendor/autoload.php';
+$composerAutoload = __DIR__ . '/../vendor/autoload.php';
+
+if (is_file($composerAutoload)) {
+    require_once $composerAutoload;
+}
 
 class MarkoAutoloader
 {
@@ -47,14 +51,14 @@ class MarkoAutoloader
         $this->classMap = [];
         $this->psr4Map = [];
 
-        foreach ($this->additionalPaths as $packagesPath) {
-            $this->scanPath($packagesPath);
+        foreach ($this->additionalPaths as $rootPath) {
+            $this->scanPath($rootPath);
         }
     }
 
-    private function scanPath(string $packagesPath): void
+    private function scanPath(string $rootPath): void
     {
-        $packages = glob($packagesPath . '/*', GLOB_ONLYDIR);
+        $packages = glob($rootPath . '/*', GLOB_ONLYDIR);
         if (!$packages) {
             return;
         }
@@ -206,7 +210,6 @@ class MarkoAutoloader
 }
 
 $corePackagesPath = dirname(__DIR__) . '/packages';
-$myPackagesPath = dirname(__DIR__) . '/packages';
 $modulesPath = dirname(__DIR__) . '/modules';
 $basePath = dirname(__DIR__);
 
