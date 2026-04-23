@@ -4,8 +4,278 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fb50ad1d09680064570d151af0e080d5",
+    "content-hash": "2b8cc2109b8767564028398e0736f5b2",
     "packages": [
+        {
+            "name": "marko/admin",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/marko-php/marko-admin.git",
+                "reference": "92fd69313af785f669b38b5d4b605f88163f75ce"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/marko-php/marko-admin/zipball/92fd69313af785f669b38b5d4b605f88163f75ce",
+                "reference": "92fd69313af785f669b38b5d4b605f88163f75ce",
+                "shasum": ""
+            },
+            "require": {
+                "marko/config": "self.version",
+                "marko/core": "self.version",
+                "marko/routing": "self.version",
+                "php": "^8.5"
+            },
+            "require-dev": {
+                "marko/testing": "self.version",
+                "pestphp/pest": "^4.0"
+            },
+            "type": "library",
+            "extra": {
+                "marko": {
+                    "module": true
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Marko\\Admin\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Admin contracts for Marko Framework",
+            "support": {
+                "source": "https://github.com/marko-php/marko-admin/tree/0.0.2"
+            },
+            "time": "2026-03-26T16:28:58+00:00"
+        },
+        {
+            "name": "marko/admin-api",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/marko-php/marko-admin-api.git",
+                "reference": "66cd071eb24357fd8eec00c24fdaf03a00070c73"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/marko-php/marko-admin-api/zipball/66cd071eb24357fd8eec00c24fdaf03a00070c73",
+                "reference": "66cd071eb24357fd8eec00c24fdaf03a00070c73",
+                "shasum": ""
+            },
+            "require": {
+                "marko/admin": "self.version",
+                "marko/admin-auth": "self.version",
+                "marko/authentication": "self.version",
+                "marko/config": "self.version",
+                "marko/core": "self.version",
+                "marko/routing": "self.version",
+                "php": "^8.5"
+            },
+            "require-dev": {
+                "marko/testing": "self.version",
+                "pestphp/pest": "^4.0"
+            },
+            "type": "marko-module",
+            "extra": {
+                "marko": {
+                    "module": true
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Marko\\AdminApi\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Admin REST API for Marko Framework",
+            "support": {
+                "source": "https://github.com/marko-php/marko-admin-api/tree/develop"
+            },
+            "time": "2026-03-25T17:53:35+00:00"
+        },
+        {
+            "name": "marko/admin-auth",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/marko-php/marko-admin-auth.git",
+                "reference": "253adcf1e41777c3acfb167a573237d2221acfc3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/marko-php/marko-admin-auth/zipball/253adcf1e41777c3acfb167a573237d2221acfc3",
+                "reference": "253adcf1e41777c3acfb167a573237d2221acfc3",
+                "shasum": ""
+            },
+            "require": {
+                "marko/admin": "self.version",
+                "marko/authentication": "self.version",
+                "marko/config": "self.version",
+                "marko/core": "self.version",
+                "marko/database": "self.version",
+                "php": "^8.5"
+            },
+            "require-dev": {
+                "marko/testing": "self.version",
+                "pestphp/pest": "^4.0"
+            },
+            "type": "marko-module",
+            "extra": {
+                "marko": {
+                    "module": true
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Marko\\AdminAuth\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Admin authentication and authorization for Marko Framework",
+            "support": {
+                "source": "https://github.com/marko-php/marko-admin-auth/tree/develop"
+            },
+            "time": "2026-04-15T14:35:33+00:00"
+        },
+        {
+            "name": "marko/admin-panel",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/marko-php/marko-admin-panel.git",
+                "reference": "38057516d413935912aba237a55aebe3f147f81a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/marko-php/marko-admin-panel/zipball/38057516d413935912aba237a55aebe3f147f81a",
+                "reference": "38057516d413935912aba237a55aebe3f147f81a",
+                "shasum": ""
+            },
+            "require": {
+                "marko/admin": "self.version",
+                "marko/admin-auth": "self.version",
+                "marko/authentication": "self.version",
+                "marko/config": "self.version",
+                "marko/core": "self.version",
+                "marko/routing": "self.version",
+                "marko/session": "self.version",
+                "marko/view": "self.version",
+                "php": "^8.5"
+            },
+            "require-dev": {
+                "marko/testing": "self.version",
+                "pestphp/pest": "^4.0"
+            },
+            "type": "marko-module",
+            "extra": {
+                "marko": {
+                    "module": true
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Marko\\AdminPanel\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Admin panel UI for Marko Framework",
+            "support": {
+                "source": "https://github.com/marko-php/marko-admin-panel/tree/develop"
+            },
+            "time": "2026-03-25T17:53:35+00:00"
+        },
+        {
+            "name": "marko/authentication",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "packages/authentication",
+                "reference": "e20ce53f2532647a9e9a1a7c564d435c180cb482"
+            },
+            "require": {
+                "marko/core": "self.version",
+                "php": "^8.5"
+            },
+            "require-dev": {
+                "marko/testing": "self.version"
+            },
+            "type": "marko-module",
+            "extra": {
+                "marko": {
+                    "module": true
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Marko\\Authentication\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Authentication and authorization for Marko Framework",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "marko/authorization",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/marko-php/marko-authorization.git",
+                "reference": "1e1b554d917caafe5608845b7f08a1a630e05f38"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/marko-php/marko-authorization/zipball/1e1b554d917caafe5608845b7f08a1a630e05f38",
+                "reference": "1e1b554d917caafe5608845b7f08a1a630e05f38",
+                "shasum": ""
+            },
+            "require": {
+                "marko/authentication": "self.version",
+                "marko/config": "self.version",
+                "marko/core": "self.version",
+                "marko/routing": "self.version",
+                "php": "^8.5"
+            },
+            "require-dev": {
+                "marko/testing": "self.version",
+                "pestphp/pest": "^4.0"
+            },
+            "type": "marko-module",
+            "extra": {
+                "marko": {
+                    "module": true
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Marko\\Authorization\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Policy-based authorization with Gates and Policies for Marko Framework",
+            "support": {
+                "source": "https://github.com/marko-php/marko-authorization/tree/develop"
+            },
+            "time": "2026-03-25T17:53:35+00:00"
+        },
         {
             "name": "marko/cli",
             "version": "dev-main",
@@ -478,6 +748,51 @@
             }
         },
         {
+            "name": "marko/view",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/marko-php/marko-view.git",
+                "reference": "182f64eab52648da92c654d62bf57b7304da39cc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/marko-php/marko-view/zipball/182f64eab52648da92c654d62bf57b7304da39cc",
+                "reference": "182f64eab52648da92c654d62bf57b7304da39cc",
+                "shasum": ""
+            },
+            "require": {
+                "marko/config": "self.version",
+                "marko/core": "self.version",
+                "marko/routing": "self.version",
+                "php": "^8.5"
+            },
+            "require-dev": {
+                "marko/testing": "self.version",
+                "pestphp/pest": "^4.0"
+            },
+            "type": "library",
+            "extra": {
+                "marko": {
+                    "module": true
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Marko\\View\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Marko Framework View - Templating interfaces and contracts",
+            "support": {
+                "source": "https://github.com/marko-php/marko-view/tree/develop"
+            },
+            "time": "2026-04-10T20:49:26+00:00"
+        },
+        {
             "name": "psr/container",
             "version": "2.0.2",
             "source": {
@@ -864,40 +1179,6 @@
                 "source": "https://github.com/Jean85/pretty-package-versions/tree/2.1.1"
             },
             "time": "2025-03-19T14:43:43+00:00"
-        },
-        {
-            "name": "marko/authentication",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "packages/authentication",
-                "reference": "e20ce53f2532647a9e9a1a7c564d435c180cb482"
-            },
-            "require": {
-                "marko/core": "self.version",
-                "php": "^8.5"
-            },
-            "require-dev": {
-                "marko/testing": "self.version"
-            },
-            "type": "marko-module",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\Authentication\\": "src/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Authentication and authorization for Marko Framework",
-            "transport-options": {
-                "relative": true
-            }
         },
         {
             "name": "marko/log",
@@ -4562,6 +4843,12 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
+        "marko/admin": 20,
+        "marko/admin-api": 20,
+        "marko/admin-auth": 20,
+        "marko/admin-panel": 20,
+        "marko/authentication": 20,
+        "marko/authorization": 20,
         "marko/cli": 20,
         "marko/config": 20,
         "marko/core": 20,
@@ -4571,6 +4858,7 @@
         "marko/errors-simple": 20,
         "marko/hashing": 20,
         "marko/routing": 20,
+        "marko/session": 20,
         "marko/session-database": 20,
         "marko/testing": 20,
         "marko/validation": 20

@@ -10,34 +10,34 @@
  * Usage: php build.php
  */
 
-echo "🚀 Starting Marko Framework Production Build...\n";
+echo "Starting Marko Framework Production Build...\n";
 
 $rootDir = __DIR__;
 $distDir = $rootDir . '/dist';
 
 // 1. Clean previous build
 if (is_dir($distDir)) {
-    echo "🧹 Cleaning existing dist directory...\n";
+    echo "Cleaning existing dist directory...\n";
     exec("rm -rf " . escapeshellarg($distDir));
 }
 mkdir($distDir, 0755, true);
 
 // 2. Install dependencies locally (only for the build environment)
 if (!is_dir($rootDir . '/vendor')) {
-    echo "📦 Installing dependencies...\n";
+    echo "Installing dependencies...\n";
     passthru('composer install --no-dev --optimize-autoloader', $exitCode);
     if ($exitCode !== 0) {
-        die("❌ Composer install failed.\n");
+        die("Composer install failed.\n");
     }
 } else {
-    echo "✅ Dependencies already present.\n";
+    echo "Dependencies already present.\n";
 }
 
 // 3. Copy necessary runtime files to dist
-echo "📂 Preparing production artifacts...\n";
+echo "Preparing production artifacts...\n";
 
 // Copy source code directories
-$sourceDirs = ['app', 'bootstrap', 'modules', 'packages', 'config', 'database', 'routes'];
+$sourceDirs = ['app', 'bootstrap', 'modules', 'packages', 'config', 'database', 'routes', 'public'];
 foreach ($sourceDirs as $dir) {
     if (is_dir($rootDir . '/' . $dir)) {
         echo "   Copying $dir...\n";
@@ -54,15 +54,15 @@ removeComposerFiles($distDir);
 // Create a minimal .gitignore for dist
 file_put_contents($distDir . '/.gitignore', "*\n!.gitignore\n");
 
-echo "✅ Build complete! Production ready files are in './dist'\n";
-echo "ℹ️  The 'dist' folder contains:\n";
+echo "Build complete! Production ready files are in './dist'\n";
+echo "The 'dist' folder contains:\n";
 echo "   - Bootstrap autoloader resolving packages/ directly\n";
 echo "   - Source code (app, modules, packages)\n";
 echo "   - All required marko/* runtime packages moved into packages/\n";
 echo "   - NO vendor directory\n";
 echo "   - NO root composer.json / composer.lock\n";
 echo "   - NO package composer.json files (runtime manifest generated)\n";
-echo "\n📦 Deploy the contents of './dist' to production.\n";
+echo "\nDeploy the contents of './dist' to production.\n";
 
 /**
  * Copy marko packages that still live only under vendor/marko into dist/packages.
