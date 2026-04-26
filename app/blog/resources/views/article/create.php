@@ -1,10 +1,9 @@
-{* blog/resources/views/article/create.latte *}
-{layout 'controllers::layouts/app.latte'}
+<?php $this->layout('controllers::layouts/app') ?>
 
-{block content}
+<?php $this->section('content') ?>
     <div class="stack">
-        <h1>{$title}</h1>
-        <p>{$message}</p>
+        <h1><?= $this->e($title) ?></h1>
+        <p><?= $this->e($message) ?></p>
 
         <form action="/blog" method="post" class="stack">
             <div class="field">
@@ -23,4 +22,4 @@
             </div>
         </form>
     </div>
-{/block}
+<?php $this->endSection() ?>
