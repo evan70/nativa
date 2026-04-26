@@ -27,7 +27,7 @@ class SimpleErrorHandler implements ErrorHandlerInterface
     protected bool $handledFatalError = false;
 
     public function __construct(
-        private Environment $environment,
+        protected Environment $environment,
         ?TextFormatter $textFormatter = null,
         ?BasicHtmlFormatter $htmlFormatter = null,
     ) {
