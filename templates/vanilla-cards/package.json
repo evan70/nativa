@@ -1,0 +1,17 @@
+{
+  "name": "@nativa/vanilla-cards",
+  "version": "0.0.1",
+  "description": "Vanilla JS and CSS cards architecture for Nativa CMS",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "rm -rf docs && vite build && touch docs/.nojekyll",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^8.0.10"
+  }
+}

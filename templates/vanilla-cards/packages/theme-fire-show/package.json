@@ -1,0 +1,20 @@
+{
+  "name": "@nativa/theme-fire-show",
+  "version": "0.0.1",
+  "description": "Fire Show theme for Vanilla Cards",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./assets/*": "./src/assets/*"
+  },
+  "files": [
+    "src"
+  ],
+  "keywords": [
+    "theme",
+    "fire-show",
+    "vanilla-cards"
+  ],
+  "author": "Nativa",
+  "license": "MIT"
+}
