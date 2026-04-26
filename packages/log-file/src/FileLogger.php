@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use Marko\Log\Config\LogConfig;
 use Marko\Log\Contracts\LogFormatterInterface;
 use Marko\Log\Contracts\LoggerInterface;
+use Marko\Log\Exceptions\LogWriteException;
 use Marko\Log\File\Rotation\RotationInterface;
 use Marko\Log\LogLevel;
 use Marko\Log\LogRecord;
@@ -90,13 +91,23 @@ class FileLogger implements LoggerInterface
         $directory = dirname($path);
 
         if (!is_dir($directory)) {
-            mkdir($directory, 0777, true);
+            if (!@mkdir($directory, 0777, true) && !is_dir($directory)) {
+                throw LogWriteException::forPath($path, 'Could not create log directory');
+            }
         }
 
-        file_put_contents(
+        if (!is_writable($directory)) {
+            throw LogWriteException::directoryNotWritable($directory);
+        }
+
+        $result = @file_put_contents(
             $path,
             $this->formatter->format($record),
             FILE_APPEND,
         );
+
+        if ($result === false) {
+            throw LogWriteException::forPath($path, 'file_put_contents failed');
+        }
     }
 }
