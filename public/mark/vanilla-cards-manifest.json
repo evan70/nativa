@@ -1,0 +1,87 @@
+{
+  "/home/engine/project/templates/admin-dashboard/packages/theme-fire-show/src/assets/fire-show.css": {
+    "file": "fire-show.css",
+    "src": "/home/engine/project/templates/admin-dashboard/packages/theme-fire-show/src/assets/fire-show.css"
+  },
+  "/home/engine/project/templates/admin-dashboard/packages/theme-neon/src/assets/neon.css": {
+    "file": "neon.css",
+    "src": "/home/engine/project/templates/admin-dashboard/packages/theme-neon/src/assets/neon.css"
+  },
+  "index.html": {
+    "file": "index.js",
+    "name": "index",
+    "src": "index.html",
+    "isEntry": true,
+    "imports": [
+      "src/app.ts",
+      "src/app.ts",
+      "src/dev/theme-switcher.ts",
+      "src/dev/theme-switcher.ts"
+    ]
+  },
+  "src/app.ts": {
+    "file": "core-app.js",
+    "name": "core-app",
+    "src": "src/app.ts",
+    "isEntry": true,
+    "imports": [
+      "src/css.ts"
+    ]
+  },
+  "src/assets/fonts/inter/Inter-Regular.woff2": {
+    "file": "Inter-Regular.woff2",
+    "src": "src/assets/fonts/inter/Inter-Regular.woff2"
+  },
+  "src/assets/fonts/playfair/PlayfairDisplay-Bold.woff2": {
+    "file": "PlayfairDisplay-Bold.woff2",
+    "src": "src/assets/fonts/playfair/PlayfairDisplay-Bold.woff2"
+  },
+  "src/assets/fonts/playfair/PlayfairDisplay-Regular.woff2": {
+    "file": "PlayfairDisplay-Regular.woff2",
+    "src": "src/assets/fonts/playfair/PlayfairDisplay-Regular.woff2"
+  },
+  "src/assets/images/dae2d1fd9b13c89bb5b4a89280099d7a.webp": {
+    "file": "dae2d1fd9b13c89bb5b4a89280099d7a.webp",
+    "src": "src/assets/images/dae2d1fd9b13c89bb5b4a89280099d7a.webp"
+  },
+  "src/css.ts": {
+    "file": "core-css.js",
+    "name": "core-css",
+    "src": "src/css.ts",
+    "isEntry": true,
+    "css": [
+      "core-css.css"
+    ],
+    "assets": [
+      "Inter-Regular.woff2",
+      "PlayfairDisplay-Regular.woff2",
+      "PlayfairDisplay-Bold.woff2",
+      "dae2d1fd9b13c89bb5b4a89280099d7a.webp"
+    ]
+  },
+  "src/dev/theme-switcher.ts": {
+    "file": "theme-switcher.js",
+    "name": "theme-switcher",
+    "src": "src/dev/theme-switcher.ts",
+    "isEntry": true,
+    "assets": [
+      "neon.css",
+      "fire-show.css"
+    ]
+  },
+  "src/frontend/home/home.ts": {
+    "file": "home.js",
+    "name": "home",
+    "src": "src/frontend/home/home.ts",
+    "isEntry": true,
+    "css": [
+      "home.css"
+    ]
+  },
+  "src/init.ts": {
+    "file": "init.js",
+    "name": "init",
+    "src": "src/init.ts",
+    "isEntry": true
+  }
+}
