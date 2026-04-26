@@ -5,6 +5,8 @@ declare(strict_types=1);
 use Marko\AdminAuth\AdminUserProvider;
 use Marko\AdminAuth\Config\AdminAuthConfig;
 use Marko\AdminAuth\Config\AdminAuthConfigInterface;
+use Marko\AdminAuth\PermissionRegistry;
+use Marko\AdminAuth\Contracts\PermissionRegistryInterface;
 use Marko\AdminAuth\Repository\AdminUserRepository;
 use Marko\AdminAuth\Repository\AdminUserRepositoryInterface;
 use Marko\AdminAuth\Repository\PermissionRepository;
@@ -21,6 +23,7 @@ return [
         AdminUserRepositoryInterface::class => AdminUserRepository::class,
         RoleRepositoryInterface::class => RoleRepository::class,
         PermissionRepositoryInterface::class => PermissionRepository::class,
+        PermissionRegistryInterface::class => PermissionRegistry::class,
         UserProviderInterface::class => function (ContainerInterface $container): UserProviderInterface {
             return new AdminUserProvider(
                 userRepository: $container->get(AdminUserRepositoryInterface::class),

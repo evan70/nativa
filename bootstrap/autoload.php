@@ -36,7 +36,7 @@ class MarkoAutoloader
 
     public function register(): void
     {
-        spl_autoload_register([$this, 'loadClass'], true, false);
+        spl_autoload_register([$this, 'loadClass'], true, true);
         $this->registerFunctions();
     }
 
