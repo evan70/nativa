@@ -17,13 +17,11 @@ $basePath = dirname(__DIR__, 2);
 return [
     'bindings' => [
         ConnectionInterface::class => function () use ($basePath): SqliteConnection {
-            $dbPath = $_ENV['DB_DATABASE'] ?? $basePath . '/database/database.sqlite';
-            
+            $dbPath = ':memory:';
             return new SqliteConnection($dbPath);
         },
         TransactionInterface::class => function () use ($basePath): SqliteConnection {
-            $dbPath = $_ENV['DB_DATABASE'] ?? $basePath . '/database/database.sqlite';
-            
+            $dbPath = ':memory:';
             return new SqliteConnection($dbPath);
         },
         IntrospectorInterface::class => function (ContainerInterface $container): SqliteIntrospector {
