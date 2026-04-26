@@ -22,8 +22,31 @@ cd my-app
 
 1. Copy `.env.example` to `.env`
 2. Install dev tools: `composer install`
-3. Start the dev server: `marko up`
-4. Visit http://localhost:8000
+3. Run database migrations: `./marko db:migrate`
+4. Start the dev server: `./marko up`
+5. Visit http://localhost:8000
+
+## CLI Commands
+
+The `marko` CLI provides several useful commands for development:
+
+### Database
+- `./marko db:migrate` — Apply database migrations
+- `./marko db:rollback` — Rollback the last batch of migrations
+- `./marko db:status` — Show migration status
+- `./marko db:diff` — Show differences between entity schema and database
+- `./marko db:rebuild` — Reset and re-run all migrations (clean slate)
+- `./marko db:seed` — Run database seeders
+
+### System
+- `./marko module:list` — Show all modules and their status
+- `./marko log:clear` — Clear old log files
+- `./marko session:gc` — Run session garbage collection
+- `./marko list` — Show all available commands
+
+### Queue
+- `./marko queue:work` — Process jobs from the queue
+- `./marko queue:status` — Show queue statistics
 
 ## Next Steps
 
