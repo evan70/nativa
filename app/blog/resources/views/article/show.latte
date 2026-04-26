@@ -1,0 +1,19 @@
+{* blog/resources/views/article/show.latte *}
+{layout 'controllers::layouts/app.latte'}
+
+{block content}
+    <article class="stack">
+        <header>
+            <span class="eyebrow">Article</span>
+            <h1>{$article->title}</h1>
+        </header>
+
+        <div class="article-content">
+            {$article->content}
+        </div>
+
+        <footer>
+            <a href="/blog" class="button secondary">Back to Blog</a>
+        </footer>
+    </article>
+{/block}

@@ -11,10 +11,13 @@ use Marko\Routing\Attributes\Get;
 use Marko\Routing\Attributes\Post;
 use Marko\Routing\Http\Response;
 
+use Marko\View\ViewInterface;
+
 class ArticleController
 {
     public function __construct(
         private readonly ArticleRepository $repository,
+        private readonly ViewInterface $view,
     ) {}
 
     #[Get('/blog')]
@@ -22,11 +25,11 @@ class ArticleController
     {
         $articles = $this->repository->findAll();
 
-        return Response::html(View::render('blog/index.phtml', [
+        return $this->view->render('blog::article/index', [
             'title' => 'Blog',
-            'message' => 'Read existing posts or publish a new one.',
+            'message' => 'Read existing articles or publish a new one.',
             'articles' => $articles,
-        ]));
+        ]);
     }
 
     #[Get('/blog/{id}')]
@@ -35,25 +38,25 @@ class ArticleController
         $article = $this->repository->find($id);
 
         if ($article === null) {
-            return Response::html(View::render('blog/not-found.phtml', [
+            return $this->view->render('blog::article/not-found', [
                 'title' => 'Article Not Found',
                 'message' => 'The requested article does not exist.',
-            ]), 404);
+            ])->withStatus(404);
         }
 
-        return Response::html(View::render('blog/show.phtml', [
+        return $this->view->render('blog::article/show', [
             'title' => $article->title,
             'article' => $article,
-        ]));
+        ]);
     }
 
     #[Get('/articles/new')]
     public function create(): Response
     {
-        return Response::html(View::render('blog/create.phtml', [
+        return $this->view->render('blog::article/create', [
             'title' => 'New Article',
             'message' => 'Draft something worth keeping.',
-        ]));
+        ]);
     }
 
     #[Post('/blog')]
