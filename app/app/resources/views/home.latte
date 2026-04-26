@@ -1,0 +1,15 @@
+{* app/resources/views/home.latte *}
+{layout 'controllers::layouts/app.latte'}
+
+{block content}
+    <div class="stack">
+        <span class="eyebrow">{$eyebrow}</span>
+        <h1>{$title}</h1>
+        <p>{$message}</p>
+
+        <div class="actions">
+            <a href="/blog" class="button">Visit Blog</a>
+            <a href="https://github.com/marko-php" class="button secondary">GitHub</a>
+        </div>
+    </div>
+{/block}
