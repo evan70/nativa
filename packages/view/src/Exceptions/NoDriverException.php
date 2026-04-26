@@ -6,9 +6,7 @@ namespace Marko\View\Exceptions;
 
 class NoDriverException extends ViewException
 {
-    private const array DRIVER_PACKAGES = [
-        'marko/view-latte',
-    ];
+    private const array DRIVER_PACKAGES = [];
 
     public static function noDriverInstalled(): self
     {

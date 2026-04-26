@@ -1,20 +1,20 @@
-{default $pageTitle = 'Login - Marko Admin', $error = null, $csrfToken = '', $loginUrl = '/mark/login'}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{$pageTitle}</title>
+    <title><?= $this->e($pageTitle ?? 'Login - Marko Admin') ?></title>
 </head>
 <body class="admin-login">
     <div class="login-container">
         <h1>Admin Login</h1>
 
-        <div n:if="$error" class="login-error" role="alert">{$error}</div>
+        <?php if (!empty($error)): ?>
+            <div class="login-error" role="alert"><?= $this->e($error) ?></div>
+        <?php endif ?>
 
-        <form method="post" action="{$loginUrl}">
-            <input type="hidden" name="_token" value="{$csrfToken}">
+        <form method="post" action="<?= $this->e($loginUrl ?? '/mark/login') ?>">
+            <input type="hidden" name="_token" value="<?= $this->e($csrfToken ?? '') ?>">
 
             <div class="form-group">
                 <label for="login-email">Email</label>

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
     'cache_directory' => '/tmp/views',
-    'extension' => '.latte',
+    'extension' => '.php',
     'auto_refresh' => true,
     'strict_types' => true,
 ];
