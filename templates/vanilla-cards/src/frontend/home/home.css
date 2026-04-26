@@ -1,0 +1,11 @@
+/* Page-specific styles for the Home page */
+.home-page {
+  /* Uses design tokens from unified.css */
+  background-color: var(--color-bg);
+  min-height: 100vh;
+}
+
+.home-page__intro {
+  padding: var(--space-8);
+  text-align: center;
+}
