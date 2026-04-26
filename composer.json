@@ -4,7 +4,35 @@
     "license": "MIT",
     "type": "project",
     "require": {
-        "php": "^8.5"
+        "php": "^8.5",
+        "latte/latte": "^3.0"
+    },
+    "replace": {
+        "marko/admin": "*",
+        "marko/admin-api": "*",
+        "marko/admin-auth": "*",
+        "marko/admin-panel": "*",
+        "marko/authentication": "*",
+        "marko/authorization": "*",
+        "marko/cli": "*",
+        "marko/config": "*",
+        "marko/core": "*",
+        "marko/database": "*",
+        "marko/env": "*",
+        "marko/errors": "*",
+        "marko/errors-simple": "*",
+        "marko/hashing": "*",
+        "marko/log": "*",
+        "marko/mail": "*",
+        "marko/psr-container": "*",
+        "marko/queue": "*",
+        "marko/routing": "*",
+        "marko/session": "*",
+        "marko/session-database": "*",
+        "marko/testing": "*",
+        "marko/validation": "*",
+        "marko/view": "*",
+        "marko/view-latte": "*"
     },
     "require-dev": {
         "pestphp/pest": "^4.0",
