@@ -27,6 +27,7 @@
         "marko/admin-panel": "dev-main",
         "marko/admin-auth": "dev-main",
         "marko/admin-api": "dev-main",
+        "marko/view": "dev-main",
         "marko/authentication": "dev-main",
         "marko/authorization": "dev-main",
         "marko/session": "dev-main"
