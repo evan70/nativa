@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "rm -rf docs && vite build && touch docs/.nojekyll",
+    "build": "rm -rf ../../public/mark && vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
