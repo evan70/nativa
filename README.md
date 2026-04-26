@@ -22,9 +22,13 @@ cd my-app
 
 1. Copy `.env.example` to `.env`
 2. Install dev tools: `composer install`
-3. Run database migrations: `./marko db:migrate`
-4. Start the dev server: `./marko up`
-5. Visit http://localhost:8000
+3. Install and build frontend assets:
+   ```bash
+   cd templates/admin-dashboard && pnpm install && pnpm build
+   ```
+4. Run database migrations: `./marko db:migrate`
+5. Start the dev server: `./marko up`
+6. Visit http://localhost:8000
 
 ## CLI Commands
 
