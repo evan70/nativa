@@ -1,0 +1,15 @@
+{
+    "name": "marko/errors-advanced",
+    "description": "Marko Framework - Advanced Error Handler",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Marko\\ErrorsAdvanced\\": "src/"
+        }
+    },
+    "require": {
+        "php": "^8.5",
+        "marko/errors": "*",
+        "marko/errors-simple": "*"
+    }
+}
