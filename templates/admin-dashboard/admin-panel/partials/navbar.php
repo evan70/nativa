@@ -1,6 +1,6 @@
 <!-- NAVBAR SECTION -->
 <nav class="navbar" data-section="navbar">
-    <div class="navbar__container container--fluid">
+    <div class="navbar__container">
         <div class="navbar__left">
             <button class="icon-btn navbar__toggle sidebar-toggle" aria-label="Toggle Sidebar">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
