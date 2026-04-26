@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
+namespace Tests\Diff;
+
+use Marko\Database\Diff\SchemaDiff;
 use Marko\Database\Schema\Column;
 use Marko\Database\Schema\ForeignKey;
 use Marko\Database\Schema\Index;
-use Marko\Database\Schema\SchemaDiff;
+use Marko\Database\Schema\IndexType;
 use Marko\Database\Schema\Table;
 use Marko\Sqlite\Diff\SqliteSqlGenerator;
 
@@ -26,9 +29,9 @@ describe('SqliteSqlGenerator', function (): void {
 
             $sql = $this->generator->generateCreateTable($table);
 
-            expect($sql)->toContain('CREATE TABLE users');
-            expect($sql)->toContain('id INTEGER NOT NULL AUTOINCREMENT');
-            expect($sql)->toContain('PRIMARY KEY (id)');
+            expect($sql)->toContain('CREATE TABLE "users"');
+            expect($sql)->toContain('"id" INTEGER PRIMARY KEY AUTOINCREMENT');
+            expect($sql)->toContain('"name" TEXT NOT NULL');
         });
 
         it('includes DEFAULT values', function (): void {
@@ -42,7 +45,7 @@ describe('SqliteSqlGenerator', function (): void {
 
             $sql = $this->generator->generateCreateTable($table);
 
-            expect($sql)->toContain("DEFAULT ''");
+            expect($sql)->toContain('DEFAULT 0');
         });
     });
 
@@ -50,7 +53,7 @@ describe('SqliteSqlGenerator', function (): void {
         it('generates DROP TABLE statement', function (): void {
             $sql = $this->generator->generateDropTable('users');
 
-            expect($sql)->toBe('DROP TABLE IF EXISTS users');
+            expect($sql)->toBe('DROP TABLE IF EXISTS "users"');
         });
     });
 
@@ -60,7 +63,7 @@ describe('SqliteSqlGenerator', function (): void {
 
             $sql = $this->generator->generateAddColumn('users', $column);
 
-            expect($sql)->toBe('ALTER TABLE users ADD COLUMN bio TEXT');
+            expect($sql)->toBe('ALTER TABLE "users" ADD COLUMN "bio" TEXT');
         });
     });
 
@@ -68,7 +71,7 @@ describe('SqliteSqlGenerator', function (): void {
         it('generates ALTER TABLE DROP COLUMN', function (): void {
             $sql = $this->generator->generateDropColumn('users', 'bio');
 
-            expect($sql)->toBe('ALTER TABLE users DROP COLUMN bio');
+            expect($sql)->toBe('ALTER TABLE "users" DROP COLUMN "bio"');
         });
     });
 
@@ -79,7 +82,7 @@ describe('SqliteSqlGenerator', function (): void {
 
             $sql = $this->generator->generateModifyColumn('users', $newColumn, $oldColumn);
 
-            expect($sql)->toContain('ALTER TABLE users MODIFY COLUMN name');
+            expect($sql)->toContain('ALTER TABLE "users" MODIFY COLUMN "name" TEXT');
         });
     });
 
@@ -89,15 +92,15 @@ describe('SqliteSqlGenerator', function (): void {
 
             $sql = $this->generator->generateAddIndex('users', $index);
 
-            expect($sql)->toBe('CREATE INDEX idx_name ON users (name)');
+            expect($sql)->toBe('CREATE INDEX "idx_name" ON "users" ("name")');
         });
 
         it('generates UNIQUE INDEX for unique indexes', function (): void {
-            $index = new Index(name: 'idx_email', columns: ['email']);
+            $index = new Index(name: 'idx_email', columns: ['email'], type: IndexType::Unique);
 
             $sql = $this->generator->generateAddIndex('users', $index);
 
-            expect($sql)->toContain('CREATE INDEX');
+            expect($sql)->toContain('UNIQUE INDEX');
         });
     });
 
@@ -105,7 +108,7 @@ describe('SqliteSqlGenerator', function (): void {
         it('generates DROP INDEX statement', function (): void {
             $sql = $this->generator->generateDropIndex('users', 'idx_name');
 
-            expect($sql)->toBe('DROP INDEX idx_name');
+            expect($sql)->toBe('DROP INDEX "idx_name"');
         });
     });
 
@@ -120,8 +123,8 @@ describe('SqliteSqlGenerator', function (): void {
 
             $sql = $this->generator->generateAddForeignKey('posts', $fk);
 
-            expect($sql)->toContain('ALTER TABLE posts ADD FOREIGN KEY');
-            expect($sql)->toContain('REFERENCES users(id)');
+            expect($sql)->toContain('ALTER TABLE "posts" ADD FOREIGN KEY ("user_id")');
+            expect($sql)->toContain('REFERENCES "users"("id")');
         });
     });
 
@@ -129,7 +132,7 @@ describe('SqliteSqlGenerator', function (): void {
         it('generates ALTER TABLE DROP FOREIGN KEY', function (): void {
             $sql = $this->generator->generateDropForeignKey('posts', 'fk_user');
 
-            expect($sql)->toBe('ALTER TABLE posts DROP FOREIGN KEY fk_user');
+            expect($sql)->toBe('ALTER TABLE "posts" DROP FOREIGN KEY "fk_user"');
         });
     });
 
@@ -141,12 +144,12 @@ describe('SqliteSqlGenerator', function (): void {
                     new Column(name: 'id', type: 'INT', primaryKey: true),
                 ],
             );
-            $diff = new \Marko\Database\Diff\SchemaDiff(tablesToCreate: [$table]);
+            $diff = new SchemaDiff(tablesToCreate: [$table]);
 
             $sql = $this->generator->generateUp($diff);
 
             expect($sql)->toHaveCount(1);
-            expect($sql[0])->toContain('CREATE TABLE users');
+            expect($sql[0])->toContain('CREATE TABLE "users"');
         });
     });
 });

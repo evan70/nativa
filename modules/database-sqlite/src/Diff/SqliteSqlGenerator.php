@@ -9,6 +9,7 @@ use Marko\Database\Diff\SchemaDiff;
 use Marko\Database\Schema\Column;
 use Marko\Database\Schema\ForeignKey;
 use Marko\Database\Schema\Index;
+use Marko\Database\Schema\IndexType;
 
 class SqliteSqlGenerator implements SqlGeneratorInterface
 {
@@ -22,6 +23,18 @@ class SqliteSqlGenerator implements SqlGeneratorInterface
 
         foreach ($diff->tablesToCreate as $table) {
             $statements[] = $this->generateCreateTable($table);
+            foreach ($table->indexes as $index) {
+                $statements[] = $this->generateAddIndex($table->name, $index);
+            }
+        }
+
+        foreach ($diff->tablesToAlter as $tableName => $tableDiff) {
+            foreach ($tableDiff->columnsToAdd as $column) {
+                $statements[] = $this->generateAddColumn($tableName, $column);
+            }
+            // SQLite has limited ALTER TABLE support. 
+            // For complex changes, usually a table recreation is needed.
+            // For now, we only implement AddColumn.
         }
 
         return array_filter($statements);
@@ -44,51 +57,50 @@ class SqliteSqlGenerator implements SqlGeneratorInterface
         $primaryKey = [];
 
         foreach ($table->columns as $column) {
-            $colDef = $column->name . ' ' . $this->mapType($column);
+            $type = $this->mapType($column);
+            $quotedName = $this->quote($column->name);
 
-            if (!$column->nullable) {
-                $colDef .= ' NOT NULL';
-            }
+            if ($column->autoIncrement && $column->primaryKey && $type === 'INTEGER') {
+                $colDef = $quotedName . ' INTEGER PRIMARY KEY AUTOINCREMENT';
+            } else {
+                $colDef = $quotedName . ' ' . $type;
 
-            if ($column->autoIncrement) {
-                $colDef .= ' AUTOINCREMENT';
-            }
+                if (!$column->nullable) {
+                    $colDef .= ' NOT NULL';
+                }
 
-            if ($column->default !== null) {
-                $colDef .= ' DEFAULT ' . $this->formatDefault($column->default);
+                if ($column->default !== null) {
+                    $colDef .= ' DEFAULT ' . $this->formatDefault($column->default);
+                }
+
+                if ($column->primaryKey) {
+                    $primaryKey[] = $quotedName;
+                }
             }
 
             $columns[] = $colDef;
-
-            if ($column->primaryKey) {
-                $primaryKey[] = $column->name;
-            }
         }
 
         if (!empty($primaryKey)) {
             $columns[] = 'PRIMARY KEY (' . implode(', ', $primaryKey) . ')';
         }
 
-        foreach ($table->indexes as $index) {
-            $idxCols = implode(', ', $index->columns);
-            $columns[] = "INDEX ($idxCols)";
-        }
-
         return sprintf(
             'CREATE TABLE %s (%s)',
-            $table->name,
+            $this->quote($table->name),
             implode(', ', $columns),
         );
     }
 
     public function generateDropTable(string $tableName): string
     {
-        return "DROP TABLE IF EXISTS $tableName";
+        return "DROP TABLE IF EXISTS " . $this->quote($tableName);
     }
 
     public function generateAddColumn(string $table, Column $column): string
     {
-        $colDef = $column->name . ' ' . $this->mapType($column);
+        $type = $this->mapType($column);
+        $colDef = $this->quote($column->name) . ' ' . $type;
 
         if (!$column->nullable) {
             $colDef .= ' NOT NULL';
@@ -98,12 +110,12 @@ class SqliteSqlGenerator implements SqlGeneratorInterface
             $colDef .= ' DEFAULT ' . $this->formatDefault($column->default);
         }
 
-        return "ALTER TABLE $table ADD COLUMN $colDef";
+        return "ALTER TABLE " . $this->quote($table) . " ADD COLUMN $colDef";
     }
 
     public function generateDropColumn(string $table, string $columnName): string
     {
-        return "ALTER TABLE $table DROP COLUMN $columnName";
+        return "ALTER TABLE " . $this->quote($table) . " DROP COLUMN " . $this->quote($columnName);
     }
 
     public function generateModifyColumn(
@@ -111,42 +123,43 @@ class SqliteSqlGenerator implements SqlGeneratorInterface
         Column $column,
         Column $oldColumn,
     ): string {
-        return "ALTER TABLE $table MODIFY COLUMN " . $column->name . ' ' . $this->mapType($column);
+        return "ALTER TABLE " . $this->quote($table) . " MODIFY COLUMN " . $this->quote($column->name) . ' ' . $this->mapType($column);
     }
 
     public function generateAddIndex(string $table, Index $index): string
     {
-        $columns = implode(', ', $index->columns);
+        $columns = implode(', ', array_map([$this, 'quote'], $index->columns));
+        $unique = $index->type === IndexType::Unique ? 'UNIQUE ' : '';
 
-        return "CREATE INDEX {$index->name} ON $table ($columns)";
+        return "CREATE {$unique}INDEX " . $this->quote($index->name) . " ON " . $this->quote($table) . " ($columns)";
     }
 
     public function generateDropIndex(string $table, string $indexName): string
     {
-        return "DROP INDEX $indexName";
+        return "DROP INDEX " . $this->quote($indexName);
     }
 
     public function generateAddForeignKey(string $table, ForeignKey $foreignKey): string
     {
-        $column = $foreignKey->columns[0] ?? '';
-        $referencedColumn = $foreignKey->referencedColumns[0] ?? '';
+        $column = $this->quote($foreignKey->columns[0] ?? '');
+        $referencedColumn = $this->quote($foreignKey->referencedColumns[0] ?? '');
         
-        return "ALTER TABLE $table ADD FOREIGN KEY ($column) REFERENCES {$foreignKey->referencedTable}($referencedColumn)";
+        return "ALTER TABLE " . $this->quote($table) . " ADD FOREIGN KEY ($column) REFERENCES " . $this->quote($foreignKey->referencedTable) . "($referencedColumn)";
     }
 
     public function generateDropForeignKey(string $table, string $keyName): string
     {
-        return "ALTER TABLE $table DROP FOREIGN KEY $keyName";
+        return "ALTER TABLE " . $this->quote($table) . " DROP FOREIGN KEY " . $this->quote($keyName);
     }
 
     private function mapType(Column $column): string
     {
-        return match ($column->type) {
-            'INT' => 'INTEGER',
+        return match (strtoupper($column->type)) {
+            'INTEGER', 'INT' => 'INTEGER',
             'BIGINT' => 'BIGINT',
             'SMALLINT' => 'INTEGER',
             'TINYINT' => 'INTEGER',
-            'DOUBLE' => 'REAL',
+            'DOUBLE', 'DECIMAL' => 'REAL',
             'FLOAT' => 'REAL',
             'BLOB' => 'BLOB',
             default => 'TEXT',
@@ -159,10 +172,19 @@ class SqliteSqlGenerator implements SqlGeneratorInterface
             return 'NULL';
         }
 
+        if (is_bool($default)) {
+            return $default ? '1' : '0';
+        }
+
         if (is_numeric($default)) {
             return (string) $default;
         }
 
         return "'" . $default . "'";
+    }
+
+    private function quote(string $identifier): string
+    {
+        return '"' . str_replace('"', '""', $identifier) . '"';
     }
 }
