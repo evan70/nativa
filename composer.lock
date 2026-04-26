@@ -4,830 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c67a313e63e206cd036ea981d18b8f53",
-    "packages": [
-        {
-            "name": "marko/admin",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "packages/admin",
-                "reference": "7fd1dfc74ad4defd470b61dccf42a659f07dc56e"
-            },
-            "require": {
-                "marko/config": "self.version",
-                "marko/core": "self.version",
-                "marko/routing": "self.version",
-                "php": "^8.5"
-            },
-            "require-dev": {
-                "marko/testing": "self.version",
-                "pestphp/pest": "^4.0"
-            },
-            "type": "library",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\Admin\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Marko\\Admin\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Admin contracts for Marko Framework",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
-            "name": "marko/admin-api",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "packages/admin-api",
-                "reference": "02f4bcdf3361c8cd8b87f684958549cd6204550c"
-            },
-            "require": {
-                "marko/admin": "self.version",
-                "marko/admin-auth": "self.version",
-                "marko/authentication": "self.version",
-                "marko/config": "self.version",
-                "marko/core": "self.version",
-                "marko/routing": "self.version",
-                "php": "^8.5"
-            },
-            "require-dev": {
-                "marko/testing": "self.version",
-                "pestphp/pest": "^4.0"
-            },
-            "type": "marko-module",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\AdminApi\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Marko\\AdminApi\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Admin REST API for Marko Framework",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
-            "name": "marko/admin-auth",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "packages/admin-auth",
-                "reference": "ec6795ea8275631cd0db85a6ec9b8f8621dd9bc8"
-            },
-            "require": {
-                "marko/admin": "self.version",
-                "marko/authentication": "self.version",
-                "marko/config": "self.version",
-                "marko/core": "self.version",
-                "marko/database": "self.version",
-                "php": "^8.5"
-            },
-            "require-dev": {
-                "marko/testing": "self.version",
-                "pestphp/pest": "^4.0"
-            },
-            "type": "marko-module",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\AdminAuth\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Marko\\AdminAuth\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Admin authentication and authorization for Marko Framework",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
-            "name": "marko/admin-panel",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "packages/admin-panel",
-                "reference": "71e29f3e95827f917cd9da4300d71c91e953d036"
-            },
-            "require": {
-                "marko/admin": "self.version",
-                "marko/admin-auth": "self.version",
-                "marko/authentication": "self.version",
-                "marko/config": "self.version",
-                "marko/core": "self.version",
-                "marko/routing": "self.version",
-                "marko/session": "self.version",
-                "marko/view": "self.version",
-                "php": "^8.5"
-            },
-            "require-dev": {
-                "marko/testing": "self.version",
-                "pestphp/pest": "^4.0"
-            },
-            "type": "marko-module",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\AdminPanel\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Marko\\AdminPanel\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Admin panel UI for Marko Framework",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
-            "name": "marko/authentication",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "packages/authentication",
-                "reference": "e20ce53f2532647a9e9a1a7c564d435c180cb482"
-            },
-            "require": {
-                "marko/core": "self.version",
-                "php": "^8.5"
-            },
-            "require-dev": {
-                "marko/testing": "self.version"
-            },
-            "type": "marko-module",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\Authentication\\": "src/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Authentication and authorization for Marko Framework",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
-            "name": "marko/authorization",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "packages/authorization",
-                "reference": "d38b90568a54157fc20f15ec67cde6655ba15978"
-            },
-            "require": {
-                "marko/authentication": "self.version",
-                "marko/config": "self.version",
-                "marko/core": "self.version",
-                "marko/routing": "self.version",
-                "php": "^8.5"
-            },
-            "require-dev": {
-                "marko/testing": "self.version",
-                "pestphp/pest": "^4.0"
-            },
-            "type": "marko-module",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\Authorization\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Marko\\Authorization\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Policy-based authorization with Gates and Policies for Marko Framework",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
-            "name": "marko/cli",
-            "version": "dev-cto/move-marko-packages-vendorless",
-            "dist": {
-                "type": "path",
-                "url": "packages/cli",
-                "reference": "b667069f07a89ff6a6125f2922040500a1422147"
-            },
-            "require": {
-                "php": "^8.5"
-            },
-            "require-dev": {
-                "pestphp/pest": "^4.0"
-            },
-            "bin": [
-                "bin/marko"
-            ],
-            "type": "library",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\Cli\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Marko\\Cli\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Marko Framework CLI",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
-            "name": "marko/config",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "packages/config",
-                "reference": "2e0e558b0d9752c2cf06ea39620575cc44ca4d5f"
-            },
-            "require": {
-                "marko/core": "self.version",
-                "php": "^8.5"
-            },
-            "require-dev": {
-                "pestphp/pest": "^4.0"
-            },
-            "type": "marko-module",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\Config\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Marko\\Config\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Configuration loading and merging for Marko Framework",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
-            "name": "marko/core",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "packages/core",
-                "reference": "268148999e34b096c26c3c876e5d40e76c7b4c15"
-            },
-            "require": {
-                "php": "^8.5",
-                "psr/container": "^2.0"
-            },
-            "require-dev": {
-                "marko/testing": "self.version",
-                "pestphp/pest": "^4.0"
-            },
-            "type": "library",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\Core\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Marko\\Core\\Tests\\": "tests/"
-                },
-                "files": [
-                    "tests/Unit/Container/Fixtures/TestFixtureInterface.php",
-                    "tests/Unit/Container/Fixtures/TestFixtureNoDriverException.php",
-                    "tests/Unit/Container/Fixtures/TestFixtureNoDriverInterface.php"
-                ]
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Marko Framework Core",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
-            "name": "marko/database",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "packages/database",
-                "reference": "05b01a047978f761d4e2845da050da7f80569106"
-            },
-            "require": {
-                "marko/core": "self.version",
-                "php": "^8.5"
-            },
-            "require-dev": {
-                "pestphp/pest": "^4.0"
-            },
-            "type": "library",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\Database\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Marko\\Database\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Marko Framework Database Layer - Entity-driven schema with Data Mapper pattern",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
-            "name": "marko/env",
-            "version": "dev-cto/move-marko-packages-vendorless",
-            "dist": {
-                "type": "path",
-                "url": "packages/env",
-                "reference": "ad3f28951784ae7260d57a636c6cbd33cfde61a3"
-            },
-            "require": {
-                "php": "^8.5"
-            },
-            "require-dev": {
-                "pestphp/pest": "^4.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Marko\\Env\\": "src/"
-                },
-                "files": [
-                    "src/functions.php"
-                ]
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Marko\\Env\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Environment variable loading for Marko applications",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
-            "name": "marko/errors",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "packages/errors",
-                "reference": "2745cbbfcdb404225d290f8f4f5be64ab5ac2502"
-            },
-            "require": {
-                "marko/core": "self.version",
-                "php": "^8.5"
-            },
-            "require-dev": {
-                "pestphp/pest": "^4.0"
-            },
-            "type": "library",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\Errors\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Marko\\Errors\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Marko Framework Error Handling",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
-            "name": "marko/errors-simple",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "packages/errors-simple",
-                "reference": "54514448e7540a8617fb502447aa678abffca608"
-            },
-            "require": {
-                "marko/core": "self.version",
-                "marko/errors": "self.version",
-                "php": ">=8.5"
-            },
-            "require-dev": {
-                "pestphp/pest": "^4.0"
-            },
-            "type": "library",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\ErrorsSimple\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Marko\\ErrorsSimple\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Simple error handling and display for the Marko framework",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
-            "name": "marko/hashing",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "packages/hashing",
-                "reference": "ce1653783049d0062e1c7003d1e8fc98360b1583"
-            },
-            "require": {
-                "marko/config": "self.version",
-                "marko/core": "self.version",
-                "php": "^8.5"
-            },
-            "require-dev": {
-                "marko/testing": "self.version",
-                "pestphp/pest": "^4.0"
-            },
-            "type": "marko-module",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\Hashing\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Marko\\Hashing\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Password hashing and verification for Marko Framework",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
-            "name": "marko/routing",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "packages/routing",
-                "reference": "c3731b122c9973c7fe048f82468182312221928d"
-            },
-            "require": {
-                "marko/core": "self.version",
-                "php": "^8.5"
-            },
-            "require-dev": {
-                "pestphp/pest": "^4.0"
-            },
-            "type": "library",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\Routing\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Marko\\Routing\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Marko Framework Routing",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
-            "name": "marko/session",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "packages/session",
-                "reference": "61542e8183d4628ef1d8ec440ad4efcd3666e8d6"
-            },
-            "require": {
-                "marko/config": "self.version",
-                "marko/core": "self.version",
-                "php": "^8.5"
-            },
-            "type": "marko-module",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\Session\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Marko\\Session\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Session interfaces and infrastructure for Marko Framework",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
-            "name": "marko/session-database",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "packages/session-database",
-                "reference": "de08b49ce388920397c84f929063a483de8f1738"
-            },
-            "require": {
-                "marko/database": "self.version",
-                "marko/session": "self.version",
-                "php": "^8.5"
-            },
-            "require-dev": {
-                "pestphp/pest": "^4.0"
-            },
-            "type": "marko-module",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\Session\\Database\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Marko\\Session\\Database\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Database session driver for Marko Framework",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
-            "name": "marko/validation",
-            "version": "dev-cto/move-marko-packages-vendorless",
-            "dist": {
-                "type": "path",
-                "url": "packages/validation",
-                "reference": "fd81101782f401226a01f2ce277a4505f80490bd"
-            },
-            "require": {
-                "php": "^8.5"
-            },
-            "type": "marko-module",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\Validation\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Marko\\Validation\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Validation component for Marko Framework",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
-            "name": "marko/view",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "packages/view",
-                "reference": "3ffe825c4d24305aa1173620311089e635e1544f"
-            },
-            "require": {
-                "marko/config": "self.version",
-                "marko/core": "self.version",
-                "marko/routing": "self.version",
-                "php": "^8.5"
-            },
-            "require-dev": {
-                "marko/testing": "self.version",
-                "pestphp/pest": "^4.0"
-            },
-            "type": "library",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\View\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Marko\\View\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Marko Framework View - Templating interfaces and contracts",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
-            "name": "psr/container",
-            "version": "2.0.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/php-fig/container.git",
-                "reference": "c71ecc56dfe541dbd90c5360474fbc405f8d5963"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/container/zipball/c71ecc56dfe541dbd90c5360474fbc405f8d5963",
-                "reference": "c71ecc56dfe541dbd90c5360474fbc405f8d5963",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.4.0"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "2.0.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Psr\\Container\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "PHP-FIG",
-                    "homepage": "https://www.php-fig.org/"
-                }
-            ],
-            "description": "Common Container Interface (PHP FIG PSR-11)",
-            "homepage": "https://github.com/php-fig/container",
-            "keywords": [
-                "PSR-11",
-                "container",
-                "container-interface",
-                "container-interop",
-                "psr"
-            ],
-            "support": {
-                "issues": "https://github.com/php-fig/container/issues",
-                "source": "https://github.com/php-fig/container/tree/2.0.2"
-            },
-            "time": "2021-11-05T16:47:00+00:00"
-        }
-    ],
+    "content-hash": "713a8ec588f2d3ed765fe2bbfb7846da",
+    "packages": [],
     "packages-dev": [
         {
             "name": "brianium/paratest",
@@ -1161,176 +339,6 @@
                 "source": "https://github.com/Jean85/pretty-package-versions/tree/2.1.1"
             },
             "time": "2025-03-19T14:43:43+00:00"
-        },
-        {
-            "name": "marko/log",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "packages/log",
-                "reference": "e98196c65f0a1d855e0f950e06619447e4d7e1ab"
-            },
-            "require": {
-                "marko/config": "self.version",
-                "marko/core": "self.version",
-                "php": "^8.5"
-            },
-            "require-dev": {
-                "marko/testing": "self.version",
-                "pestphp/pest": "^4.0"
-            },
-            "type": "marko-module",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\Log\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Marko\\Log\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "PSR-3 compatible logging interfaces and formatters for Marko Framework",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
-            "name": "marko/mail",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "packages/mail",
-                "reference": "9c49861eee620334a045449d1ded01e74fdc8753"
-            },
-            "require": {
-                "marko/config": "self.version",
-                "marko/core": "self.version",
-                "php": "^8.5"
-            },
-            "require-dev": {
-                "marko/testing": "self.version",
-                "pestphp/pest": "^4.0"
-            },
-            "type": "library",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\Mail\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Marko\\Mail\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Marko Framework Mail - Message building and mailing interfaces",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
-            "name": "marko/queue",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "packages/queue",
-                "reference": "b18c662d6371f8cf106fb8c93132680a932fca89"
-            },
-            "require": {
-                "marko/core": "self.version",
-                "php": "^8.5"
-            },
-            "require-dev": {
-                "marko/testing": "self.version",
-                "pestphp/pest": "^4.0"
-            },
-            "type": "library",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\Queue\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Marko\\Queue\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Queue interfaces and infrastructure for Marko Framework",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
-            "name": "marko/testing",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "packages/testing",
-                "reference": "15b9dcb2c41975218a369a194be289304b7ef266"
-            },
-            "require": {
-                "marko/authentication": "self.version",
-                "marko/config": "self.version",
-                "marko/core": "self.version",
-                "marko/log": "self.version",
-                "marko/mail": "self.version",
-                "marko/queue": "self.version",
-                "marko/session": "self.version",
-                "php": "^8.5"
-            },
-            "require-dev": {
-                "pestphp/pest": "^4.0"
-            },
-            "type": "marko-module",
-            "extra": {
-                "marko": {
-                    "module": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Marko\\Testing\\": "src/"
-                },
-                "files": [
-                    "src/Pest/Expectations.php"
-                ]
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Marko\\Testing\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Testing utilities for the Marko framework - fakes, assertions, and Pest integration",
-            "transport-options": {
-                "relative": true
-            }
         },
         {
             "name": "myclabs/deep-copy",
@@ -2852,6 +1860,59 @@
             "time": "2026-04-18T06:12:49+00:00"
         },
         {
+            "name": "psr/container",
+            "version": "2.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/container.git",
+                "reference": "c71ecc56dfe541dbd90c5360474fbc405f8d5963"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/container/zipball/c71ecc56dfe541dbd90c5360474fbc405f8d5963",
+                "reference": "c71ecc56dfe541dbd90c5360474fbc405f8d5963",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Container\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "https://www.php-fig.org/"
+                }
+            ],
+            "description": "Common Container Interface (PHP FIG PSR-11)",
+            "homepage": "https://github.com/php-fig/container",
+            "keywords": [
+                "PSR-11",
+                "container",
+                "container-interface",
+                "container-interop",
+                "psr"
+            ],
+            "support": {
+                "issues": "https://github.com/php-fig/container/issues",
+                "source": "https://github.com/php-fig/container/tree/2.0.2"
+            },
+            "time": "2021-11-05T16:47:00+00:00"
+        },
+        {
             "name": "psr/log",
             "version": "3.0.2",
             "source": {
@@ -4128,7 +3189,7 @@
         },
         {
             "name": "symfony/polyfill-ctype",
-            "version": "v1.36.0",
+            "version": "v1.37.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-ctype.git",
@@ -4187,7 +3248,7 @@
                 "portable"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-ctype/tree/v1.36.0"
+                "source": "https://github.com/symfony/polyfill-ctype/tree/v1.37.0"
             },
             "funding": [
                 {
@@ -4211,16 +3272,16 @@
         },
         {
             "name": "symfony/polyfill-intl-grapheme",
-            "version": "v1.36.0",
+            "version": "v1.37.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-intl-grapheme.git",
-                "reference": "ad1b7b9092976d6c948b8a187cec9faaea9ec1df"
+                "reference": "4864388bfbd3001ce88e234fab652acd91fdc57e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-intl-grapheme/zipball/ad1b7b9092976d6c948b8a187cec9faaea9ec1df",
-                "reference": "ad1b7b9092976d6c948b8a187cec9faaea9ec1df",
+                "url": "https://api.github.com/repos/symfony/polyfill-intl-grapheme/zipball/4864388bfbd3001ce88e234fab652acd91fdc57e",
+                "reference": "4864388bfbd3001ce88e234fab652acd91fdc57e",
                 "shasum": ""
             },
             "require": {
@@ -4269,7 +3330,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-intl-grapheme/tree/v1.36.0"
+                "source": "https://github.com/symfony/polyfill-intl-grapheme/tree/v1.37.0"
             },
             "funding": [
                 {
@@ -4289,11 +3350,11 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-04-10T16:19:22+00:00"
+            "time": "2026-04-26T13:13:48+00:00"
         },
         {
             "name": "symfony/polyfill-intl-normalizer",
-            "version": "v1.36.0",
+            "version": "v1.37.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-intl-normalizer.git",
@@ -4354,7 +3415,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-intl-normalizer/tree/v1.36.0"
+                "source": "https://github.com/symfony/polyfill-intl-normalizer/tree/v1.37.0"
             },
             "funding": [
                 {
@@ -4378,7 +3439,7 @@
         },
         {
             "name": "symfony/polyfill-mbstring",
-            "version": "v1.36.0",
+            "version": "v1.37.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
@@ -4439,7 +3500,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.36.0"
+                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.37.0"
             },
             "funding": [
                 {
@@ -4877,28 +3938,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "marko/admin": 20,
-        "marko/admin-api": 20,
-        "marko/admin-auth": 20,
-        "marko/admin-panel": 20,
-        "marko/authentication": 20,
-        "marko/authorization": 20,
-        "marko/cli": 20,
-        "marko/config": 20,
-        "marko/core": 20,
-        "marko/database": 20,
-        "marko/env": 20,
-        "marko/errors": 20,
-        "marko/errors-simple": 20,
-        "marko/hashing": 20,
-        "marko/routing": 20,
-        "marko/session": 20,
-        "marko/session-database": 20,
-        "marko/testing": 20,
-        "marko/validation": 20,
-        "marko/view": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

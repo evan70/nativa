@@ -10,6 +10,7 @@ use Marko\Cli\Exceptions\ProjectNotFoundException;
 use Marko\Core\Application;
 use Marko\Core\Command\Input;
 use Marko\Core\Command\Output;
+use Marko\Core\Path\ProjectPaths;
 use Throwable;
 
 readonly class CliKernel
@@ -28,9 +29,10 @@ readonly class CliKernel
         ?Output $output = null,
     ) {
         $this->applicationFactory = $applicationFactory ?? fn (string $projectRoot): Application => new Application(
-            vendorPath: $projectRoot . '/vendor',
+            vendorPath: ProjectPaths::resolvePackagesRoot($projectRoot),
             modulesPath: $projectRoot . '/modules',
             appPath: $projectRoot . '/app',
+            basePath: $projectRoot,
         );
         $this->output = $output ?? new Output();
     }
