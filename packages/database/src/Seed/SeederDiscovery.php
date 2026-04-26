@@ -123,6 +123,9 @@ readonly class SeederDiscovery implements SeederDiscoveryInterface
             }
 
             foreach ($matches as $seedDir) {
+                if (str_contains($seedDir, '/tests/')) {
+                    continue;
+                }
                 foreach ($this->discoverInPath($seedDir) as $definition) {
                     if (isset($seen[$definition->seederClass])) {
                         continue;
