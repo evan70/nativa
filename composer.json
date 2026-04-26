@@ -20,6 +20,7 @@
         "marko/database": "*",
         "marko/env": "*",
         "marko/errors": "*",
+        "marko/errors-advanced": "*",
         "marko/errors-simple": "*",
         "marko/hashing": "*",
         "marko/log": "*",
