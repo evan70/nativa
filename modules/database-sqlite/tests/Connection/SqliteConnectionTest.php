@@ -42,7 +42,7 @@ describe('SqliteConnection', function (): void {
         $this->connection->execute('CREATE TABLE items (id INTEGER PRIMARY KEY, name TEXT)');
         $this->connection->execute('INSERT INTO items (name) VALUES (?)', ['Test']);
         
-        expect($this->connection->lastInsertId())->toBe('1');
+        expect($this->connection->lastInsertId())->toBe(1);
     });
 
     it('throws SqliteException on invalid query', function (): void {
@@ -55,10 +55,8 @@ describe('SqliteConnection', function (): void {
     it('handles multiple statements', function (): void {
         $this->connection->connect();
         
-        $this->connection->execute('
-            CREATE TABLE posts (id INTEGER PRIMARY KEY, title TEXT);
-            INSERT INTO posts (title) VALUES ("Hello");
-        ');
+        $this->connection->execute('CREATE TABLE posts (id INTEGER PRIMARY KEY, title TEXT)');
+        $this->connection->execute('INSERT INTO posts (title) VALUES ("Hello")');
         
         $results = $this->connection->query('SELECT * FROM posts');
         

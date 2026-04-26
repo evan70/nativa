@@ -38,8 +38,8 @@ describe('SqliteIntrospector', function (): void {
         $table = $this->introspector->getTable('users');
         
         expect($table)->not->toBeNull();
-        expect($table?->getName())->toBe('users');
-        expect($table?->getColumns())->toHaveCount(2);
+        expect($table?->name)->toBe('users');
+        expect($table?->columns)->toHaveCount(2);
     });
 
     it('detects primary key column', function (): void {
@@ -79,7 +79,7 @@ describe('SqliteIntrospector', function (): void {
         $foreignKeys = $this->introspector->getForeignKeys('posts');
         
         expect($foreignKeys)->toHaveCount(1);
-        expect($foreignKeys[0]->column)->toBe('user_id');
+        expect($foreignKeys[0]->columns[0])->toBe('user_id');
         expect($foreignKeys[0]->referencedTable)->toBe('users');
     });
 
