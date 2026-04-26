@@ -101,8 +101,8 @@ class RoleRepository extends Repository implements RoleRepositoryInterface
         int $roleId,
     ): array {
         $sql = 'SELECT p.* FROM permissions p
-            INNER JOIN role_permissions rp ON p.id = rp.permission_id
-            WHERE rp.role_id = ?';
+            INNER JOIN role_permissions rp ON p.id = rp.permissionId
+            WHERE rp.roleId = ?';
 
         $rows = $this->connection->query($sql, [$roleId]);
 
@@ -128,12 +128,12 @@ class RoleRepository extends Repository implements RoleRepositoryInterface
         array $permissionIds,
     ): void {
         // Remove all existing permissions for this role
-        $sql = 'DELETE FROM role_permissions WHERE role_id = ?';
+        $sql = 'DELETE FROM role_permissions WHERE roleId = ?';
         $this->connection->execute($sql, [$roleId]);
 
         // Attach the new permissions
         foreach ($permissionIds as $permissionId) {
-            $sql = 'INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)';
+            $sql = 'INSERT INTO role_permissions (roleId, permissionId) VALUES (?, ?)';
             $this->connection->execute($sql, [$roleId, $permissionId]);
         }
     }
