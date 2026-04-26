@@ -1,0 +1,30 @@
+# Project Rules
+
+## Technical Stack
+- TypeScript (ES2022)
+- Vite for bundling
+- Pure CSS with BEM methodology
+- No frontend frameworks (Vanilla JS only)
+- pnpm for package management
+
+## Architecture
+- Modular, section-based architecture.
+- Core Bundle: Loaded on every page (tokens, global components, SectionLoader).
+- Page-Specific Bundles: Separate entry points per page to minimize payload.
+- Sections auto-instantiate via `data-section` attributes.
+
+## CSS Guidelines
+- Follow BEM methodology (`.block__element--modifier`).
+- Use CSS custom properties (design tokens) from `unified.css`.
+- Keep CSS flat; avoid deep nesting.
+- No CSS frameworks.
+
+## Performance & SEO
+- Maintain 100/100 Lighthouse scores.
+- Proper use of semantic HTML and landmarks.
+- Optimized asset loading.
+
+## Development Workflow
+- All changes must be documented in a PR.
+- Use pnpm for all dependency management and scripts.
+- GitHub Actions handles CI/CD and deployment to GitHub Pages.
