@@ -33,6 +33,11 @@ readonly class Response
         return $this->headers;
     }
 
+    public function withStatus(int $statusCode): self
+    {
+        return new self($this->body, $statusCode, $this->headers);
+    }
+
     public static function json(
         mixed $data,
         int $statusCode = 200,
