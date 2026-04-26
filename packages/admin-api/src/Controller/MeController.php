@@ -23,7 +23,7 @@ readonly class MeController
     /**
      * @throws JsonException
      */
-    #[Get('/admin/api/v1/me')]
+    #[Get('/mark/api/v1/me')]
     public function me(): Response
     {
         $user = $this->guard->user();
