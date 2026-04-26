@@ -34,7 +34,8 @@
     },
     "require-dev": {
         "pestphp/pest": "^4.0",
-        "marko/testing": "*@dev"
+        "marko/testing": "*@dev",
+        "phpstan/phpstan": "^2.1"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
