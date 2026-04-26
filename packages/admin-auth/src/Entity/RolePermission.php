@@ -10,7 +10,7 @@ use Marko\Database\Attributes\Table;
 use Marko\Database\Entity\Entity;
 
 #[Table('role_permissions')]
-#[Index('idx_role_permissions_unique', ['role_id', 'permission_id'], unique: true)]
+#[Index('idx_role_permissions_unique', ['roleId', 'permissionId'], unique: true)]
 class RolePermission extends Entity implements RolePermissionInterface
 {
     #[Column(references: 'roles.id', onDelete: 'CASCADE')]

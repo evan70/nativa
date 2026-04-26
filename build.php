@@ -37,7 +37,7 @@ if (!is_dir($rootDir . '/vendor')) {
 echo "Preparing production artifacts...\n";
 
 // Copy source code directories
-$sourceDirs = ['app', 'bootstrap', 'modules', 'packages', 'config', 'database', 'routes', 'public'];
+$sourceDirs = ['app', 'bootstrap', 'modules', 'packages', 'config', 'database', 'routes', 'public', 'storage'];
 foreach ($sourceDirs as $dir) {
     if (is_dir($rootDir . '/' . $dir)) {
         echo "   Copying $dir...\n";
@@ -48,6 +48,13 @@ foreach ($sourceDirs as $dir) {
 }
 
 copyVendorMarkoPackages($rootDir, $distDir);
+
+if (is_file($rootDir . '/marko')) {
+    echo "   Copying marko CLI binary...\n";
+    copy($rootDir . '/marko', $distDir . '/marko');
+    chmod($distDir . '/marko', 0755);
+}
+
 writeRuntimeManifest($distDir);
 removeComposerFiles($distDir);
 
