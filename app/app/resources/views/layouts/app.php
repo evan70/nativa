@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{$title ?? 'Nativa'}</title>
+    <title><?= $this->e($title ?? 'Nativa') ?></title>
     <style>
         :root {
             color-scheme: light;
@@ -205,9 +205,9 @@
 </head>
 <body>
 <div class="shell">
-    {include 'controllers::partials/nav.latte'}
+    <?= $this->include('controllers::partials/nav') ?>
     <main class="page">
-        {include content}
+        <?= $this->yield('content') ?>
     </main>
 </div>
 </body>

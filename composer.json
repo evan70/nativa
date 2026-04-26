@@ -4,8 +4,7 @@
     "license": "MIT",
     "type": "project",
     "require": {
-        "php": "^8.5",
-        "latte/latte": "^3.0"
+        "php": "^8.5"
     },
     "replace": {
         "marko/admin": "*",
@@ -32,8 +31,7 @@
         "marko/session-database": "*",
         "marko/testing": "*",
         "marko/validation": "*",
-        "marko/view": "*",
-        "marko/view-latte": "*"
+        "marko/view": "*"
     },
     "require-dev": {
         "pestphp/pest": "^4.0",

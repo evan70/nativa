@@ -2,7 +2,7 @@
 
 return [
     'cache_directory' => dirname(__DIR__) . '/storage/view',
-    'extension' => '.latte',
+    'extension' => '.php',
     'auto_refresh' => true,
     'strict_types' => true,
 ];
