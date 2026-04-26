@@ -36,3 +36,4 @@ database/*.sqlite
 dist/
 build/
 *.phar
+public/mark/
