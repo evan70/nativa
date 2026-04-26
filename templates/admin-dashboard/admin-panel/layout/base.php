@@ -7,6 +7,10 @@
     <title><?= $this->e($pageTitle ?? 'Marko Admin | Dashboard') ?></title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     
+    <!-- Vanilla Cards Assets -->
+    <link rel="stylesheet" href="/mark/core-css.css">
+    <script type="module" src="/mark/init.js"></script>
+    
     <!-- Init script (blocks rendering, prevents FOUC) -->
     <script>
         (function() {
@@ -51,6 +55,8 @@
             });
         }
     </script>
+    <script type="module" src="/mark/core-app.js"></script>
+    <script type="module" src="/mark/theme-switcher.js"></script>
     <?= $this->yield('scripts') ?>
 </body>
 </html>
