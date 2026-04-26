@@ -1,0 +1,37 @@
+{
+    "name": "marko/authorization",
+    "description": "Policy-based authorization with Gates and Policies for Marko Framework",
+    "type": "marko-module",
+    "license": "MIT",
+    "require": {
+        "php": "^8.5",
+        "marko/core": "self.version",
+        "marko/authentication": "self.version",
+        "marko/routing": "self.version",
+        "marko/config": "self.version"
+    },
+    "require-dev": {
+        "marko/testing": "self.version",
+        "pestphp/pest": "^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Marko\\Authorization\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Marko\\Authorization\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "extra": {
+        "marko": {
+            "module": true
+        }
+    }
+}
