@@ -28,7 +28,7 @@ readonly class SectionController
     /**
      * @throws JsonException
      */
-    #[Get('/admin/api/v1/sections')]
+    #[Get('/mark/api/v1/sections')]
     public function index(): Response
     {
         $sections = $this->sectionRegistry->all();
@@ -58,7 +58,7 @@ readonly class SectionController
     /**
      * @throws JsonException
      */
-    #[Get('/admin/api/v1/sections/{id}')]
+    #[Get('/mark/api/v1/sections/{id}')]
     public function show(
         string $id,
     ): Response {
