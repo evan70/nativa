@@ -20,7 +20,7 @@ class LoginController
         private readonly AdminConfigInterface $adminConfig,
     ) {}
 
-    #[Get(path: '/admin/login')]
+    #[Get(path: '/mark/login')]
     public function showLoginForm(
         Request $request,
     ): Response {
@@ -33,7 +33,7 @@ class LoginController
         ]);
     }
 
-    #[Post(path: '/admin/login')]
+    #[Post(path: '/mark/login')]
     public function authenticate(
         Request $request,
     ): Response {
@@ -52,7 +52,7 @@ class LoginController
         ]);
     }
 
-    #[Post(path: '/admin/logout')]
+    #[Post(path: '/mark/logout')]
     public function logout(
         Request $request,
     ): Response {

@@ -21,7 +21,7 @@ class DashboardController
         private readonly GuardInterface $guard,
     ) {}
 
-    #[Get(path: '/admin')]
+    #[Get(path: '/mark')]
     #[Middleware(AdminAuthMiddleware::class)]
     public function index(
         Request $request,
