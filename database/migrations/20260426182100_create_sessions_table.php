@@ -1,0 +1,28 @@
+<?php
+
+declare(strict_types=1);
+
+use Marko\Database\Connection\ConnectionInterface;
+use Marko\Database\Migration\Migration;
+
+return new class extends Migration {
+    public function up(
+        ConnectionInterface $connection,
+    ): void {
+        $this->execute($connection, <<<'SQL'
+            CREATE TABLE "sessions" (
+                "id" TEXT PRIMARY KEY,
+                "payload" TEXT NOT NULL,
+                "last_activity" INTEGER NOT NULL
+            );
+            SQL);
+    }
+
+    public function down(
+        ConnectionInterface $connection,
+    ): void {
+        $this->execute($connection, <<<'SQL'
+            DROP TABLE IF EXISTS "sessions";
+            SQL);
+    }
+};
