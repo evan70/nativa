@@ -3,7 +3,7 @@ import { resolve } from 'path';
 
 export default defineConfig(({ mode }) => {
   return {
-    base: './',
+    base: '/mark/',
     publicDir: 'static',
     server: {
       allowedHosts: true,
