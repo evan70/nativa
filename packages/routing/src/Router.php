@@ -26,7 +26,7 @@ readonly class Router
      * @param array<class-string<MiddlewareInterface>> $globalMiddleware
      */
     public function __construct(
-        private RouteCollection $routes,
+        RouteCollection $routes,
         private ContainerInterface $container,
         private array $globalMiddleware = [],
     ) {

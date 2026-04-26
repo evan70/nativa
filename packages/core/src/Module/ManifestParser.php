@@ -24,6 +24,16 @@ class ManifestParser
     ): bool {
         $composerData = $this->loadComposerMetadata($modulePath);
 
+        if ($composerData === null) {
+            $composerPath = $modulePath . '/composer.json';
+            if (is_file($composerPath)) {
+                $content = file_get_contents($composerPath);
+                if ($content !== false) {
+                    $composerData = json_decode($content, true);
+                }
+            }
+        }
+
         return is_array($composerData)
             && isset($composerData['extra']['marko']['module'])
             && $composerData['extra']['marko']['module'] === true;
