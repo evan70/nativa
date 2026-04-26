@@ -95,9 +95,16 @@ class Container implements ContainerInterface
 
             $typeName = $type->getName();
 
-            if ($type->allowsNull() && !$this->has($typeName)) {
-                $dependencies[] = null;
-                continue;
+            if (!$this->has($typeName)) {
+                if ($parameter->isDefaultValueAvailable()) {
+                    $dependencies[] = $parameter->getDefaultValue();
+                    continue;
+                }
+
+                if ($type->allowsNull()) {
+                    $dependencies[] = null;
+                    continue;
+                }
             }
 
             $dependencies[] = $this->resolve($typeName);
@@ -188,13 +195,22 @@ class Container implements ContainerInterface
                 }
 
                 $typeName = $type->getName();
+                $hasBinding = $this->has($typeName);
 
-                // Closure cannot be instantiated - use default value if available
-                if ($typeName === 'Closure' || $typeName === Closure::class) {
+                if (!$hasBinding) {
                     if ($parameter->isDefaultValueAvailable()) {
                         $dependencies[] = $parameter->getDefaultValue();
                         continue;
                     }
+
+                    if ($type->allowsNull()) {
+                        $dependencies[] = null;
+                        continue;
+                    }
+                }
+
+                // Closure cannot be instantiated
+                if ($typeName === 'Closure' || $typeName === Closure::class) {
                     throw BindingException::unresolvableParameter($parameter->getName(), $id);
                 }
 
