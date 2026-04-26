@@ -22,6 +22,16 @@ if (is_dir($distDir)) {
 }
 mkdir($distDir, 0755, true);
 
+// 1.5. Build frontend assets
+echo "Building frontend assets...\n";
+$assetDir = $rootDir . '/templates/admin-dashboard';
+if (is_dir($assetDir)) {
+    passthru("cd " . escapeshellarg($assetDir) . " && pnpm install && pnpm build", $exitCode);
+    if ($exitCode !== 0) {
+        echo "Warning: Frontend asset build failed. Proceeding with existing assets in public/mark if any.\n";
+    }
+}
+
 // 2. Install dependencies locally (only for the build environment)
 if (!is_dir($rootDir . '/vendor')) {
     echo "Installing dependencies...\n";
