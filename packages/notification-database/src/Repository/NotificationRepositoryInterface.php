@@ -23,7 +23,7 @@ interface NotificationRepositoryInterface
 
     public function markAllAsRead(NotifiableInterface $notifiable): void;
 
-    public function delete(string $notificationId): void;
+    public function deleteById(string $notificationId): void;
 
     public function deleteAll(NotifiableInterface $notifiable): void;
 

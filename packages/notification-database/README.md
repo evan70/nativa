@@ -64,7 +64,7 @@ foreach ($unread as $notification) {
 
 ```php
 // Delete a single notification
-$this->notificationRepository->delete($notificationId);
+$this->notificationRepository->deleteById($notificationId);
 
 // Delete all notifications for a user
 $this->notificationRepository->deleteAll($user);
