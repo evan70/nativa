@@ -24,7 +24,7 @@ mkdir($distDir, 0755, true);
 
 // 1.5. Build frontend assets
 echo "Building frontend assets...\n";
-$assetDir = $rootDir . '/templates/admin-dashboard';
+$assetDir = $rootDir . '/templates';
 if (is_dir($assetDir)) {
     passthru("cd " . escapeshellarg($assetDir) . " && pnpm install && pnpm build", $exitCode);
     if ($exitCode !== 0) {

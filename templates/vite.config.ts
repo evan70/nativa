@@ -40,7 +40,7 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       target: ['chrome67', 'es2015'],
-      outDir: '../../public/mark',
+      outDir: '../public/mark',
       emptyOutDir: true,
       manifest: 'vanilla-cards-manifest.json',
       rollupOptions: {
