@@ -49,7 +49,7 @@ final class View
         return self::renderFile($template, $data);
     }
 
-    public static function vite(string $entry): string
+    public static function vite(string $entry, bool $isPageAsset = false): string
     {
         if (self::$manifest === null) {
             $manifestPath = dirname(__DIR__, 2) . '/public/mark/vanilla-cards-manifest.json';
@@ -94,17 +94,29 @@ final class View
         // Handle CSS dependencies
         if (isset($match['css'])) {
             foreach ($match['css'] as $css) {
-                $html .= '<link rel="stylesheet" href="/mark/' . ltrim($css, '/') . '" />' . "\n";
+                $cssPath = '/mark/' . ltrim($css, '/');
+                if ($isPageAsset) {
+                    $html .= '<link rel="preload" href="' . $cssPath . '" as="style" />' . "\n";
+                    $html .= '<link rel="stylesheet" href="' . $cssPath . '" fetchpriority="high" />' . "\n";
+                } else {
+                    $html .= '<link rel="stylesheet" href="' . $cssPath . '" />' . "\n";
+                }
             }
         }
 
         // Handle the main file
         if (isset($match['file'])) {
             $file = $match['file'];
+            $filePath = '/mark/' . ltrim($file, '/');
             if (str_ends_with($file, '.css')) {
-                $html .= '<link rel="stylesheet" href="/mark/' . ltrim($file, '/') . '" />' . "\n";
+                if ($isPageAsset) {
+                    $html .= '<link rel="preload" href="' . $filePath . '" as="style" />' . "\n";
+                    $html .= '<link rel="stylesheet" href="' . $filePath . '" fetchpriority="high" />' . "\n";
+                } else {
+                    $html .= '<link rel="stylesheet" href="' . $filePath . '" />' . "\n";
+                }
             } else {
-                $html .= '<script type="module" src="/mark/' . ltrim($file, '/') . '"></script>' . "\n";
+                $html .= '<script type="module" src="' . $filePath . '"></script>' . "\n";
             }
         }
 

@@ -17,6 +17,7 @@ class ViewAdapter implements ViewInterface
 
     public function withAssets(string $page, array $js, array $css): self
     {
+        $page = str_replace('.', '/', $page);
         $this->customAssets[$page] = [
             'js' => $js,
             'css' => $css,
