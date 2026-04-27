@@ -8,6 +8,7 @@ use App\View;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Vanilla Cards Architecture - Fast, lightweight BEM component-based UI for Nativa CMS." />
     <title><?= $this->e($title ?? 'Nativa Vanilla Cards') ?></title>
+    <link rel="preconnect" href="https://res.cloudinary.com">
     <link rel="icon" type="image/svg+xml" href="/mark/favicon.svg" />
     
     <!-- Core Styles -->
@@ -15,7 +16,7 @@ use App\View;
     
     <!-- Page Specific Assets -->
     <?php foreach (View::$pageAssets as $asset): ?>
-        <?= View::vite($asset) ?>
+        <?= View::vite($asset, true) ?>
     <?php endforeach; ?>
 
     <!-- Scripts -->
