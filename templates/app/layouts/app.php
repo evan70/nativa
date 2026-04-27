@@ -1,3 +1,6 @@
+<?php
+use App\View;
+?>
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
@@ -8,16 +11,17 @@
     <link rel="icon" type="image/svg+xml" href="/mark/favicon.svg" />
     
     <!-- Core Styles -->
-    <link rel="stylesheet" href="/mark/core-css.css" />
+    <?= View::vite('core-css.css') ?>
     
-    <!-- Page Specific Styles -->
-    <link rel="stylesheet" href="/mark/home.css" />
+    <!-- Page Specific Assets -->
+    <?php foreach (View::$pageAssets as $asset): ?>
+        <?= View::vite($asset) ?>
+    <?php endforeach; ?>
 
     <!-- Scripts -->
-    <script src="/mark/init.js"></script>
-    <script type="module" src="/mark/core-app.js"></script>
-    <script type="module" src="/mark/home.js"></script>
-    <script defer src="/mark/theme-switcher.js"></script>
+    <?= View::vite('init.js') ?>
+    <?= View::vite('core-app.js') ?>
+    <?= View::vite('theme-switcher.js') ?>
 </head>
 <body class="home-page">
 

@@ -1,4 +1,4 @@
-<?php $this->layout('controllers::layouts/app') ?>
+<?php $this->layout('app.layouts.app') ?>
 
 <?php $this->section('content') ?>
     <section class="hero-section hero-section--fw" data-section="hero">

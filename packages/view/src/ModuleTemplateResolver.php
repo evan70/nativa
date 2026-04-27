@@ -71,6 +71,8 @@ readonly class ModuleTemplateResolver implements TemplateResolverInterface
     private function parseTemplate(
         string $template,
     ): array {
+        $template = str_replace('.', '/', $template);
+
         if (str_contains($template, '::')) {
             [$moduleName, $templatePath] = explode('::', $template, 2);
 
