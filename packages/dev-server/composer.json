@@ -1,0 +1,20 @@
+{
+    "name": "marko/dev-server",
+    "description": "Marko Framework Dev Server",
+    "license": "MIT",
+    "type": "library",
+    "require": {
+        "php": "^8.5",
+        "marko/core": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Marko\\DevServer\\": "src/"
+        }
+    },
+    "extra": {
+        "marko": {
+            "module": true
+        }
+    }
+}
