@@ -8,7 +8,10 @@ use App\View;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Vanilla Cards Architecture - Fast, lightweight BEM component-based UI for Nativa CMS." />
     <title><?= $this->e($title ?? 'Nativa Vanilla Cards') ?></title>
-    <link rel="preconnect" href="https://res.cloudinary.com">
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+    <?php if (View::$lcpImage): ?>
+        <link rel="preload" as="image" href="<?= View::$lcpImage ?>" fetchpriority="high">
+    <?php endif; ?>
     <link rel="icon" type="image/svg+xml" href="/mark/favicon.svg" />
     
     <!-- Core Styles -->

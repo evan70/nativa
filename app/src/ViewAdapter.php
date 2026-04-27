@@ -46,6 +46,10 @@ class ViewAdapter implements ViewInterface
         // Set the assets in View so the layout can access them
         View::$pageAssets = array_merge($js, $css);
 
+        if (isset($data['lcpImage'])) {
+            View::$lcpImage = $data['lcpImage'];
+        }
+
         return $this->view->renderToString($templatePath, $data);
     }
 }

@@ -11,6 +11,8 @@ final class View
     /** @var string[] */
     public static array $pageAssets = [];
 
+    public static ?string $lcpImage = null;
+
     private static ?array $manifest = null;
 
     /**
@@ -80,6 +82,10 @@ final class View
         if (!$match) {
             // Fallback for direct files or missed matches
             if (str_ends_with($entry, '.css')) {
+                if ($isPageAsset) {
+                    return '<link rel="preload" href="/mark/' . ltrim($entry, '/') . '" as="style" fetchpriority="high" />' . "\n" .
+                           '<link rel="stylesheet" href="/mark/' . ltrim($entry, '/') . '" fetchpriority="high" />';
+                }
                 return '<link rel="stylesheet" href="/mark/' . ltrim($entry, '/') . '" />';
             }
             if (str_ends_with($entry, '.js') || str_ends_with($entry, '.ts')) {
@@ -96,7 +102,7 @@ final class View
             foreach ($match['css'] as $css) {
                 $cssPath = '/mark/' . ltrim($css, '/');
                 if ($isPageAsset) {
-                    $html .= '<link rel="preload" href="' . $cssPath . '" as="style" />' . "\n";
+                    $html .= '<link rel="preload" href="' . $cssPath . '" as="style" fetchpriority="high" />' . "\n";
                     $html .= '<link rel="stylesheet" href="' . $cssPath . '" fetchpriority="high" />' . "\n";
                 } else {
                     $html .= '<link rel="stylesheet" href="' . $cssPath . '" />' . "\n";
@@ -110,7 +116,7 @@ final class View
             $filePath = '/mark/' . ltrim($file, '/');
             if (str_ends_with($file, '.css')) {
                 if ($isPageAsset) {
-                    $html .= '<link rel="preload" href="' . $filePath . '" as="style" />' . "\n";
+                    $html .= '<link rel="preload" href="' . $filePath . '" as="style" fetchpriority="high" />' . "\n";
                     $html .= '<link rel="stylesheet" href="' . $filePath . '" fetchpriority="high" />' . "\n";
                 } else {
                     $html .= '<link rel="stylesheet" href="' . $filePath . '" />' . "\n";
