@@ -10,7 +10,18 @@ return new class extends Migration {
         ConnectionInterface $connection,
     ): void {
         $this->execute($connection, <<<'SQL'
-            CREATE TABLE "articles" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, "title" TEXT NOT NULL DEFAULT '', "content" TEXT NOT NULL DEFAULT '', "published" TEXT NOT NULL DEFAULT '', "created_at" TEXT);
+            CREATE TABLE "articles" (
+                "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+                "title" TEXT NOT NULL DEFAULT '',
+                "slug" TEXT NOT NULL DEFAULT '',
+                "excerpt" TEXT NOT NULL DEFAULT '',
+                "content" TEXT NOT NULL DEFAULT '',
+                "image" TEXT NOT NULL DEFAULT '',
+                "status" TEXT NOT NULL DEFAULT 'published',
+                "category_id" INTEGER,
+                "published" TEXT NOT NULL DEFAULT '',
+                "created_at" TEXT
+            );
             SQL);
     }
 
