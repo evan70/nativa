@@ -33,7 +33,8 @@
         "marko/testing": "*",
         "marko/validation": "*",
         "marko/view": "*",
-        "marko/amphp": "*"
+        "marko/amphp": "*",
+        "marko/dev-server": "*"
     },
     "require-dev": {
         "pestphp/pest": "^4.0",
