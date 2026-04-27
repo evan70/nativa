@@ -1,0 +1,20 @@
+{
+    "name": "marko/notification",
+    "description": "Marko Framework Notification Layer",
+    "license": "MIT",
+    "type": "library",
+    "require": {
+        "php": "^8.5",
+        "marko/core": "self.version"
+    },
+    "autoload": {
+        "psr-4": {
+            "Marko\\Notification\\": "src/"
+        }
+    },
+    "extra": {
+        "marko": {
+            "module": true
+        }
+    }
+}
