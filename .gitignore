@@ -37,5 +37,10 @@ database/*.sqlite
 # Build artifacts
 dist/
 build/
-public/mark/
+public/mark/*
+!public/mark/.htaccess
+!public/mark/vanilla-cards-manifest.json
+!public/mark/favicon.svg
+!public/mark/favicon.ico
+!public/mark/robots.txt
 *.phar
