@@ -47,7 +47,7 @@ if (!is_dir($rootDir . '/vendor')) {
 echo "Preparing production artifacts...\n";
 
 // Copy source code directories
-$sourceDirs = ['app', 'bootstrap', 'modules', 'packages', 'config', 'database', 'routes', 'public', 'storage'];
+$sourceDirs = ['app', 'bootstrap', 'modules', 'packages', 'config', 'database', 'routes', 'public', 'storage', 'templates'];
 foreach ($sourceDirs as $dir) {
     if (is_dir($rootDir . '/' . $dir)) {
         echo "   Copying $dir...\n";
