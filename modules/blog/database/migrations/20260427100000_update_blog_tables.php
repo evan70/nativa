@@ -12,13 +12,11 @@ return new class extends Migration {
         $this->execute($connection, 'CREATE TABLE "categories" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, "name" TEXT NOT NULL, "slug" TEXT NOT NULL UNIQUE, "description" TEXT)');
         $this->execute($connection, 'CREATE TABLE "tags" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, "name" TEXT NOT NULL, "slug" TEXT NOT NULL UNIQUE)');
         $this->execute($connection, 'CREATE TABLE "article_tags" ("article_id" INTEGER, "tag_id" INTEGER, PRIMARY KEY ("article_id", "tag_id"))');
-        $this->execute($connection, 'CREATE TABLE "portfolio_items" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, "title" TEXT NOT NULL, "slug" TEXT NOT NULL UNIQUE, "description" TEXT, "category" TEXT, "image" TEXT)');
     }
 
     public function down(
         ConnectionInterface $connection,
     ): void {
-        $this->execute($connection, 'DROP TABLE IF EXISTS "portfolio_items"');
         $this->execute($connection, 'DROP TABLE IF EXISTS "article_tags"');
         $this->execute($connection, 'DROP TABLE IF EXISTS "tags"');
         $this->execute($connection, 'DROP TABLE IF EXISTS "categories"');
