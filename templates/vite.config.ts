@@ -15,7 +15,8 @@ function getFrontendInputs(baseDir: string) {
         walk(join(dir, file.name), join(prefix, file.name));
       } else if (file.name.endsWith('.ts') || file.name.endsWith('.css')) {
         const name = join(prefix, file.name.replace(/\.(ts|css)$/, '')).replace(/\\/g, '/');
-        inputs[name] = resolve(dir, file.name);
+        const inputKey = file.name.endsWith('.css') ? `${name}-style` : name;
+        inputs[inputKey] = resolve(dir, file.name);
       }
     }
   };
