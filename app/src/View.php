@@ -11,14 +11,19 @@ final class View
     /** @var string[] */
     public static array $pageAssets = [];
 
+    private static ?array $manifest = null;
+
     /**
      * @param array<string, mixed> $data
+     * @param string[] $pageAssets
      */
     public static function render(
         string $template,
         array $data = [],
         ?string $layout = 'app/layouts/app',
+        array $pageAssets = [],
     ): string {
+        self::$pageAssets = $pageAssets;
         $template = str_replace('.', '/', $template);
         if ($layout) {
             $layout = str_replace('.', '/', $layout);
@@ -46,10 +51,64 @@ final class View
 
     public static function vite(string $entry): string
     {
-        if (str_ends_with($entry, '.css')) {
-            return '<link rel="stylesheet" href="/mark/' . $entry . '" />';
+        if (self::$manifest === null) {
+            $manifestPath = dirname(__DIR__, 2) . '/public/mark/vanilla-cards-manifest.json';
+            if (is_file($manifestPath)) {
+                self::$manifest = json_decode(file_get_contents($manifestPath), true);
+            } else {
+                self::$manifest = [];
+            }
         }
-        return '<script type="module" src="/mark/' . $entry . '"></script>';
+
+        // Try to find the entry in the manifest
+        $match = null;
+        
+        // 1. Exact match by key
+        if (isset(self::$manifest[$entry])) {
+            $match = self::$manifest[$entry];
+        } 
+        // 2. Match by name property
+        else {
+            foreach (self::$manifest as $data) {
+                if (isset($data['name']) && $data['name'] === $entry) {
+                    $match = $data;
+                    break;
+                }
+            }
+        }
+
+        if (!$match) {
+            // Fallback for direct files or missed matches
+            if (str_ends_with($entry, '.css')) {
+                return '<link rel="stylesheet" href="/mark/' . ltrim($entry, '/') . '" />';
+            }
+            if (str_ends_with($entry, '.js') || str_ends_with($entry, '.ts')) {
+                return '<script type="module" src="/mark/' . ltrim($entry, '/') . '"></script>';
+            }
+            // If it's just a name without extension, we can't do much without manifest match
+            return '';
+        }
+
+        $html = '';
+        
+        // Handle CSS dependencies
+        if (isset($match['css'])) {
+            foreach ($match['css'] as $css) {
+                $html .= '<link rel="stylesheet" href="/mark/' . ltrim($css, '/') . '" />' . "\n";
+            }
+        }
+
+        // Handle the main file
+        if (isset($match['file'])) {
+            $file = $match['file'];
+            if (str_ends_with($file, '.css')) {
+                $html .= '<link rel="stylesheet" href="/mark/' . ltrim($file, '/') . '" />' . "\n";
+            } else {
+                $html .= '<script type="module" src="/mark/' . ltrim($file, '/') . '"></script>' . "\n";
+            }
+        }
+
+        return trim($html);
     }
 
     /**
