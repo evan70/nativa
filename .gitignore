@@ -37,4 +37,5 @@ database/*.sqlite
 # Build artifacts
 dist/
 build/
+public/mark/
 *.phar
