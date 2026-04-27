@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace Marko\Validation\Exceptions;
 
-use Exception;
+use Marko\Core\Exceptions\MarkoException;
 use Marko\Validation\Validation\ValidationErrors;
 use Throwable;
 
-class ValidationException extends Exception
+class ValidationException extends MarkoException
 {
     public function __construct(
         string $message,
         private readonly ValidationErrors $errors,
-        private readonly string $context = '',
-        private readonly string $suggestion = '',
+        string $context = '',
+        string $suggestion = '',
         int $code = 0,
         ?Throwable $previous = null,
     ) {
-        parent::__construct($message, $code, $previous);
+        parent::__construct($message, $context, $suggestion, $code, $previous);
     }
 
     public static function withErrors(
@@ -35,15 +35,5 @@ class ValidationException extends Exception
     public function errors(): ValidationErrors
     {
         return $this->errors;
-    }
-
-    public function getContext(): string
-    {
-        return $this->context;
-    }
-
-    public function getSuggestion(): string
-    {
-        return $this->suggestion;
     }
 }

@@ -4,22 +4,24 @@ declare(strict_types=1);
 
 namespace Marko\Authorization\Exceptions;
 
-use Exception;
+use Marko\Core\Exceptions\MarkoException;
 use Throwable;
 
-class AuthorizationException extends Exception
+class AuthorizationException extends MarkoException
 {
     public function __construct(
         string $message,
         private readonly string $ability = '',
         private readonly string $resource = '',
-        private readonly string $context = '',
-        private readonly string $suggestion = '',
+        string $context = '',
+        string $suggestion = '',
         int $code = 0,
         ?Throwable $previous = null,
     ) {
         parent::__construct(
             $message,
+            $context,
+            $suggestion,
             $code,
             $previous,
         );
@@ -33,16 +35,6 @@ class AuthorizationException extends Exception
     public function getResource(): string
     {
         return $this->resource;
-    }
-
-    public function getContext(): string
-    {
-        return $this->context;
-    }
-
-    public function getSuggestion(): string
-    {
-        return $this->suggestion;
     }
 
     public static function forbidden(
