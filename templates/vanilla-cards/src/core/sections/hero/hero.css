@@ -6,7 +6,7 @@
   align-items: center;
   padding: var(--space-16) var(--space-4);
   background-color: var(--color-bg);
-  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../../../assets/images/dae2d1fd9b13c89bb5b4a89280099d7a.webp');
+  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://res.cloudinary.com/epithemic/image/upload/v1773169416/blog/dae2d1fd9b13c89bb5b4a89280099d7a_hqfarh.webp');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
