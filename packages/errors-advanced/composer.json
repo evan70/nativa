@@ -11,5 +11,10 @@
         "php": "^8.5",
         "marko/errors": "*",
         "marko/errors-simple": "*"
+    },
+    "extra": {
+        "marko": {
+            "module": true
+        }
     }
 }
