@@ -24,7 +24,7 @@ cd my-app
 2. Install dev tools: `composer install`
 3. Install and build frontend assets:
    ```bash
-   cd templates/admin-dashboard && pnpm install && pnpm build
+   cd templates && pnpm install && pnpm build
    ```
 4. Run database migrations: `./marko db:migrate`
 5. Start the dev server: `./marko up`
