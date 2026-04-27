@@ -39,21 +39,16 @@ readonly class ModuleTemplateResolver implements TemplateResolverInterface
         $paths = [];
 
         if ($moduleName === '') {
-            $paths[] = $this->projectPaths->base . '/templates/admin-dashboard/views/' . $templatePath . $extension;
-            $paths[] = $this->projectPaths->base . '/templates/vanilla-cards/views/' . $templatePath . $extension;
-            $paths[] = $this->projectPaths->base . '/templates/legacy/views/' . $templatePath . $extension;
-            $paths[] = $this->projectPaths->base . '/templates/legacy/views/' . $templatePath . '.phtml';
+            $paths[] = $this->projectPaths->base . '/templates/views/' . $templatePath . $extension;
+            $paths[] = $this->projectPaths->base . '/templates/' . $templatePath . $extension;
         }
 
         foreach ($this->moduleRepository->all() as $module) {
             if ($this->matchesModuleName($module->name, $moduleName)) {
                 $shortName = $this->getShortModuleName($module->name);
-                $legacyName = ($module->name === 'app/controllers') ? 'app' : $shortName;
+                $legacyName = ($module->name === 'app/main') ? 'app' : $shortName;
 
-                $paths[] = $this->projectPaths->base . '/templates/admin-dashboard/' . $legacyName . '/' . $templatePath . $extension;
-                $paths[] = $this->projectPaths->base . '/templates/vanilla-cards/' . $legacyName . '/' . $templatePath . $extension;
-                $paths[] = $this->projectPaths->base . '/templates/legacy/' . $legacyName . '/' . $templatePath . $extension;
-                $paths[] = $this->projectPaths->base . '/templates/legacy/' . $legacyName . '/' . $templatePath . '.phtml';
+                $paths[] = $this->projectPaths->base . '/templates/' . $legacyName . '/' . $templatePath . $extension;
                 $paths[] = $module->path . '/resources/views/' . $templatePath . $extension;
             }
         }

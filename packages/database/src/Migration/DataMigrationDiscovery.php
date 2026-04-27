@@ -87,6 +87,7 @@ readonly class DataMigrationDiscovery
     private function discoverFromApp(): array
     {
         return $this->discoverFromPatterns([
+            $this->appPath . '/Data/*.php',
             $this->appPath . '/*/Data/*.php',
         ], 'app');
     }
