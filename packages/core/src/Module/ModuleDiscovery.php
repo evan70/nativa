@@ -106,9 +106,19 @@ readonly class ModuleDiscovery
         foreach ($moduleNames as $moduleName) {
             $modulePath = $appDir . '/' . $moduleName;
 
-            if (is_dir($modulePath) && $this->isMarkoModule($modulePath)) {
+            if (!is_dir($modulePath)) {
+                continue;
+            }
+
+            if ($this->isMarkoModule($modulePath)) {
                 $manifest = $this->parser->parse($modulePath);
                 $modules[] = $this->withPathAndSource($manifest, $modulePath, 'app');
+            } elseif (is_file($modulePath . '/composer.json')) {
+                throw new ModuleException(
+                    message: "Module '$moduleName' could not be loaded",
+                    context: "Module '$moduleName' at $modulePath — composer.json missing \"extra.marko.module\" key",
+                    suggestion: 'Add {"extra": {"marko": {"module": true}}} to the module\'s composer.json',
+                );
             }
         }
 
@@ -166,6 +176,15 @@ readonly class ModuleDiscovery
             $modules[] = $this->withPathAndSource($manifest, $dir, $source);
 
             return; // Don't recurse into module directories
+        }
+
+        if (is_file($dir . '/composer.json')) {
+            $moduleName = basename($dir);
+            throw new ModuleException(
+                message: "Module '$moduleName' could not be loaded",
+                context: "Module '$moduleName' at $dir — composer.json missing \"extra.marko.module\" key",
+                suggestion: 'Add {"extra": {"marko": {"module": true}}} to the module\'s composer.json',
+            );
         }
 
         // No module found, recurse into subdirectories
