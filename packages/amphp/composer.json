@@ -1,0 +1,21 @@
+{
+    "name": "marko/amphp",
+    "description": "Marko Framework - AmpHP Integration",
+    "license": "MIT",
+    "type": "library",
+    "require": {
+        "php": "^8.5",
+        "marko/config": "self.version",
+        "marko/core": "self.version"
+    },
+    "autoload": {
+        "psr-4": {
+            "Marko\\Amphp\\": "src/"
+        }
+    },
+    "extra": {
+        "marko": {
+            "module": true
+        }
+    }
+}
