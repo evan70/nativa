@@ -9,7 +9,7 @@ use App\View;
     <meta name="description" content="Vanilla Cards Architecture - Fast, lightweight BEM component-based UI for Nativa CMS." />
     <title><?= $this->e($title ?? 'Nativa Vanilla Cards') ?></title>
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
-    <link rel="preload" href="/mark/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin fetchpriority="high">
+    <link rel="preload" href="<?= View::resolve('src/assets/fonts/inter/Inter-Regular.woff2') ?>" as="font" type="font/woff2" crossorigin fetchpriority="high">
     <?php if (View::$lcpImage): ?>
         <link rel="preload" as="image" href="<?= View::$lcpImage ?>" fetchpriority="high">
     <?php endif; ?>
