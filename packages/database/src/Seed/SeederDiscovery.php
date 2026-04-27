@@ -52,6 +52,7 @@ readonly class SeederDiscovery implements SeederDiscoveryInterface
         string $appPath,
     ): array {
         return $this->discoverInDirectoryPatterns($appPath, [
+            '/Seed',
             '/*/Seed',
         ]);
     }

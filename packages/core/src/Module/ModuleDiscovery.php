@@ -100,6 +100,13 @@ readonly class ModuleDiscovery
             return $modules;
         }
 
+        if ($this->isMarkoModule($appDir)) {
+            $manifest = $this->parser->parse($appDir);
+            $modules[] = $this->withPathAndSource($manifest, $appDir, 'app');
+
+            return $modules;
+        }
+
         // Scan app/*/
         $moduleNames = $this->scanDirectory($appDir);
 
