@@ -47,10 +47,6 @@ readonly class CliKernel
     ): int {
         try {
             return $this->doRun($argv);
-        } catch (CliException $e) {
-            $this->displayCliException($e);
-
-            return 1;
         } catch (Throwable $e) {
             $this->displayException($e);
 
@@ -96,28 +92,20 @@ readonly class CliKernel
         return $app->commandRunner->run($commandName, $input, $this->output);
     }
 
-    private function displayCliException(
-        CliException $e,
-    ): void {
-        $this->output->writeLine('');
-        $this->output->writeLine("Error: {$e->getMessage()}");
-
-        if ($e->getContext() !== '') {
-            $this->output->writeLine("  Context: {$e->getContext()}");
-        }
-
-        if ($e->getSuggestion() !== '') {
-            $this->output->writeLine("  Suggestion: {$e->getSuggestion()}");
-        }
-
-        $this->output->writeLine('');
-    }
-
     private function displayException(
         Throwable $e,
     ): void {
         $this->output->writeLine('');
         $this->output->writeLine("Error: {$e->getMessage()}");
+
+        if (method_exists($e, 'getContext') && $e->getContext() !== '') {
+            $this->output->writeLine("  Context: {$e->getContext()}");
+        }
+
+        if (method_exists($e, 'getSuggestion') && $e->getSuggestion() !== '') {
+            $this->output->writeLine("  Suggestion: {$e->getSuggestion()}");
+        }
+
         $this->output->writeLine('');
     }
 }
