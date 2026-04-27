@@ -5,21 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Vanilla Cards Architecture - Fast, lightweight BEM component-based UI for Nativa CMS." />
   <title>Vanilla Cards Preview</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="icon" type="image/svg+xml" href="/mark/favicon.svg" />
   
   <!-- Init script (blocks rendering, prevents FOUC) -->
-  <script>
-    (function() {
-      try {
-        const storedTheme = localStorage.getItem('nativa-theme');
-        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const themeToSet = storedTheme ? storedTheme : (systemPrefersDark ? 'dark' : 'light');
-        document.documentElement.dataset.theme = themeToSet;
-      } catch (e) {
-        console.warn('Could not initialize theme', e);
-      }
-    })();
-  </script>
 
   <!-- Core Styles -->
   
@@ -28,13 +16,14 @@
   <!-- Page Specific Styles -->
 
   <!-- Scripts -->
-  <script type="module" crossorigin src="/mark/index-B14Aeaia.js"></script>
+  <script type="module" crossorigin src="/mark/index-CMylH0gL.js"></script>
   <link rel="modulepreload" crossorigin href="/mark/core-css-SKTeLIfC.js">
   <link rel="modulepreload" crossorigin href="/mark/core-app-BmsyX_Pi.js">
   <link rel="modulepreload" crossorigin href="/mark/theme-switcher-CHNTZbFc.js">
-  <link rel="modulepreload" crossorigin href="/mark/home/home-BpSnscGV.js">
+  <link rel="modulepreload" crossorigin href="/mark/home/home-C6XeFw_o.js">
+  <link rel="modulepreload" crossorigin href="/mark/init-CwG0wiw0.js">
   <link rel="stylesheet" crossorigin href="/mark/core-css-DyanYvfp.css">
-  <link rel="stylesheet" crossorigin href="/mark/home-LD26QFGV.css">
+  <link rel="stylesheet" crossorigin href="/mark/home/home-style-LD26QFGV.css">
 </head>
 <body class="home-page">
 

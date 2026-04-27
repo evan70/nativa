@@ -5,47 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Vanilla Cards Architecture - Fast, lightweight BEM component-based UI for Nativa CMS." />
   <title>Vanilla Cards Preview</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   
   <!-- Init script (blocks rendering, prevents FOUC) -->
-  <script>
-    (function() {
-      try {
-        const storedTheme = localStorage.getItem('nativa-theme');
-        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const themeToSet = storedTheme ? storedTheme : (systemPrefersDark ? 'dark' : 'light');
-        document.documentElement.dataset.theme = themeToSet;
-      } catch (e) {
-        console.warn('Could not initialize theme', e);
-      }
-    })();
-  </script>
+  <script type="module" src="/src/init.ts"></script>
 
   <!-- Core Styles -->
-  <link rel="stylesheet" href="./src/core/tokens/unified.css" />
-  <link rel="stylesheet" href="./src/core/theme/default/theme.css" />
-  <link rel="stylesheet" href="./src/core/components/navbar.css" />
-  <link rel="stylesheet" href="./src/core/components/button.css" />
-  <link rel="stylesheet" href="./src/core/components/vanilla-card.css" />
-  <link rel="stylesheet" href="./src/core/components/card-grid.css" />
-  <link rel="stylesheet" href="./src/core/components/icon.css" />
-  <link rel="stylesheet" href="./src/core/components/icon-button.css" />
-  <link rel="stylesheet" href="./src/core/components/notification.css" />
-  <link rel="stylesheet" href="./src/core/components/footer.css" />
+  <link rel="stylesheet" href="/src/core/tokens/unified.css" />
+  <link rel="stylesheet" href="/src/core/theme/default/theme.css" />
+  <link rel="stylesheet" href="/src/core/components/navbar.css" />
+  <link rel="stylesheet" href="/src/core/components/button.css" />
+  <link rel="stylesheet" href="/src/core/components/vanilla-card.css" />
+  <link rel="stylesheet" href="/src/core/components/card-grid.css" />
+  <link rel="stylesheet" href="/src/core/components/icon.css" />
+  <link rel="stylesheet" href="/src/core/components/icon-button.css" />
+  <link rel="stylesheet" href="/src/core/components/notification.css" />
+  <link rel="stylesheet" href="/src/core/components/footer.css" />
   
   <!-- Section Styles -->
-  <link rel="stylesheet" href="./src/core/sections/hero/hero.css" />
-  <link rel="stylesheet" href="./src/core/sections/features/features.css" />
-  <link rel="stylesheet" href="./src/core/sections/stats/stats.css" />
-  <link rel="stylesheet" href="./src/core/sections/cta/cta.css" />
+  <link rel="stylesheet" href="/src/core/sections/hero/hero.css" />
+  <link rel="stylesheet" href="/src/core/sections/features/features.css" />
+  <link rel="stylesheet" href="/src/core/sections/stats/stats.css" />
+  <link rel="stylesheet" href="/src/core/sections/cta/cta.css" />
 
   <!-- Page Specific Styles -->
-  <link rel="stylesheet" href="./src/frontend/home/home.css" />
+  <link rel="stylesheet" href="/src/frontend/home/home.css" />
 
   <!-- Scripts -->
-  <script type="module" src="./src/app.ts"></script>
-  <script type="module" src="./src/frontend/home/home.ts"></script>
-  <script type="module" src="./src/dev/theme-switcher.ts"></script>
+  <script type="module" src="/src/app.ts"></script>
+  <script type="module" src="/src/frontend/home/home.ts"></script>
+  <script type="module" src="/src/dev/theme-switcher.ts"></script>
 </head>
 <body class="home-page">
 

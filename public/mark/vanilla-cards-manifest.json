@@ -8,7 +8,7 @@
     "src": "/home/engine/project/templates/packages/theme-neon/src/assets/neon.css"
   },
   "index.html": {
-    "file": "index-B14Aeaia.js",
+    "file": "index-CMylH0gL.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -19,7 +19,12 @@
       "src/dev/theme-switcher.ts",
       "src/css.ts",
       "src/frontend/home/home.ts",
-      "src/frontend/home/home.ts"
+      "src/frontend/home/home.ts",
+      "src/init.ts",
+      "src/init.ts"
+    ],
+    "css": [
+      "home/home-style-LD26QFGV.css"
     ]
   },
   "src/app.ts": {
@@ -67,13 +72,22 @@
       "fire-show-CxddCEMD.css"
     ]
   },
+  "src/frontend/home/home.css": {
+    "file": "home/home-style-LD26QFGV.css",
+    "name": "home/home-style",
+    "names": [
+      "home/home-style.css"
+    ],
+    "src": "src/frontend/home/home.css",
+    "isEntry": true
+  },
   "src/frontend/home/home.ts": {
-    "file": "home/home-BpSnscGV.js",
+    "file": "home/home-C6XeFw_o.js",
     "name": "home/home",
     "src": "src/frontend/home/home.ts",
     "isEntry": true,
     "css": [
-      "home-LD26QFGV.css"
+      "home/home-style-LD26QFGV.css"
     ]
   },
   "src/init.ts": {
