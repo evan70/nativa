@@ -24,8 +24,10 @@ final class View
         array $data = [],
         ?string $layout = 'app/layouts/app',
         array $pageAssets = [],
+        ?string $lcpImage = null,
     ): string {
         self::$pageAssets = $pageAssets;
+        self::$lcpImage = $lcpImage;
         $template = str_replace('.', '/', $template);
         if ($layout) {
             $layout = str_replace('.', '/', $layout);

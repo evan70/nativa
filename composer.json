@@ -32,7 +32,8 @@
         "marko/session-database": "*",
         "marko/testing": "*",
         "marko/validation": "*",
-        "marko/view": "*"
+        "marko/view": "*",
+        "marko/amphp": "*"
     },
     "require-dev": {
         "pestphp/pest": "^4.0",
