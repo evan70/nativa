@@ -17,7 +17,7 @@ class HomeController
     #[Get('/')]
     public function index(): Response
     {
-        return $this->view->render('app.home', [
+        return $this->view->render('app/home', [
             'eyebrow' => 'Marko App',
             'title' => 'Nativa',
             'message' => 'A small Marko application with a shared layout and a simple blog.',

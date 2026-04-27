@@ -11,7 +11,7 @@ use App\View;
     <link rel="icon" type="image/svg+xml" href="/mark/favicon.svg" />
     
     <!-- Core Styles -->
-    <?= View::vite('core-css.css') ?>
+    <?= View::vite('core-css') ?>
     
     <!-- Page Specific Assets -->
     <?php foreach (View::$pageAssets as $asset): ?>
@@ -19,9 +19,9 @@ use App\View;
     <?php endforeach; ?>
 
     <!-- Scripts -->
-    <?= View::vite('init.js') ?>
-    <?= View::vite('core-app.js') ?>
-    <?= View::vite('theme-switcher.js') ?>
+    <?= View::vite('init') ?>
+    <?= View::vite('core-app') ?>
+    <?= View::vite('theme-switcher') ?>
 </head>
 <body class="home-page">
 
