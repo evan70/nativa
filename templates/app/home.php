@@ -1,4 +1,8 @@
-<?php $this->layout('app.layouts.app') ?>
+<?php 
+use App\View;
+View::$lcpImage = 'https://res.cloudinary.com/epithemic/image/upload/v1773169416/blog/dae2d1fd9b13c89bb5b4a89280099d7a_hqfarh.webp';
+$this->layout('app.layouts.app');
+?>
 
 <?php $this->section('content') ?>
     <!-- HERO SECTION -->
