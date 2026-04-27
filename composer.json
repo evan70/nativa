@@ -4,7 +4,10 @@
     "license": "MIT",
     "type": "project",
     "require": {
-        "php": "^8.5"
+        "php": "^8.5",
+        "marko/core": "self.version",
+        "marko/database": "self.version",
+        "marko/notification": "self.version"
     },
     "replace": {
         "marko/admin": "*",
@@ -15,8 +18,6 @@
         "marko/authorization": "*",
         "marko/cli": "*",
         "marko/config": "*",
-        "marko/core": "*",
-        "marko/database": "*",
         "marko/env": "*",
         "marko/errors": "*",
         "marko/errors-advanced": "*",
@@ -25,7 +26,6 @@
         "marko/log": "*",
         "marko/log-file": "*",
         "marko/mail": "*",
-        "marko/notification": "*",
         "marko/notification-database": "*",
         "marko/psr-container": "*",
         "marko/queue": "*",
