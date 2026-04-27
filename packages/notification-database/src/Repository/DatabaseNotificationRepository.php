@@ -52,7 +52,7 @@ class DatabaseNotificationRepository extends Repository implements NotificationR
         );
     }
 
-    public function delete(string $notificationId): void
+    public function deleteById(string $notificationId): void
     {
         $this->connection->execute(
             "DELETE FROM {$this->metadata->tableName} WHERE id = ?",

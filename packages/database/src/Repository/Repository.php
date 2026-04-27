@@ -69,7 +69,7 @@ abstract class Repository implements RepositoryInterface
      * @return TEntity|null
      */
     public function find(
-        int $id,
+        int|string $id,
     ): ?Entity {
         $primaryKey = $this->metadata->getPrimaryKeyProperty();
         $columnName = $primaryKey?->columnName ?? 'id';
@@ -100,7 +100,7 @@ abstract class Repository implements RepositoryInterface
      * @throws RepositoryException When entity is not found
      */
     public function findOrFail(
-        int $id,
+        int|string $id,
     ): Entity {
         $entity = $this->find($id);
 
@@ -276,7 +276,7 @@ abstract class Repository implements RepositoryInterface
      * Check if an entity with the given ID exists.
      */
     public function exists(
-        int $id,
+        int|string $id,
     ): bool {
         return $this->find(id: $id) !== null;
     }
@@ -298,7 +298,7 @@ abstract class Repository implements RepositoryInterface
     protected function isColumnUnique(
         string $column,
         mixed $value,
-        ?int $excludeId = null,
+        int|string|null $excludeId = null,
     ): bool {
         $sql = sprintf(
             'SELECT * FROM %s WHERE %s = ?',
