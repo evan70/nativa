@@ -46,7 +46,7 @@ readonly class ModuleTemplateResolver implements TemplateResolverInterface
         foreach ($this->moduleRepository->all() as $module) {
             if ($this->matchesModuleName($module->name, $moduleName)) {
                 $shortName = $this->getShortModuleName($module->name);
-                $legacyName = ($module->name === 'app/main') ? 'app' : $shortName;
+                $legacyName = ($module->name === 'app/controllers') ? 'app' : $shortName;
 
                 $paths[] = $this->projectPaths->base . '/templates/' . $legacyName . '/' . $templatePath . $extension;
                 $paths[] = $module->path . '/resources/views/' . $templatePath . $extension;

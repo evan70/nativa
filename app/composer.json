@@ -1,5 +1,5 @@
 {
-    "name": "app/main",
+    "name": "app/controllers",
     "description": "Application controllers",
     "type": "library",
     "autoload": {
