@@ -1,0 +1,22 @@
+{
+    "name": "marko/notification-database",
+    "description": "Marko Framework Database Notification Storage",
+    "license": "MIT",
+    "type": "library",
+    "require": {
+        "php": "^8.5",
+        "marko/core": "self.version",
+        "marko/database": "self.version",
+        "marko/notification": "self.version"
+    },
+    "autoload": {
+        "psr-4": {
+            "Marko\\Notification\\Database\\": "src/"
+        }
+    },
+    "extra": {
+        "marko": {
+            "module": true
+        }
+    }
+}

@@ -25,6 +25,8 @@
         "marko/log": "*",
         "marko/log-file": "*",
         "marko/mail": "*",
+        "marko/notification": "*",
+        "marko/notification-database": "*",
         "marko/psr-container": "*",
         "marko/queue": "*",
         "marko/routing": "*",
