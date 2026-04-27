@@ -53,14 +53,14 @@ export default defineConfig(({ mode }) => {
           ...frontendInputs
         },
         output: {
-          entryFileNames: `[name].js`,
-          chunkFileNames: `[name].js`,
+          entryFileNames: `[name]-[hash].js`,
+          chunkFileNames: `[name]-[hash].js`,
           assetFileNames: (assetInfo) => {
             const name = assetInfo.name || '';
             if (name.endsWith('.css')) {
-              return `[name].css`;
+              return `[name]-[hash].css`;
             }
-            return `[name][extname]`;
+            return `[name]-[hash][extname]`;
           }
         }
       }

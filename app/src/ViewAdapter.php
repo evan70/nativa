@@ -10,10 +10,17 @@ use Marko\View\ViewInterface;
 class ViewAdapter implements ViewInterface
 {
     private array $customAssets = [];
+    private ?string $lcpImage = null;
 
     public function __construct(
         private readonly ViewInterface $view,
     ) {}
+
+    public function withLcpImage(string $url): self
+    {
+        $this->lcpImage = $url;
+        return $this;
+    }
 
     public function withAssets(string $page, array $js, array $css): self
     {
@@ -45,6 +52,7 @@ class ViewAdapter implements ViewInterface
 
         // Set the assets in View so the layout can access them
         View::$pageAssets = array_merge($js, $css);
+        View::$lcpImage = $this->lcpImage;
 
         if (isset($data['lcpImage'])) {
             View::$lcpImage = $data['lcpImage'];
