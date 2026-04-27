@@ -1,0 +1,31 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\App\Entity;
+
+use Marko\Database\Attributes\Column;
+use Marko\Database\Attributes\Table;
+use Marko\Database\Entity\Entity;
+
+#[Table('portfolio_items')]
+class PortfolioItem extends Entity
+{
+    #[Column(primaryKey: true, autoIncrement: true)]
+    public ?int $id = null;
+
+    #[Column]
+    public string $title = '';
+
+    #[Column]
+    public string $slug = '';
+
+    #[Column(type: 'TEXT')]
+    public string $description = '';
+
+    #[Column]
+    public string $category = '';
+
+    #[Column]
+    public string $image = '';
+}
