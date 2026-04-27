@@ -23,6 +23,21 @@ class Article extends Entity
     #[Column]
     public bool $published = false;
 
+    #[Column]
+    public string $slug = '';
+
+    #[Column(type: 'TEXT')]
+    public string $excerpt = '';
+
+    #[Column]
+    public string $image = '';
+
+    #[Column]
+    public string $status = 'published';
+
+    #[Column('category_id')]
+    public ?int $categoryId = null;
+
     #[Column('created_at')]
     public ?string $createdAt = null;
 }
