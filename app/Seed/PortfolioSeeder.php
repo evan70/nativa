@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\App\Seed;
+namespace App\Seed;
 
 use Marko\Database\Connection\ConnectionInterface;
 use Marko\Database\Seed\Seeder;
