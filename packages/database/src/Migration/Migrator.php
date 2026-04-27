@@ -16,15 +16,13 @@ class Migrator
 {
     private bool $tableCreated = false;
 
-    private readonly string $migrationsPath;
+    private ?array $discoveredMigrations = null;
 
     public function __construct(
         private readonly ConnectionInterface $connection,
         private readonly MigrationRepository $repository,
-        ProjectPaths $paths,
-    ) {
-        $this->migrationsPath = $paths->database . '/migrations';
-    }
+        private readonly MigrationDiscovery $discovery,
+    ) {}
 
     /**
      * Run all pending migrations.
@@ -163,20 +161,11 @@ class Migrator
      */
     private function getMigrationFiles(): array
     {
-        if (!is_dir($this->migrationsPath)) {
-            return [];
+        if ($this->discoveredMigrations === null) {
+            $this->discoveredMigrations = $this->discovery->discover();
         }
 
-        $files = glob($this->migrationsPath . '/*.php');
-
-        if ($files === false) {
-            return [];
-        }
-
-        $names = array_map(
-            fn (string $file): string => pathinfo($file, PATHINFO_FILENAME),
-            $files,
-        );
+        $names = array_keys($this->discoveredMigrations);
 
         sort($names);
 
@@ -192,9 +181,13 @@ class Migrator
         string $name,
         string $direction,
     ): void {
-        $path = $this->migrationsPath . '/' . $name . '.php';
+        if ($this->discoveredMigrations === null) {
+            $this->discoveredMigrations = $this->discovery->discover();
+        }
 
-        if (!file_exists($path)) {
+        $path = $this->discoveredMigrations[$name] ?? null;
+
+        if ($path === null || !file_exists($path)) {
             throw MigrationException::migrationNotFound($name);
         }
 
