@@ -103,7 +103,7 @@ class FileLogger implements LoggerInterface
         $result = @file_put_contents(
             $path,
             $this->formatter->format($record),
-            FILE_APPEND,
+            FILE_APPEND | LOCK_EX,
         );
 
         if ($result === false) {

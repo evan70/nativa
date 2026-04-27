@@ -2,6 +2,7 @@
     "name": "marko/log-file",
     "description": "File logging driver for Marko Framework",
     "license": "MIT",
+    "type": "marko-module",
     "autoload": {
         "psr-4": {
             "Marko\\Log\\File\\": "src/"
@@ -10,5 +11,10 @@
     "require": {
         "php": "^8.5",
         "marko/log": "*"
+    },
+    "extra": {
+        "marko": {
+            "module": true
+        }
     }
 }
