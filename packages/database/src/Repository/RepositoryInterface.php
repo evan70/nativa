@@ -19,7 +19,7 @@ interface RepositoryInterface
      *
      * @return TEntity|null The entity or null if not found
      */
-    public function find(int $id): ?Entity;
+    public function find(int|string $id): ?Entity;
 
     /**
      * Find an entity by its primary key or throw an exception.
@@ -27,7 +27,7 @@ interface RepositoryInterface
      * @return TEntity The entity
      * @throws RepositoryException When entity is not found
      */
-    public function findOrFail(int $id): Entity;
+    public function findOrFail(int|string $id): Entity;
 
     /**
      * Find all entities in the repository.
