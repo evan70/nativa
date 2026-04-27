@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "rm -rf ../../public/mark && vite build",
+    "build": "rm -rf ../public/mark && vite build",
     "preview": "vite preview"
   },
   "devDependencies": {

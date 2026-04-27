@@ -21,12 +21,11 @@ readonly class AssetBuildCommand implements CommandInterface
         Input $input,
         Output $output,
     ): int {
-        $template = $input->getArgument(0) ?? 'admin-dashboard';
-        $assetDir = $this->projectPaths->base . '/templates/' . $template;
+        $template = $input->getArgument(0);
+        $assetDir = $this->projectPaths->base . '/templates' . ($template ? '/' . $template : '');
 
         if (!is_dir($assetDir)) {
             $output->writeLine("Asset directory not found: $assetDir");
-            $output->writeLine("Available templates are: admin-dashboard, vanilla-cards, legacy");
             return 1;
         }
 
