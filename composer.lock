@@ -4,8 +4,195 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1d56b8590f03c36b17941fa94a0ed6bd",
-    "packages": [],
+    "content-hash": "c5a480e9cf6a8c8e2c2ab58e6d6d990d",
+    "packages": [
+        {
+            "name": "marko/core",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/marko-php/marko-core.git",
+                "reference": "653b1a6468978c4a4790fa5c865ce5cd9d2c418d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/marko-php/marko-core/zipball/653b1a6468978c4a4790fa5c865ce5cd9d2c418d",
+                "reference": "653b1a6468978c4a4790fa5c865ce5cd9d2c418d",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.5",
+                "psr/container": "^2.0"
+            },
+            "require-dev": {
+                "marko/testing": "self.version",
+                "pestphp/pest": "^4.0"
+            },
+            "type": "library",
+            "extra": {
+                "marko": {
+                    "module": true
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Marko\\Core\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Marko Framework Core",
+            "support": {
+                "source": "https://github.com/marko-php/marko-core/tree/develop"
+            },
+            "time": "2026-04-10T20:49:26+00:00"
+        },
+        {
+            "name": "marko/database",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/marko-php/marko-database.git",
+                "reference": "711b2bdc7599195b991f8b1770555a4aecf8c907"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/marko-php/marko-database/zipball/711b2bdc7599195b991f8b1770555a4aecf8c907",
+                "reference": "711b2bdc7599195b991f8b1770555a4aecf8c907",
+                "shasum": ""
+            },
+            "require": {
+                "marko/core": "self.version",
+                "php": "^8.5"
+            },
+            "require-dev": {
+                "pestphp/pest": "^4.0"
+            },
+            "type": "library",
+            "extra": {
+                "marko": {
+                    "module": true
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Marko\\Database\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Marko Framework Database Layer - Entity-driven schema with Data Mapper pattern",
+            "support": {
+                "source": "https://github.com/marko-php/marko-database/tree/0.3.1"
+            },
+            "time": "2026-04-21T16:37:54+00:00"
+        },
+        {
+            "name": "marko/notification",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/marko-php/marko-notification.git",
+                "reference": "1ecb73989e55a78b4fd8af9b12451aa259701bbb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/marko-php/marko-notification/zipball/1ecb73989e55a78b4fd8af9b12451aa259701bbb",
+                "reference": "1ecb73989e55a78b4fd8af9b12451aa259701bbb",
+                "shasum": ""
+            },
+            "require": {
+                "marko/config": "self.version",
+                "marko/core": "self.version",
+                "php": "^8.5"
+            },
+            "require-dev": {
+                "pestphp/pest": "^4.0"
+            },
+            "suggest": {
+                "marko/database": "Required for database channel notifications",
+                "marko/mail": "Required for mail channel notifications",
+                "marko/queue": "Required for queued notification sending"
+            },
+            "type": "marko-module",
+            "extra": {
+                "marko": {
+                    "module": true
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Marko\\Notification\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Notification system interfaces and channels for the Marko Framework",
+            "support": {
+                "source": "https://github.com/marko-php/marko-notification/tree/0.0.2"
+            },
+            "time": "2026-03-26T16:28:58+00:00"
+        },
+        {
+            "name": "psr/container",
+            "version": "2.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/container.git",
+                "reference": "c71ecc56dfe541dbd90c5360474fbc405f8d5963"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/container/zipball/c71ecc56dfe541dbd90c5360474fbc405f8d5963",
+                "reference": "c71ecc56dfe541dbd90c5360474fbc405f8d5963",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Container\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "https://www.php-fig.org/"
+                }
+            ],
+            "description": "Common Container Interface (PHP FIG PSR-11)",
+            "homepage": "https://github.com/php-fig/container",
+            "keywords": [
+                "PSR-11",
+                "container",
+                "container-interface",
+                "container-interop",
+                "psr"
+            ],
+            "support": {
+                "issues": "https://github.com/php-fig/container/issues",
+                "source": "https://github.com/php-fig/container/tree/2.0.2"
+            },
+            "time": "2021-11-05T16:47:00+00:00"
+        }
+    ],
     "packages-dev": [
         {
             "name": "brianium/paratest",
@@ -1858,59 +2045,6 @@
                 }
             ],
             "time": "2026-04-18T06:12:49+00:00"
-        },
-        {
-            "name": "psr/container",
-            "version": "2.0.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/php-fig/container.git",
-                "reference": "c71ecc56dfe541dbd90c5360474fbc405f8d5963"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/container/zipball/c71ecc56dfe541dbd90c5360474fbc405f8d5963",
-                "reference": "c71ecc56dfe541dbd90c5360474fbc405f8d5963",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.4.0"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "2.0.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Psr\\Container\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "PHP-FIG",
-                    "homepage": "https://www.php-fig.org/"
-                }
-            ],
-            "description": "Common Container Interface (PHP FIG PSR-11)",
-            "homepage": "https://github.com/php-fig/container",
-            "keywords": [
-                "PSR-11",
-                "container",
-                "container-interface",
-                "container-interop",
-                "psr"
-            ],
-            "support": {
-                "issues": "https://github.com/php-fig/container/issues",
-                "source": "https://github.com/php-fig/container/tree/2.0.2"
-            },
-            "time": "2021-11-05T16:47:00+00:00"
         },
         {
             "name": "psr/log",
@@ -3938,7 +4072,11 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {},
+    "stability-flags": {
+        "marko/core": 20,
+        "marko/database": 20,
+        "marko/notification": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
