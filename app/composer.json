@@ -1,13 +1,10 @@
 {
-    "name": "app/blog",
-    "description": "Blog module",
+    "name": "app/main",
+    "description": "Application controllers",
     "type": "library",
-    "require": {
-        "php": "^8.5"
-    },
     "autoload": {
         "psr-4": {
-            "App\\Blog\\": "src/"
+            "App\\Controllers\\": "src/"
         }
     },
     "extra": {

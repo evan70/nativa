@@ -53,6 +53,8 @@ class EntityDiscovery
         string $appPath,
     ): array {
         return $this->discoverInDirectoryPatterns($appPath, [
+            '/src/Entity',
+            '/Entity',
             '/*/Entity',
             '/*/src/Entity',
         ]);
