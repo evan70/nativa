@@ -23,6 +23,7 @@
         "marko/errors-simple": "*",
         "marko/hashing": "*",
         "marko/log": "*",
+        "marko/log-file": "*",
         "marko/mail": "*",
         "marko/psr-container": "*",
         "marko/queue": "*",
