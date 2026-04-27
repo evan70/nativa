@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Controllers;
+namespace App;
 
 use Marko\Routing\Attributes\Get;
 use Marko\Routing\Http\Response;

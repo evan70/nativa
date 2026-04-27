@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Blog\Controller;
 
-use App\Controllers\View;
 use App\Blog\Repository\ArticleRepository;
 use App\Blog\Entity\Article;
 use Marko\Routing\Attributes\Get;
