@@ -8,14 +8,22 @@ use RuntimeException;
 
 final class View
 {
+    /** @var string[] */
+    public static array $pageAssets = [];
+
     /**
      * @param array<string, mixed> $data
      */
     public static function render(
         string $template,
         array $data = [],
-        ?string $layout = 'layouts/app.phtml',
+        ?string $layout = 'app/layouts/app',
     ): string {
+        $template = str_replace('.', '/', $template);
+        if ($layout) {
+            $layout = str_replace('.', '/', $layout);
+        }
+
         $content = self::renderFile($template, $data);
 
         if ($layout === null) {
@@ -32,7 +40,16 @@ final class View
         string $template,
         array $data = [],
     ): string {
+        $template = str_replace('.', '/', $template);
         return self::renderFile($template, $data);
+    }
+
+    public static function vite(string $entry): string
+    {
+        if (str_ends_with($entry, '.css')) {
+            return '<link rel="stylesheet" href="/mark/' . $entry . '" />';
+        }
+        return '<script type="module" src="/mark/' . $entry . '"></script>';
     }
 
     /**
@@ -42,13 +59,12 @@ final class View
         string $template,
         array $data = [],
     ): string {
-        $viewPath = self::viewsPath() . '/' . ltrim($template, '/');
+        $viewPath = self::viewsPath() . '/' . ltrim($template, '/') . '.php';
 
         if (!is_file($viewPath)) {
             throw new RuntimeException("View not found: $viewPath");
         }
 
-        $include = static fn (string $partial, array $partialData = []): string => self::partial($partial, $partialData);
         extract($data, EXTR_SKIP);
 
         ob_start();
@@ -59,6 +75,6 @@ final class View
 
     private static function viewsPath(): string
     {
-        return dirname(__DIR__, 2) . '/views';
+        return dirname(__DIR__, 2) . '/templates';
     }
 }
