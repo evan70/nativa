@@ -36,8 +36,8 @@ Each individual page or logical use-case gets its own entry point folder (e.g., 
 
 We use Vite strictly as an asset bundler for the PHP backend, mapping sources to hashed production files.
 
-1. **Source Code:** You write modular TS/CSS in `packages/vanilla-cards/src/`.
-2. **Vite Build (`pnpm run build`):** Vite processes, minifies, and adds cache-busting hashes to the filenames, outputting them into `docs/`.
+1. **Source Code:** You write modular TS/CSS in `templates/src/`.
+2. **Vite Build (`pnpm run build`):** Vite processes, minifies, and adds cache-busting hashes to the filenames, outputting them into `public/mark/`.
 3. **Manifest Generation:** Vite generates a `vanilla-cards-manifest.json` file. It maps source files to their new hashed names (e.g., `src/app.ts` -> `core-app.DYSIM4Cj.js`).
 4. **PHP Integration (`AssetHelper`):** The Nativa CMS backend reads this manifest. When the backend asks for the `home` entry point, PHP dynamically prints the `<link>` and `<script>` tags for exactly those hashed files.
 
@@ -135,7 +135,7 @@ Enjoy building fast, reliable interfaces!
 **Solution:** 
 - Added explicit `<link rel="stylesheet">` tags to the `<head>` of `index.html` for all core and section styles. This ensures CSS is discovered and bundled correctly by Vite and remains visible in the document head.
 - Moved all entry point `<script>` tags to the `<head>` with `type="module"`.
-- Added a `.nojekyll` file to the `docs/` directory to disable Jekyll processing on GitHub Pages.
+- Added a `.nojekyll` file to the `public/mark/` directory to disable Jekyll processing on GitHub Pages.
 - Ensured all script tags in `index.html` use relative paths (e.g., `./src/app.ts`) so Vite's bundler correctly identifies and processes them during the build.
 - Configured `base: './'` in `vite.config.ts` to ensure compatibility with subpath deployments.
 
