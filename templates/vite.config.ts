@@ -1,7 +1,32 @@
 import { defineConfig } from 'vite';
-import { resolve } from 'path';
+import { resolve, join } from 'path';
+import fs from 'fs';
+
+function getFrontendInputs(baseDir: string) {
+  const inputs: Record<string, string> = {};
+  const frontendDir = resolve(baseDir, 'src/frontend');
+  
+  if (!fs.existsSync(frontendDir)) return inputs;
+
+  const walk = (dir: string, prefix = '') => {
+    const files = fs.readdirSync(dir, { withFileTypes: true });
+    for (const file of files) {
+      if (file.isDirectory()) {
+        walk(join(dir, file.name), join(prefix, file.name));
+      } else if (file.name.endsWith('.ts') || file.name.endsWith('.css')) {
+        const name = join(prefix, file.name.replace(/\.(ts|css)$/, '')).replace(/\\/g, '/');
+        inputs[name] = resolve(dir, file.name);
+      }
+    }
+  };
+
+  walk(frontendDir);
+  return inputs;
+}
 
 export default defineConfig(({ mode }) => {
+  const frontendInputs = getFrontendInputs(__dirname);
+
   return {
     base: '/mark/',
     publicDir: 'static',
@@ -24,8 +49,8 @@ export default defineConfig(({ mode }) => {
           init: resolve(__dirname, 'src/init.ts'),
           'core-app': resolve(__dirname, 'src/app.ts'),
           'core-css': resolve(__dirname, 'src/css.ts'),
-          home: resolve(__dirname, 'src/frontend/home/home.ts'),
-          'theme-switcher': resolve(__dirname, 'src/dev/theme-switcher.ts')
+          'theme-switcher': resolve(__dirname, 'src/dev/theme-switcher.ts'),
+          ...frontendInputs
         },
         output: {
           entryFileNames: `[name].js`,
