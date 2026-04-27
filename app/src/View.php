@@ -53,16 +53,37 @@ final class View
         return self::renderFile($template, $data);
     }
 
+    /**
+     * Resolve a path to its hashed version from the manifest
+     */
+    public static function resolve(string $path): string
+    {
+        self::ensureManifestLoaded();
+
+        if (isset(self::$manifest[$path]['file'])) {
+            return '/mark/' . ltrim(self::$manifest[$path]['file'], '/');
+        }
+
+        return '/mark/' . ltrim($path, '/');
+    }
+
+    private static function ensureManifestLoaded(): void
+    {
+        if (self::$manifest !== null) {
+            return;
+        }
+
+        $manifestPath = dirname(__DIR__, 2) . '/public/mark/vanilla-cards-manifest.json';
+        if (is_file($manifestPath)) {
+            self::$manifest = json_decode(file_get_contents($manifestPath), true);
+        } else {
+            self::$manifest = [];
+        }
+    }
+
     public static function vite(string $entry, bool $isPageAsset = false): string
     {
-        if (self::$manifest === null) {
-            $manifestPath = dirname(__DIR__, 2) . '/public/mark/vanilla-cards-manifest.json';
-            if (is_file($manifestPath)) {
-                self::$manifest = json_decode(file_get_contents($manifestPath), true);
-            } else {
-                self::$manifest = [];
-            }
-        }
+        self::ensureManifestLoaded();
 
         // Try to find the entry in the manifest
         $match = null;
@@ -88,7 +109,7 @@ final class View
                     return '<link rel="preload" href="/mark/' . ltrim($entry, '/') . '" as="style" fetchpriority="high" />' . "\n" .
                            '<link rel="stylesheet" href="/mark/' . ltrim($entry, '/') . '" fetchpriority="high" />';
                 }
-                return '<link rel="stylesheet" href="/mark/' . ltrim($entry, '/') . '" />';
+                return '<link rel="stylesheet" href="/mark/' . ltrim($entry, '/') . '" fetchpriority="high" />';
             }
             if (str_ends_with($entry, '.js') || str_ends_with($entry, '.ts')) {
                 return '<script type="module" src="/mark/' . ltrim($entry, '/') . '"></script>';
@@ -107,7 +128,7 @@ final class View
                     $html .= '<link rel="preload" href="' . $cssPath . '" as="style" fetchpriority="high" />' . "\n";
                     $html .= '<link rel="stylesheet" href="' . $cssPath . '" fetchpriority="high" />' . "\n";
                 } else {
-                    $html .= '<link rel="stylesheet" href="' . $cssPath . '" />' . "\n";
+                    $html .= '<link rel="stylesheet" href="' . $cssPath . '" fetchpriority="high" />' . "\n";
                 }
             }
         }
@@ -121,7 +142,7 @@ final class View
                     $html .= '<link rel="preload" href="' . $filePath . '" as="style" fetchpriority="high" />' . "\n";
                     $html .= '<link rel="stylesheet" href="' . $filePath . '" fetchpriority="high" />' . "\n";
                 } else {
-                    $html .= '<link rel="stylesheet" href="' . $filePath . '" />' . "\n";
+                    $html .= '<link rel="stylesheet" href="' . $filePath . '" fetchpriority="high" />' . "\n";
                 }
             } else {
                 $html .= '<script type="module" src="' . $filePath . '"></script>' . "\n";
