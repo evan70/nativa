@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Marko Admin - Authentication" />
+  <title>Marko Admin | Sign In</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  
+  <!-- Init script (blocks rendering, prevents FOUC) -->
+  <script type="module" src="/src/init.ts"></script>
+
+  <!-- Core Styles (Tokens & Global UI) -->
+  <link rel="stylesheet" href="/src/core/tokens/unified.css" />
+  <link rel="stylesheet" href="/src/core/theme/default/theme.css" />
+  
+  <!-- Auth-specific Styles -->
+  <link rel="stylesheet" href="/src/auth/styles.css" />
+
+  <!-- Scripts -->
+  <script type="module" src="/src/auth/app.ts"></script>
+</head>
+<body class="auth-layout">
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-card__header">
+                <h1 class="auth-card__title">Sign in</h1>
+                <p class="auth-card__subtitle">Enter your credentials to access your account</p>
+            </div>
+
+            <form class="auth-form" method="POST" action="/mark/login">
+                <div class="form-group">
+                    <label class="form-label" for="email">Email address</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        class="form-input" 
+                        placeholder="admin@example.com"
+                        required 
+                        autofocus
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="form-input" 
+                        required
+                    />
+                </div>
+
+                <div class="form-group form-group--row">
+                    <label class="checkbox">
+                        <input type="checkbox" name="remember" value="1" />
+                        <span>Remember me</span>
+                    </label>
+                    <a href="#" class="link">
+                        Forgot password?
+                    </a>
+                </div>
+
+                <button type="submit" class="btn btn--primary btn--block">
+                    Sign in
+                </button>
+            </form>
+
+            <div class="auth-card__footer">
+                <p>Don't have an account? <a href="#" class="link">Register</a></p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
