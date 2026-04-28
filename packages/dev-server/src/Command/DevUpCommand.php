@@ -59,7 +59,9 @@ class DevUpCommand implements CommandInterface
         }
 
         // 2. PHP Server
-        $phpCommand = sprintf('php -S localhost:%d -t public', $port);
+        $routerPath = $projectRoot . '/router.php';
+        $router = file_exists($routerPath) ? ' ' . escapeshellarg($routerPath) : '';
+        $phpCommand = sprintf('php -S localhost:%d -t public%s', $port, $router);
         $output->writeLine("Starting PHP server: {$phpCommand}");
         $processManager->start('php', $phpCommand, $detach);
 
