@@ -8,7 +8,7 @@
     "src": "/home/engine/project/templates/packages/theme-neon/src/assets/neon.css"
   },
   "index.html": {
-    "file": "index-CMylH0gL.js",
+    "file": "index-D4xmhTra.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -48,6 +48,24 @@
     "file": "PlayfairDisplay-Regular-CxA4Ig4w.woff2",
     "src": "src/assets/fonts/playfair/PlayfairDisplay-Regular.woff2"
   },
+  "src/auth/app.ts": {
+    "file": "auth-app-DC3sCQPH.js",
+    "name": "auth-app",
+    "src": "src/auth/app.ts",
+    "isEntry": true,
+    "css": [
+      "auth-style-3PjjQolB.css"
+    ]
+  },
+  "src/auth/styles.css": {
+    "file": "auth-style-3PjjQolB.css",
+    "name": "auth-style",
+    "names": [
+      "auth-style.css"
+    ],
+    "src": "src/auth/styles.css",
+    "isEntry": true
+  },
   "src/css.ts": {
     "file": "core-css-SKTeLIfC.js",
     "name": "core-css",
@@ -82,7 +100,7 @@
     "isEntry": true
   },
   "src/frontend/home/home.ts": {
-    "file": "home/home-C6XeFw_o.js",
+    "file": "home/home-Bv3ziqMN.js",
     "name": "home/home",
     "src": "src/frontend/home/home.ts",
     "isEntry": true,
