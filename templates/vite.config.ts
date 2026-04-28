@@ -51,6 +51,8 @@ export default defineConfig(({ mode }) => {
           'core-app': resolve(__dirname, 'src/app.ts'),
           'core-css': resolve(__dirname, 'src/css.ts'),
           'theme-switcher': resolve(__dirname, 'src/dev/theme-switcher.ts'),
+          'auth-app': resolve(__dirname, 'src/auth/app.ts'),
+          'auth-style': resolve(__dirname, 'src/auth/styles.css'),
           ...frontendInputs
         },
         output: {
