@@ -46,8 +46,6 @@ export default defineConfig(({ mode }) => {
       manifest: 'vanilla-cards-manifest.json',
       rollupOptions: {
         input: {
-          index: resolve(__dirname, 'index.html'),
-          login: resolve(__dirname, 'login.html'),
           init: resolve(__dirname, 'src/init.ts'),
           'core-app': resolve(__dirname, 'src/app.ts'),
           'core-css': resolve(__dirname, 'src/css.ts'),
