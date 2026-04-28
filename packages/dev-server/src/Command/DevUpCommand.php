@@ -58,10 +58,10 @@ class DevUpCommand implements CommandInterface
             }
         }
 
-        // 2. PHP Server
-        $routerPath = $projectRoot . '/router.php';
-        $router = file_exists($routerPath) ? ' ' . escapeshellarg($routerPath) : '';
-        $phpCommand = sprintf('php -S localhost:%d -t public%s', $port, $router);
+        // 2. PHP Server - use public/index.php as router for core Router
+        // This serves static files directly and bootstraps the core app for dynamic requests
+        $indexPath = $projectRoot . '/public/index.php';
+        $phpCommand = sprintf('php -S localhost:%d -t public %s', $port, escapeshellarg($indexPath));
         $output->writeLine("Starting PHP server: {$phpCommand}");
         $processManager->start('php', $phpCommand, $detach);
 
