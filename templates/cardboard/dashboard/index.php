@@ -7,34 +7,46 @@
 </header>
 
 <div class="card-grid card-grid--cols-4" style="margin-bottom: var(--space-8);">
-    <article class="card">
+    <article class="card stat-card">
         <div class="card__body">
             <p style="font-size: var(--text-xs); color: var(--color-text-muted); text-transform: uppercase; font-weight: var(--font-bold);">Total Revenue</p>
-            <h2 style="margin: var(--space-2) 0;">$45,231.89</h2>
+            <h2 class="stat-card__value" style="margin: var(--space-2) 0;">$45,231.89</h2>
             <p style="font-size: var(--text-xs); color: var(--brand-emerald);">+20.1% from last month</p>
         </div>
     </article>
-    <article class="card">
+    <article class="card stat-card">
         <div class="card__body">
             <p style="font-size: var(--text-xs); color: var(--color-text-muted); text-transform: uppercase; font-weight: var(--font-bold);">Subscriptions</p>
-            <h2 style="margin: var(--space-2) 0;">+2,350</h2>
+            <h2 class="stat-card__value" style="margin: var(--space-2) 0;">+2,350</h2>
             <p style="font-size: var(--text-xs); color: var(--brand-emerald);">+180.1% from last month</p>
         </div>
     </article>
-    <article class="card">
+    <article class="card stat-card">
         <div class="card__body">
             <p style="font-size: var(--text-xs); color: var(--color-text-muted); text-transform: uppercase; font-weight: var(--font-bold);">Sales</p>
-            <h2 style="margin: var(--space-2) 0;">+12,234</h2>
+            <h2 class="stat-card__value" style="margin: var(--space-2) 0;">+12,234</h2>
             <p style="font-size: var(--text-xs); color: var(--brand-emerald);">+19% from last month</p>
         </div>
     </article>
-    <article class="card">
+    <article class="card stat-card">
         <div class="card__body">
             <p style="font-size: var(--text-xs); color: var(--color-text-muted); text-transform: uppercase; font-weight: var(--font-bold);">Active Now</p>
-            <h2 style="margin: var(--space-2) 0;">+573</h2>
+            <h2 class="stat-card__value" style="margin: var(--space-2) 0;">+573</h2>
             <p style="font-size: var(--text-xs); color: var(--brand-emerald);">+201 since last hour</p>
         </div>
     </article>
+</div>
+
+<!-- Revenue Chart -->
+<div class="card" style="margin-bottom: var(--space-8);">
+    <div class="card__header">
+        <h3 class="card__title">Revenue Trend</h3>
+    </div>
+    <div class="card__body">
+        <div class="chart-container">
+            <canvas id="revenue-chart"></canvas>
+        </div>
+    </div>
 </div>
 
 <div class="card-grid card-grid--cols-2">
@@ -82,5 +94,29 @@
             <?php endif ?>
         </div>
     </article>
+</div>
+
+<!-- Subscriptions Chart -->
+<div class="card" style="margin-bottom: var(--space-8);">
+    <div class="card__header">
+        <h3 class="card__title">Subscriptions by Quarter</h3>
+    </div>
+    <div class="card__body">
+        <div class="chart-container chart-container--small">
+            <canvas id="subscriptions-chart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Sales Doughnut Chart -->
+<div class="card" style="margin-bottom: var(--space-8);">
+    <div class="card__header">
+        <h3 class="card__title">Sales Distribution</h3>
+    </div>
+    <div class="card__body">
+        <div class="chart-container chart-container--small">
+            <canvas id="sales-chart"></canvas>
+        </div>
+    </div>
 </div>
 <?php $this->endSection() ?>

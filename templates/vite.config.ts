@@ -52,6 +52,9 @@ export default defineConfig(({ mode }) => {
           'theme-switcher': resolve(__dirname, 'src/dev/theme-switcher.ts'),
           'auth-app': resolve(__dirname, 'src/auth/app.ts'),
           'auth-style': resolve(__dirname, 'src/auth/styles.css'),
+          // Cardboard admin page-specific
+          'cardboard-app': resolve(__dirname, 'src/cardboard/app.ts'),
+          'cardboard-style': resolve(__dirname, 'src/cardboard/styles/cardboard.css'),
           ...frontendInputs
         },
         output: {

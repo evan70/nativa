@@ -1,38 +1,28 @@
-<!-- SIDEBAR -->
 <aside class="sidebar">
     <nav class="sidebar__nav">
-        <a href="/mark" class="sidebar__link <?= str_contains($_SERVER['REQUEST_URI'] ?? '', '/mark') && !str_contains($_SERVER['REQUEST_URI'] ?? '', '/mark/') ? 'sidebar__link--active' : '' ?>">
-            <svg class="sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <a href="/mark" class="sidebar__link sidebar__link--active">
+            <svg class="sidebar__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+            </svg>
             Dashboard
         </a>
-        
-        <?php foreach ($menuItems as $item): ?>
-            <a href="<?= $this->e($item->getUrl()) ?>" class="sidebar__link <?= ($item->isActive() ? 'sidebar__link--active' : '') ?>">
-                <?php if ($item->getIcon()): ?>
-                    <span class="sidebar__icon"><?= $item->getIcon() ?></span>
-                <?php endif; ?>
-                <?= $this->e($item->getLabel()) ?>
-            </a>
-        <?php endforeach; ?>
 
-        <a href="#" class="sidebar__link">
-            <svg class="sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-            Users
-        </a>
-        <a href="#" class="sidebar__link">
-            <svg class="sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-            Products
-        </a>
-        <a href="#" class="sidebar__link">
-            <svg class="sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-            Reports
-        </a>
-        <a href="#" class="sidebar__link">
-            <svg class="sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-            Settings
-        </a>
+        <?php if (!empty($menuItems)): ?>
+            <?php foreach ($menuItems as $item): ?>
+                <a href="<?= $this->e($item['url']) ?>" class="sidebar__link">
+                    <?php if (!empty($item['icon'])): ?>
+                        <span class="sidebar__icon"><?= $item['icon'] ?></span>
+                    <?php endif ?>
+                    <?= $this->e($item['label']) ?>
+                </a>
+            <?php endforeach ?>
+        <?php endif ?>
+
+        <div class="sidebar__footer">
+            <p style="font-size: var(--text-xs); color: var(--color-text-muted);">Version 0.0.1-alpha</p>
+        </div>
     </nav>
-    <div class="sidebar__footer">
-        <p style="font-size: var(--text-xs); color: var(--color-text-muted);">v0.0.1-alpha</p>
-    </div>
 </aside>

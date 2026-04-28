@@ -8,7 +8,7 @@ use Marko\Database\Attributes\Column;
 use Marko\Database\Attributes\Table;
 use Marko\Database\Entity\Entity;
 
-#[Table('marks')]
+#[Table('mark_users')]
 class Mark extends Entity implements MarkInterface
 {
     #[Column(primaryKey: true, autoIncrement: true)]

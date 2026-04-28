@@ -1,26 +1,24 @@
 {
-  "/home/engine/project/templates/packages/theme-fire-show/src/assets/fire-show.css": {
+  "/home/evan/dev/05/nativa/templates/packages/theme-fire-show/src/assets/fire-show.css": {
     "file": "fire-show-CxddCEMD.css",
-    "src": "/home/engine/project/templates/packages/theme-fire-show/src/assets/fire-show.css"
+    "src": "/home/evan/dev/05/nativa/templates/packages/theme-fire-show/src/assets/fire-show.css"
   },
-  "/home/engine/project/templates/packages/theme-neon/src/assets/neon.css": {
+  "/home/evan/dev/05/nativa/templates/packages/theme-neon/src/assets/neon.css": {
     "file": "neon-CgVRqVFo.css",
-    "src": "/home/engine/project/templates/packages/theme-neon/src/assets/neon.css"
+    "src": "/home/evan/dev/05/nativa/templates/packages/theme-neon/src/assets/neon.css"
   },
-  "_modulepreload-polyfill-CQbHc8N5.js": {
-    "file": "modulepreload-polyfill-CQbHc8N5.js",
-    "name": "modulepreload-polyfill"
-  },
-  "_theme-DBRYjU-l.css": {
-    "file": "theme-DBRYjU-l.css",
-    "src": "_theme-DBRYjU-l.css"
+  "_defineProperty-CDrfZGhu.js": {
+    "file": "defineProperty-CDrfZGhu.js",
+    "name": "defineProperty"
   },
   "src/app.ts": {
-    "file": "core-app-F94cHrjl.js",
+    "file": "core-app-FbzY2hCi.js",
     "name": "core-app",
     "src": "src/app.ts",
     "isEntry": true,
     "imports": [
+      "_defineProperty-CDrfZGhu.js",
+      "src/css.ts",
       "src/css.ts"
     ]
   },
@@ -37,7 +35,7 @@
     "src": "src/assets/fonts/playfair/PlayfairDisplay-Regular.woff2"
   },
   "src/auth/app.ts": {
-    "file": "auth-app-C3Q_id0d.js",
+    "file": "auth-app-Cak4LoAm.js",
     "name": "auth-app",
     "src": "src/auth/app.ts",
     "isEntry": true,
@@ -54,14 +52,34 @@
     "src": "src/auth/styles.css",
     "isEntry": true
   },
+  "src/cardboard/app.ts": {
+    "file": "cardboard-app-CpSPj1n9.js",
+    "name": "cardboard-app",
+    "src": "src/cardboard/app.ts",
+    "isEntry": true,
+    "imports": [
+      "_defineProperty-CDrfZGhu.js"
+    ],
+    "css": [
+      "cardboard-style-ENChOUmZ.css"
+    ]
+  },
+  "src/cardboard/styles/cardboard.css": {
+    "file": "cardboard-style-ENChOUmZ.css",
+    "name": "cardboard-style",
+    "names": [
+      "cardboard-style.css"
+    ],
+    "src": "src/cardboard/styles/cardboard.css",
+    "isEntry": true
+  },
   "src/css.ts": {
-    "file": "core-css-DTx--eqX.js",
+    "file": "core-css-CUqzbnvc.js",
     "name": "core-css",
     "src": "src/css.ts",
     "isEntry": true,
     "css": [
-      "core-css-C98irz-q.css",
-      "theme-DBRYjU-l.css"
+      "core-css-Dg6MIPoq.css"
     ],
     "assets": [
       "Inter-Regular-COLGFB3M.woff2",
@@ -70,7 +88,7 @@
     ]
   },
   "src/dev/theme-switcher.ts": {
-    "file": "theme-switcher-BoPMxyG0.js",
+    "file": "theme-switcher-DoLUzo9O.js",
     "name": "theme-switcher",
     "src": "src/dev/theme-switcher.ts",
     "isEntry": true,
@@ -98,7 +116,7 @@
     ]
   },
   "src/init.ts": {
-    "file": "init-qKjV9Oig.js",
+    "file": "init-B_U-wsDj.js",
     "name": "init",
     "src": "src/init.ts",
     "isEntry": true

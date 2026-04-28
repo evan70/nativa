@@ -10,7 +10,7 @@ return new class extends Migration {
         ConnectionInterface $connection,
     ): void {
         $this->execute($connection, <<<'SQL'
-            CREATE TABLE "mark_users" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, "email" TEXT NOT NULL, "password" TEXT NOT NULL, "name" TEXT NOT NULL, "rememberToken" TEXT, "isActive" TEXT NOT NULL DEFAULT 1, "createdAt" TEXT, "updatedAt" TEXT);
+            CREATE TABLE "notifications" ("id" TEXT NOT NULL DEFAULT '', "type" TEXT NOT NULL DEFAULT '', "notifiableType" TEXT NOT NULL DEFAULT '', "notifiableId" TEXT NOT NULL DEFAULT '', "data" TEXT NOT NULL DEFAULT '', "readAt" TEXT, "createdAt" TEXT NOT NULL DEFAULT '', PRIMARY KEY ("id"));
             SQL);
     }
 
@@ -18,7 +18,7 @@ return new class extends Migration {
         ConnectionInterface $connection,
     ): void {
         $this->execute($connection, <<<'SQL'
-            DROP TABLE IF EXISTS "mark_users";
+            DROP TABLE IF EXISTS "notifications";
             SQL);
     }
 };

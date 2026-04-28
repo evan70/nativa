@@ -8,9 +8,9 @@
     <link rel="icon" type="image/svg+xml" href="/mark/favicon.svg" />
     
     <!-- Auth-specific Assets -->
-    <link rel="stylesheet" href="/mark/auth/auth-style.css">
-    <script src="/mark/auth/init.js"></script>
-    <script type="module" src="/mark/auth/auth-app.js"></script>
+    <link rel="stylesheet" href="/mark/auth-style-3PjjQolB.css">
+    <script src="/mark/init-B_U-wsDj.js"></script>
+    <script type="module" src="/mark/auth-app-Cak4LoAm.js"></script>
 
     <?= $this->yield('head') ?>
 </head>

@@ -21,6 +21,23 @@ class DashboardController
         private readonly GuardInterface $guard,
     ) {}
 
+    /**
+     * @return array<array{url: string, label: string, icon: string, active: bool}>
+     */
+    private function buildMenuItems(): array
+    {
+        $items = [];
+        foreach ($this->sectionRegistry->all() as $section) {
+            $items[] = [
+                'url' => '/mark' . ($section->getSlug() !== 'dashboard' ? '/' . $section->getSlug() : ''),
+                'label' => $section->getLabel(),
+                'icon' => $section->getIcon(),
+                'active' => false,
+            ];
+        }
+        return $items;
+    }
+
     #[Get(path: '/mark')]
     #[Middleware(MarkMiddleware::class)]
     public function index(
@@ -31,6 +48,8 @@ class DashboardController
         return $this->view->render('cardboard::dashboard/index', [
             'sections' => $sections,
             'currentUser' => $this->guard->user(),
+            'menuItems' => $this->buildMenuItems(),
+            'activeSection' => 'dashboard',
         ]);
     }
 }

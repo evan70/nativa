@@ -8,10 +8,12 @@
     <link rel="icon" type="image/svg+xml" href="/mark/favicon.svg" />
     
     <!-- Vanilla Cards Assets -->
-    <link rel="stylesheet" href="/mark/core-css.css">
-    <script src="/mark/init.js"></script>
-    <script type="module" src="/mark/core-app.js"></script>
-    <script defer src="/mark/theme-switcher.js"></script>
+    <link rel="stylesheet" href="/mark/core-css-Dg6MIPoq.css">
+    <link rel="stylesheet" href="/mark/cardboard-style-ENChOUmZ.css">
+    <script src="/mark/init-B_U-wsDj.js"></script>
+    <script type="module" src="/mark/core-app-FbzY2hCi.js"></script>
+    <script type="module" src="/mark/cardboard-app-CpSPj1n9.js"></script>
+    <script defer src="/mark/theme-switcher-DoLUzo9O.js"></script>
 
     <?= $this->yield('head') ?>
 </head>
