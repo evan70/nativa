@@ -7,28 +7,16 @@
     "file": "neon-CgVRqVFo.css",
     "src": "/home/engine/project/templates/packages/theme-neon/src/assets/neon.css"
   },
-  "index.html": {
-    "file": "index-D4xmhTra.js",
-    "name": "index",
-    "src": "index.html",
-    "isEntry": true,
-    "imports": [
-      "src/app.ts",
-      "src/app.ts",
-      "src/dev/theme-switcher.ts",
-      "src/dev/theme-switcher.ts",
-      "src/css.ts",
-      "src/frontend/home/home.ts",
-      "src/frontend/home/home.ts",
-      "src/init.ts",
-      "src/init.ts"
-    ],
-    "css": [
-      "home/home-style-LD26QFGV.css"
-    ]
+  "_modulepreload-polyfill-CQbHc8N5.js": {
+    "file": "modulepreload-polyfill-CQbHc8N5.js",
+    "name": "modulepreload-polyfill"
+  },
+  "_theme-DBRYjU-l.css": {
+    "file": "theme-DBRYjU-l.css",
+    "src": "_theme-DBRYjU-l.css"
   },
   "src/app.ts": {
-    "file": "core-app-BmsyX_Pi.js",
+    "file": "core-app-F94cHrjl.js",
     "name": "core-app",
     "src": "src/app.ts",
     "isEntry": true,
@@ -49,7 +37,7 @@
     "src": "src/assets/fonts/playfair/PlayfairDisplay-Regular.woff2"
   },
   "src/auth/app.ts": {
-    "file": "auth-app-DC3sCQPH.js",
+    "file": "auth-app-C3Q_id0d.js",
     "name": "auth-app",
     "src": "src/auth/app.ts",
     "isEntry": true,
@@ -67,12 +55,13 @@
     "isEntry": true
   },
   "src/css.ts": {
-    "file": "core-css-SKTeLIfC.js",
+    "file": "core-css-DTx--eqX.js",
     "name": "core-css",
     "src": "src/css.ts",
     "isEntry": true,
     "css": [
-      "core-css-DyanYvfp.css"
+      "core-css-C98irz-q.css",
+      "theme-DBRYjU-l.css"
     ],
     "assets": [
       "Inter-Regular-COLGFB3M.woff2",
@@ -81,7 +70,7 @@
     ]
   },
   "src/dev/theme-switcher.ts": {
-    "file": "theme-switcher-CHNTZbFc.js",
+    "file": "theme-switcher-BoPMxyG0.js",
     "name": "theme-switcher",
     "src": "src/dev/theme-switcher.ts",
     "isEntry": true,
@@ -100,7 +89,7 @@
     "isEntry": true
   },
   "src/frontend/home/home.ts": {
-    "file": "home/home-Bv3ziqMN.js",
+    "file": "home/home-C-Fd7miU.js",
     "name": "home/home",
     "src": "src/frontend/home/home.ts",
     "isEntry": true,
@@ -109,7 +98,7 @@
     ]
   },
   "src/init.ts": {
-    "file": "init-CwG0wiw0.js",
+    "file": "init-qKjV9Oig.js",
     "name": "init",
     "src": "src/init.ts",
     "isEntry": true
