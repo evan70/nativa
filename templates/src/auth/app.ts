@@ -1,4 +1,4 @@
-import './auth/styles.css';
+import './styles.css';
 
 document.addEventListener('DOMContentLoaded', () => {
     const forms = document.querySelectorAll('.auth-form');
