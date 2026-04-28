@@ -33,7 +33,7 @@ class LoginController
         ]);
     }
 
-    #[Post(path: '/mark/login'])
+    #[Post(path: '/mark/login')]
     public function authenticate(
         Request $request,
     ): Response {
