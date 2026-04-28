@@ -79,7 +79,7 @@ readonly class MarkMiddleware implements MiddlewareInterface
             );
         }
 
-        return Response::redirect($this->adminConfig->getRoutePrefix() . '/login');
+        return Response::redirect('/mark/login');
     }
 
     /**
