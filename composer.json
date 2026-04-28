@@ -9,8 +9,8 @@
     "replace": {
         "marko/admin": "*",
         "marko/admin-api": "*",
-        "marko/admin-auth": "*",
-        "marko/admin-panel": "*",
+        "marko/cardboard": "*",
+        "marko/mark": "*",
         "marko/authentication": "*",
         "marko/authorization": "*",
         "marko/cli": "*",
