@@ -32,13 +32,13 @@ class RoleSeeder implements SeederInterface
 
         $roleId = $this->connection->lastInsertId();
 
-        // Find the admin user created by AdminUserSeeder
-        $rows = $this->connection->query('SELECT id FROM admin_users WHERE email = ?', ['admin@example.com']);
+        // Find the mark user created by MarkSeeder
+        $rows = $this->connection->query('SELECT id FROM marks WHERE email = ?', ['admin@example.com']);
         $user = $rows[0] ?? null;
 
         if ($user) {
             $this->connection->execute(
-                'INSERT INTO "admin_user_roles" ("user_id", "role_id") VALUES (?, ?)',
+                'INSERT INTO "mark_roles" ("user_id", "role_id") VALUES (?, ?)',
                 [(int)$user['id'], (int)$roleId]
             );
         }

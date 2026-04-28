@@ -9,8 +9,8 @@ use Marko\Database\Seed\Seeder;
 use Marko\Database\Seed\SeederInterface;
 use Marko\Hashing\Contracts\HasherInterface;
 
-#[Seeder(name: 'AdminUserSeeder', order: 1)]
-class AdminUserSeeder implements SeederInterface
+#[Seeder(name: 'MarkSeeder', order: 1)]
+class MarkSeeder implements SeederInterface
 {
     public function __construct(
         private ConnectionInterface $connection,
@@ -20,7 +20,7 @@ class AdminUserSeeder implements SeederInterface
     public function run(): void
     {
         $this->connection->execute(
-            'INSERT INTO "admin_users" ("email", "password", "name", "isActive", "createdAt", "updatedAt") VALUES (?, ?, ?, ?, ?, ?)',
+            'INSERT INTO "marks" ("email", "password", "name", "isActive", "createdAt", "updatedAt") VALUES (?, ?, ?, ?, ?, ?)',
             [
                 'admin@example.com',
                 $this->hasher->hash('password'),
