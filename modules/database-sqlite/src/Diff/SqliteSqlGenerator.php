@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Marko\Sqlite\Diff;
+namespace Marko\Database\Sqlite\Diff;
 
 use Marko\Database\Diff\SqlGeneratorInterface;
 use Marko\Database\Diff\SchemaDiff;

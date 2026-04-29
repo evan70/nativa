@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Marko\Sqlite\Connection\SqliteConnection;
-use Marko\Sqlite\Introspection\SqliteIntrospector;
+use Marko\Database\Sqlite\Connection\SqliteConnection;
+use Marko\Database\Sqlite\Introspection\SqliteIntrospector;
 
 describe('SqliteIntrospector', function (): void {
     beforeEach(function (): void {

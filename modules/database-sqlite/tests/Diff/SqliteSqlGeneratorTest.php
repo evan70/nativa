@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Marko\Sqlite\Tests\Diff;
+namespace Marko\Database\Sqlite\Tests\Diff;
 
 use Marko\Database\Diff\SchemaDiff;
 use Marko\Database\Schema\Column;
@@ -10,7 +10,7 @@ use Marko\Database\Schema\ForeignKey;
 use Marko\Database\Schema\Index;
 use Marko\Database\Schema\IndexType;
 use Marko\Database\Schema\Table;
-use Marko\Sqlite\Diff\SqliteSqlGenerator;
+use Marko\Database\Sqlite\Diff\SqliteSqlGenerator;
 
 describe('SqliteSqlGenerator', function (): void {
     beforeEach(function (): void {

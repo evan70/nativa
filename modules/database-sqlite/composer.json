@@ -1,5 +1,5 @@
 {
-    "name": "marko/sqlite",
+    "name": "marko/database-sqlite",
     "description": "SQLite driver for Marko Framework",
     "license": "MIT",
     "type": "library",
@@ -14,12 +14,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Marko\\Sqlite\\": "src/"
+            "Marko\\Database\\Sqlite\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Marko\\Sqlite\\Tests\\": "tests/"
+            "Marko\\Database\\Sqlite\\Tests\\": "tests/"
         }
     },
     "config": {
@@ -27,6 +27,8 @@
             "pestphp/pest-plugin": true
         }
     },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "extra": {
         "marko": {
             "module": true

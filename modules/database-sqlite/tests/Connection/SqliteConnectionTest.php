@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Marko\Sqlite\Tests\Connection;
+namespace Marko\Database\Sqlite\Tests\Connection;
 
-use Marko\Sqlite\Connection\SqliteConnection;
-use Marko\Sqlite\Connection\SqliteException;
+use Marko\Database\Sqlite\Connection\SqliteConnection;
+use Marko\Database\Sqlite\Connection\SqliteException;
 
 describe('SqliteConnection', function (): void {
     beforeEach(function (): void {

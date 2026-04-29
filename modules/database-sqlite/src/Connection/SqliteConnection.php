@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Marko\Sqlite\Connection;
+namespace Marko\Database\Sqlite\Connection;
 
 use InvalidArgumentException;
 use Marko\Database\Connection\ConnectionInterface;

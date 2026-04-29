@@ -8,9 +8,9 @@ use Marko\Database\Connection\ConnectionInterface;
 use Marko\Database\Connection\TransactionInterface;
 use Marko\Database\Diff\SqlGeneratorInterface;
 use Marko\Database\Introspection\IntrospectorInterface;
-use Marko\Sqlite\Connection\SqliteConnection;
-use Marko\Sqlite\Diff\SqliteSqlGenerator;
-use Marko\Sqlite\Introspection\SqliteIntrospector;
+use Marko\Database\Sqlite\Connection\SqliteConnection;
+use Marko\Database\Sqlite\Diff\SqliteSqlGenerator;
+use Marko\Database\Sqlite\Introspection\SqliteIntrospector;
 
 $basePath = dirname(__DIR__, 2);
 

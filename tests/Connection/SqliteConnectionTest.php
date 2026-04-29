@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Marko\Sqlite\Connection\SqliteConnection;
-use Marko\Sqlite\Connection\SqliteException;
+use Marko\Database\Sqlite\Connection\SqliteConnection;
+use Marko\Database\Sqlite\Connection\SqliteException;
 
 describe('SqliteConnection', function (): void {
     beforeEach(function (): void {

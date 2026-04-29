@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Marko\Sqlite\Introspection;
+namespace Marko\Database\Sqlite\Introspection;
 
 use Marko\Database\Connection\ConnectionInterface;
 use Marko\Database\Introspection\IntrospectorInterface;
@@ -10,7 +10,7 @@ use Marko\Database\Schema\Column;
 use Marko\Database\Schema\ForeignKey;
 use Marko\Database\Schema\Index;
 use Marko\Database\Schema\Table;
-use Marko\Sqlite\Connection\SqliteConnection;
+use Marko\Database\Sqlite\Connection\SqliteConnection;
 use PDO;
 
 class SqliteIntrospector implements IntrospectorInterface

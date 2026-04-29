@@ -10,7 +10,7 @@ use Marko\Database\Schema\ForeignKey;
 use Marko\Database\Schema\Index;
 use Marko\Database\Schema\IndexType;
 use Marko\Database\Schema\Table;
-use Marko\Sqlite\Diff\SqliteSqlGenerator;
+use Marko\Database\Sqlite\Diff\SqliteSqlGenerator;
 
 describe('SqliteSqlGenerator', function (): void {
     beforeEach(function (): void {

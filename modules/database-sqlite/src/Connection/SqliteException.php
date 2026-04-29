@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Marko\Sqlite\Connection;
+namespace Marko\Database\Sqlite\Connection;
 
 use Marko\Core\Exceptions\MarkoException;
 use Throwable;
