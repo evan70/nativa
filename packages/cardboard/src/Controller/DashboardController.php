@@ -44,7 +44,7 @@ class DashboardController
         Request $request,
     ): Response {
         $sections = $this->sectionRegistry->all();
-
+        
         return $this->view->render('cardboard::dashboard/index', [
             'sections' => $sections,
             'currentUser' => $this->guard->user(),

@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Marko Admin Dashboard - Powered by Nativa Vanilla Cards" />
     <title><?= $this->e($pageTitle ?? 'Marko Admin | Dashboard') ?></title>
-    <link rel="icon" type="image/svg+xml" href="/mark/favicon.svg" />
-    
+    <link rel="icon" type="image/svg+xml" href="/cardboard-assets/favicon.svg" />
+      
     <!-- Vanilla Cards Assets -->
-    <link rel="stylesheet" href="/mark/core-css-Dg6MIPoq.css">
-    <link rel="stylesheet" href="/mark/cardboard-style-ENChOUmZ.css">
-    <script src="/mark/init-B_U-wsDj.js"></script>
-    <script type="module" src="/mark/core-app-FbzY2hCi.js"></script>
-    <script type="module" src="/mark/cardboard-app-CpSPj1n9.js"></script>
-    <script defer src="/mark/theme-switcher-DoLUzo9O.js"></script>
+    <?= \App\View::vite('core-css', true) ?>
+    <?= \App\View::vite('cardboard-style', true) ?>
+    <?= \App\View::vite('init') ?>
+    <?= \App\View::vite('core-app') ?>
+    <?= \App\View::vite('cardboard-app') ?>
+    <?= \App\View::vite('theme-switcher') ?>
 
     <?= $this->yield('head') ?>
 </head>

@@ -61,10 +61,10 @@ final class View
         self::ensureManifestLoaded();
 
         if (isset(self::$manifest[$path]['file'])) {
-            return '/mark/' . ltrim(self::$manifest[$path]['file'], '/');
+            return '/cardboard-assets/' . ltrim(self::$manifest[$path]['file'], '/');
         }
 
-        return '/mark/' . ltrim($path, '/');
+        return '/cardboard-assets/' . ltrim($path, '/');
     }
 
     private static function ensureManifestLoaded(): void
@@ -73,7 +73,7 @@ final class View
             return;
         }
 
-        $manifestPath = dirname(__DIR__, 2) . '/public/mark/vanilla-cards-manifest.json';
+        $manifestPath = dirname(__DIR__, 2) . '/public/cardboard-assets/vanilla-cards-manifest.json';
         if (is_file($manifestPath)) {
             self::$manifest = json_decode(file_get_contents($manifestPath), true);
         } else {
@@ -106,13 +106,13 @@ final class View
             // Fallback for direct files or missed matches
             if (str_ends_with($entry, '.css')) {
                 if ($isPageAsset) {
-                    return '<link rel="preload" href="/mark/' . ltrim($entry, '/') . '" as="style" fetchpriority="high" />' . "\n" .
-                           '<link rel="stylesheet" href="/mark/' . ltrim($entry, '/') . '" fetchpriority="high" />';
+                return '<link rel="preload" href="/cardboard-assets/' . ltrim($entry, '/') . '" as="style" fetchpriority="high" />' . "\n" .
+                       '<link rel="stylesheet" href="/cardboard-assets/' . ltrim($entry, '/') . '" fetchpriority="high" />';
                 }
-                return '<link rel="stylesheet" href="/mark/' . ltrim($entry, '/') . '" fetchpriority="high" />';
+                return '<link rel="stylesheet" href="/cardboard-assets/' . ltrim($entry, '/') . '" fetchpriority="high" />';
             }
             if (str_ends_with($entry, '.js') || str_ends_with($entry, '.ts')) {
-                return '<script type="module" src="/mark/' . ltrim($entry, '/') . '"></script>';
+                return '<script type="module" src="/cardboard-assets/' . ltrim($entry, '/') . '"></script>';
             }
             // If it's just a name without extension, we can't do much without manifest match
             return '';
@@ -123,7 +123,7 @@ final class View
         // Handle CSS dependencies
         if (isset($match['css'])) {
             foreach ($match['css'] as $css) {
-                $cssPath = '/mark/' . ltrim($css, '/');
+                $cssPath = '/cardboard-assets/' . ltrim($css, '/');
                 if ($isPageAsset) {
                     $html .= '<link rel="preload" href="' . $cssPath . '" as="style" fetchpriority="high" />' . "\n";
                     $html .= '<link rel="stylesheet" href="' . $cssPath . '" fetchpriority="high" />' . "\n";
@@ -136,7 +136,7 @@ final class View
         // Handle the main file
         if (isset($match['file'])) {
             $file = $match['file'];
-            $filePath = '/mark/' . ltrim($file, '/');
+            $filePath = '/cardboard-assets/' . ltrim($file, '/');
             if (str_ends_with($file, '.css')) {
                 if ($isPageAsset) {
                     $html .= '<link rel="preload" href="' . $filePath . '" as="style" fetchpriority="high" />' . "\n";

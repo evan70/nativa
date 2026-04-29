@@ -33,6 +33,7 @@ Thumbs.db
 database/*.sqlite
 /*.sqlite
 *.sqlite
+storage/framework/
 
 # Build artifacts
 dist/
@@ -43,4 +44,5 @@ public/mark/*
 !public/mark/favicon.svg
 !public/mark/favicon.ico
 !public/mark/robots.txt
+public/cardboard-assets/*
 *.phar

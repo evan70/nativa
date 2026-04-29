@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Marko Admin - Authentication" />
     <title><?= $this->e($pageTitle ?? 'Marko Admin | Authentication') ?></title>
-    <link rel="icon" type="image/svg+xml" href="/mark/favicon.svg" />
-    
+    <link rel="icon" type="image/svg+xml" href="/cardboard-assets/favicon.svg" />
+      
     <!-- Auth-specific Assets -->
-    <link rel="stylesheet" href="/mark/auth-style-3PjjQolB.css">
-    <script src="/mark/init-B_U-wsDj.js"></script>
-    <script type="module" src="/mark/auth-app-Cak4LoAm.js"></script>
+    <?= \App\View::vite('init') ?>
+    <?= \App\View::vite('auth-style', true) ?>
+    <?= \App\View::vite('auth-app') ?>
 
     <?= $this->yield('head') ?>
 </head>

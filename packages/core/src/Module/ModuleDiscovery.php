@@ -25,7 +25,11 @@ readonly class ModuleDiscovery
     ) {}
 
     /**
-     * Discover modules in vendor directory (two levels deep: vendor/vendor-name/package-name/)
+     * Discover modules in vendor directory.
+     *
+     * Supports both:
+     * - Two levels deep: vendor/vendor-name/package-name/ (standard Composer)
+     * - One level deep: packages/package-name/ (Marko monorepo style)
      *
      * @return array<ModuleManifest>
      * @throws ModuleException
@@ -46,12 +50,14 @@ readonly class ModuleDiscovery
                 continue;
             }
 
+            // Check if this is a module directly (one level: packages/package-name/)
             if ($this->isMarkoModule($entryPath)) {
                 $manifest = $this->parser->parse($entryPath);
                 $modules[] = $this->withPathAndSource($manifest, $entryPath, 'vendor');
                 continue;
             }
 
+            // Otherwise scan one level deeper (two levels: vendor/vendor-name/package-name/)
             foreach ($this->scanDirectory($entryPath) as $packageName) {
                 $packagePath = $entryPath . '/' . $packageName;
 

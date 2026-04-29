@@ -29,7 +29,7 @@ export default defineConfig(({ mode }) => {
   const frontendInputs = getFrontendInputs(__dirname);
 
   return {
-    base: '/mark/',
+    base: '/cardboard-assets/',
     publicDir: 'static',
     server: {
       allowedHosts: true,
@@ -41,7 +41,7 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       target: ['chrome67', 'es2015'],
-      outDir: '../public/mark',
+      outDir: '../public/cardboard-assets',
       emptyOutDir: true,
       manifest: 'vanilla-cards-manifest.json',
       rollupOptions: {
