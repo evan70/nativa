@@ -7,7 +7,6 @@ namespace App\Blog\Controller;
 use App\Blog\Repository\ArticleRepository;
 use App\Blog\Entity\Article;
 use Marko\Routing\Attributes\Get;
-use Marko\Routing\Attributes\Post;
 use Marko\Routing\Http\Response;
 
 use Marko\View\ViewInterface;
@@ -19,19 +18,19 @@ class ArticleController
         private readonly ViewInterface $view,
     ) {}
 
-    #[Get('/blog')]
+    #[Get('/articles')]
     public function index(): Response
     {
         $articles = $this->repository->findAll();
 
         return $this->view->render('blog::article/index', [
-            'title' => 'Blog',
-            'message' => 'Read existing articles or publish a new one.',
+            'title' => 'Articles',
+            'message' => 'Read existing articles.',
             'articles' => $articles,
         ]);
     }
 
-    #[Get('/blog/{id}')]
+    #[Get('/articles/{id}')]
     public function show(int $id): Response
     {
         $article = $this->repository->find($id);
@@ -49,27 +48,5 @@ class ArticleController
         ]);
     }
 
-    #[Get('/articles/new')]
-    public function create(): Response
-    {
-        return $this->view->render('blog::article/create', [
-            'title' => 'New Article',
-            'message' => 'Draft something worth keeping.',
-        ]);
-    }
 
-    #[Post('/blog')]
-    public function store(): Response
-    {
-        $title = $_POST['title'] ?? '';
-        $content = $_POST['content'] ?? '';
-
-        $article = new Article();
-        $article->title = $title;
-        $article->content = $content;
-
-        $this->repository->save($article);
-
-        return new Response('', 302, ['Location' => '/blog']);
-    }
 }

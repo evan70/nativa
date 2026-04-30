@@ -247,6 +247,7 @@ $basePath = dirname(__DIR__);
 
 $autoloader = new MarkoAutoloader($corePackagesPath, $basePath, is_array($runtimeManifest) ? $runtimeManifest : []);
 $autoloader->addPath($modulesPath);
+$autoloader->addPath($basePath . '/app');
 $autoloader->build();
 $autoloader->register();
 
