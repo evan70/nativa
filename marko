@@ -10,12 +10,21 @@ use Marko\Cli\ProjectFinder;
 
 $projectFinder = new ProjectFinder();
 
+// Ensure required storage directories exist
 $dbConfig = require __DIR__ . '/config/database.php';
 $dbPath = $dbConfig['database'];
-$dbDir = dirname($dbPath);
 
-if (!is_dir($dbDir)) {
-    mkdir($dbDir, 0755, true);
+$directories = [
+    dirname($dbPath),
+    __DIR__ . '/storage/framework/sessions',
+    __DIR__ . '/storage/framework/cache',
+    __DIR__ . '/storage/framework/views',
+];
+
+foreach ($directories as $directory) {
+    if (!is_dir($directory)) {
+        mkdir($directory, 0755, true);
+    }
 }
 
 if (!is_file($dbPath)) {
