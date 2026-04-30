@@ -10,6 +10,18 @@ use Marko\Cli\ProjectFinder;
 
 $projectFinder = new ProjectFinder();
 
+$dbConfig = require __DIR__ . '/config/database.php';
+$dbPath = $dbConfig['database'];
+$dbDir = dirname($dbPath);
+
+if (!is_dir($dbDir)) {
+    mkdir($dbDir, 0755, true);
+}
+
+if (!is_file($dbPath)) {
+    touch($dbPath);
+}
+
 exit((new CliKernel(
     projectFinder: $projectFinder,
 ))->run($argv));
