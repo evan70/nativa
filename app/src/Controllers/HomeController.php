@@ -4,17 +4,26 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use Marko\Http\Request;
-use Marko\Http\Response;
+use Marko\Routing\Http\Request;
+use Marko\Routing\Http\Response;
+use Marko\Routing\Attributes\Get;
+use Marko\View\ViewInterface;
 
 class HomeController
 {
+    public function __construct(private readonly ViewInterface $view) {}
+
+    #[Get(path: '/')]
     public function index(Request $request): Response
     {
         if ($this->shouldLogDebug()) {
             $this->logDebug('HomeController::index called', ['path' => $request->path()]);
         }
-        return new Response('Hello, Marko!');
+        return $this->view->render('app.home', [
+            'eyebrow' => 'Nativa',
+            'title' => 'Welcome to Nativa',
+            'message' => 'Hello, Marko!',
+        ]);
     }
 
     private function shouldLogDebug(): bool
