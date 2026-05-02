@@ -28,4 +28,26 @@ The Marko Framework follows a modular architecture where application code reside
 ## Non-Functional Requirements
 - Logging: Configurable via LOG_LEVEL in .env, using file driver by default
 - Error handling: Structured error responses via Marko's exception handling
+
+## Module Groups
+This project uses `modules/init` for module grouping and idle eviction:
+
+```bash
+# List all modules
+php marko module:list
+
+# Show bindings and groups
+php marko module:bindings
+
+# Activate a group
+php marko module:activate <group>
+
+# Unbind a group
+php marko module:unbind <group> [--force]
+
+# Evict idle groups
+php marko module:evict [group]
+```
+
+**Configuration:** `config/module.php`
 - Security: Includes CSRF protection, input validation, and output escaping (as per Marko Framework features)
