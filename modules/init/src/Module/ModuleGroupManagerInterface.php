@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Init\Module;
 
-use Psr\Container\ContainerInterface;
+use Marko\Core\Module\ModuleManifest;
 
 /**
  * Interface for managing module groups, their bindings, and idle eviction.
