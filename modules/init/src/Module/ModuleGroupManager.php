@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Marko\Core\Module;
+namespace App\Init\Module;
 
 use Marko\Core\Container\Container;
 use Marko\Core\Container\ContainerInterface;
@@ -50,7 +50,7 @@ class ModuleGroupManager implements ModuleGroupManagerInterface
     /**
      * Register a module group from a module manifest.
      */
-    public function registerGroup(ModuleManifest $manifest): void
+    public function registerGroup(\Marko\Core\Module\ModuleManifest $manifest): void
     {
         // Skip if no group defined
         if ($manifest->group === null) {

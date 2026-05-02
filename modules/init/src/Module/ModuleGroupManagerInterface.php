@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Marko\Core\Module;
+namespace App\Init\Module;
 
 use Psr\Container\ContainerInterface;
 

@@ -30,8 +30,6 @@ use Marko\Core\Exceptions\PreferenceConflictException;
 use Marko\Core\Module\DependencyResolver;
 use Marko\Core\Module\ManifestParser;
 use Marko\Core\Module\ModuleDiscovery;
-use Marko\Core\Module\ModuleGroupManager;
-use Marko\Core\Module\ModuleGroupManagerInterface;
 use Marko\Core\Module\ModuleManifest;
 use Marko\Core\Module\ModuleRepository;
 use Marko\Core\Module\ModuleRepositoryInterface;
@@ -425,27 +423,25 @@ class Application
     /**
      * Register module groups for lazy loading and idle eviction.
      *
-     * Core modules are always bound. Non-core modules with groups are managed by ModuleGroupManager.
+     * Loads ModuleGroupManager from app/init module if available.
      */
     private function registerModuleGroups(): void
     {
-        // Only create if the class exists
-        if (!class_exists(ModuleGroupManager::class)) {
+        // Try to load from app/init module
+        if (!class_exists(\App\Init\Module\ModuleGroupManager::class)) {
             return;
         }
 
-        $groupManager = new ModuleGroupManager(
+        $groupManager = new \App\Init\Module\ModuleGroupManager(
             $this->container,
-            null, // uses default
-            true, // eviction enabled
+            null,
+            true,
         );
 
-        // Register all module groups from manifests
         foreach ($this->modules as $module) {
             $groupManager->registerGroup($module);
         }
 
-        // Bind the manager in container for later use
-        $this->container->instance(ModuleGroupManagerInterface::class, $groupManager);
+        $this->container->instance(\App\Init\Module\ModuleGroupManagerInterface::class, $groupManager);
     }
 }
