@@ -172,6 +172,10 @@ readonly class ModuleDiscovery
             source: $source,
             autoload: $manifest->autoload,
             boot: $manifest->boot,
+            group: $manifest->group,
+            routes: $manifest->routes,
+            idleTimeout: $manifest->idleTimeout,
+            isCore: $manifest->isCore,
         );
     }
 
