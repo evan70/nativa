@@ -23,7 +23,7 @@
                             <p><?= $this->e(substr($article->content, 0, 100)) ?>...</p>
                         </div>
                         <footer class="card__footer">
-                            <a href="/blog/<?= $this->e($article->id) ?>" class="btn btn--secondary btn--sm">Read More</a>
+                            <a href="/articles/<?= $this->e($article->id) ?>" class="btn btn--secondary btn--sm">Read More</a>
                         </footer>
                     </article>
                 <?php endforeach ?>

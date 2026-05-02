@@ -1,0 +1,30 @@
+[
+    {
+        "name": "php",
+        "pid": 115526,
+        "command": "php -S localhost:8000 -t public '\/home\/evan\/dev\/05\/nativa\/public\/index.php'",
+        "port": 8000,
+        "startedAt": "2026-05-02 12:38:23"
+    },
+    {
+        "name": "pubsub",
+        "pid": 115528,
+        "command": "php marko pubsub:listen",
+        "port": 8000,
+        "startedAt": "2026-05-02 12:38:23"
+    },
+    {
+        "name": "php",
+        "pid": 4252,
+        "command": "php -S localhost:8000 -t public '\/home\/evan\/dev\/05\/nativa\/public\/index.php'",
+        "port": 8000,
+        "startedAt": "2026-05-02 16:11:09"
+    },
+    {
+        "name": "pubsub",
+        "pid": 4254,
+        "command": "php marko pubsub:listen",
+        "port": 8000,
+        "startedAt": "2026-05-02 16:11:09"
+    }
+]

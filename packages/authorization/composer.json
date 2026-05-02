@@ -31,7 +31,10 @@
     },
     "extra": {
         "marko": {
-            "module": true
+            "module": true,
+            "group": "authorization",
+            "routes": ["/admin/*"],
+            "idleTimeout": "5m"
         }
     }
 }

@@ -3,45 +3,57 @@
     "description": "Marko Framework - Application Skeleton",
     "license": "MIT",
     "type": "project",
+    "repositories": [
+        {
+            "type": "path",
+            "url": "./modules/*",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "./packages/*",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
     "require": {
-        "php": "^8.5"
+        "php": "^8.5",
+        "marko/core": "@dev",
+        "marko/routing": "@dev",
+        "marko/database": "@dev",
+        "marko/session": "@dev",
+        "marko/session-database": "@dev",
+        "marko/validation": "@dev",
+        "marko/view": "@dev",
+        "marko/cli": "@dev",
+        "marko/amphp": "@dev",
+        "marko/dev-server": "@dev",
+        "marko/config": "@dev",
+        "marko/env": "@dev",
+        "marko/errors": "@dev",
+        "marko/errors-simple": "@dev",
+        "marko/errors-advanced": "@dev",
+        "marko/hashing": "@dev",
+        "marko/log": "@dev",
+        "marko/log-file": "@dev",
+        "marko/mail": "@dev",
+        "marko/notification": "@dev",
+        "marko/notification-database": "@dev",
+        "marko/queue": "@dev",
+        "marko/authentication": "@dev",
+        "marko/authorization": "@dev",
+        "marko/cardboard": "@dev",
+        "marko/mark": "@dev",
+        "marko/testing": "@dev",
+        "marko/psr-container-shim": "@dev"
     },
     "autoload": {
         "psr-4": {
             "App\\": "app/src/"
         }
-    },
-    "replace": {
-        "marko/admin": "*",
-        "marko/admin-api": "*",
-        "marko/cardboard": "*",
-        "marko/mark": "*",
-        "marko/authentication": "*",
-        "marko/authorization": "*",
-        "marko/cli": "*",
-        "marko/config": "*",
-        "marko/core": "*",
-        "marko/database": "*",
-        "marko/env": "*",
-        "marko/errors": "*",
-        "marko/errors-advanced": "*",
-        "marko/errors-simple": "*",
-        "marko/hashing": "*",
-        "marko/log": "*",
-        "marko/log-file": "*",
-        "marko/mail": "*",
-        "marko/notification": "*",
-        "marko/notification-database": "*",
-        "marko/psr-container": "*",
-        "marko/queue": "*",
-        "marko/routing": "*",
-        "marko/session": "*",
-        "marko/session-database": "*",
-        "marko/testing": "*",
-        "marko/validation": "*",
-        "marko/view": "*",
-        "marko/amphp": "*",
-        "marko/dev-server": "*"
     },
     "require-dev": {
         "pestphp/pest": "^4.0",

@@ -15,7 +15,7 @@
                     <div class="article-content" style="white-space: pre-wrap; line-height: 1.6;"><?= $this->e($article->content) ?></div>
                 </div>
                 <footer class="card__footer">
-                    <a href="/blog" class="btn btn--secondary">Back to Blog</a>
+                    <a href="/articles/" class="btn btn--secondary">Back to Blog</a>
                 </footer>
             </article>
         </div>

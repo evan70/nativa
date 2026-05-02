@@ -14,7 +14,10 @@
     },
     "extra": {
         "marko": {
-            "module": true
+            "module": true,
+            "group": "notification",
+            "routes": ["/api/notifications/*"],
+            "idleTimeout": "10m"
         }
     }
 }

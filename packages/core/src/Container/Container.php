@@ -43,6 +43,62 @@ class Container implements ContainerInterface
     }
 
     /**
+     * Unbind an interface/class (remove binding, keep existing instance).
+     *
+     * @return bool True if binding was removed
+     */
+    public function unbind(string $id): bool
+    {
+        if (isset($this->bindings[$id])) {
+            unset($this->bindings[$id]);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Unbind a singleton (remove instance and shared flag).
+     *
+     * @return bool True if singleton was removed
+     */
+    public function unbindSingleton(string $id): bool
+    {
+        $removed = false;
+        
+        if (isset($this->shared[$id])) {
+            unset($this->shared[$id]);
+            $removed = true;
+        }
+        
+        if (isset($this->instances[$id])) {
+            unset($this->instances[$id]);
+            $removed = true;
+        }
+        
+        return $removed;
+    }
+
+    /**
+     * Get all registered bindings.
+     *
+     * @return array<string, string|Closure>
+     */
+    public function getBindings(): array
+    {
+        return $this->bindings;
+    }
+
+    /**
+     * Get all registered singletons.
+     *
+     * @return array<string, bool>
+     */
+    public function getSingletons(): array
+    {
+        return $this->shared;
+    }
+
+    /**
      * @throws BindingException|ReflectionException|PluginException
      */
     public function get(

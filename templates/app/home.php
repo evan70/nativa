@@ -14,7 +14,7 @@ $this->layout('app.layouts.app');
                 <?= $this->e($message) ?>
             </p>
             <div class="hero-section__buttons">
-                <a href="/blog" class="btn btn--lg">Visit Blog</a>
+                <a href="/articles/" class="btn btn--lg">Visit Blog</a>
                 <a href="https://github.com/marko-php" class="btn btn--outline btn--lg">GitHub</a>
             </div>
         </div>

@@ -6,7 +6,7 @@
             <h1 class="hero-section__title"><?= $this->e($title) ?></h1>
             <p class="hero-section__description"><?= $this->e($message) ?></p>
             <div class="hero-section__buttons">
-                <a href="/blog" class="btn btn--lg">Back to Blog</a>
+                <a href="/articles/" class="btn btn--lg">Back to Blog</a>
             </div>
         </div>
     </section>

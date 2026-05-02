@@ -64,6 +64,10 @@ class ManifestParser
             singletons: $moduleData['singletons'] ?? [],
             autoload: $composerData['autoload']['psr-4'] ?? [],
             boot: $moduleData['boot'] ?? null,
+            group: $composerData['extra']['marko']['group'] ?? null,
+            routes: $composerData['extra']['marko']['routes'] ?? [],
+            idleTimeout: $composerData['extra']['marko']['idleTimeout'] ?? null,
+            isCore: $composerData['extra']['marko']['isCore'] ?? false,
         );
     }
 

@@ -27,7 +27,10 @@
     },
     "extra": {
         "marko": {
-            "module": true
+            "module": true,
+            "group": "config",
+            "routes": [],
+            "isCore": true
         }
     }
 }

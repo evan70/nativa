@@ -18,7 +18,10 @@
     },
     "extra": {
         "marko": {
-            "module": true
+            "module": true,
+            "group": "validation",
+            "routes": [],
+            "idleTimeout": "10m"
         }
     }
 }

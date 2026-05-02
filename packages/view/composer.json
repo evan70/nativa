@@ -30,7 +30,10 @@
     },
     "extra": {
         "marko": {
-            "module": true
+            "module": true,
+            "group": "view",
+            "routes": ["/admin/*"],
+            "idleTimeout": "10m"
         }
     }
 }

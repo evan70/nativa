@@ -28,7 +28,10 @@
     },
     "extra": {
         "marko": {
-            "module": true
+            "module": true,
+            "group": "queue",
+            "routes": ["/api/queue/*"],
+            "idleTimeout": "10m"
         }
     }
 }

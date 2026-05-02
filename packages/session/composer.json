@@ -20,7 +20,10 @@
     },
     "extra": {
         "marko": {
-            "module": true
+            "module": true,
+            "group": "session",
+            "routes": [],
+            "isCore": true
         }
     }
 }

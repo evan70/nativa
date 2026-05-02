@@ -27,6 +27,10 @@ readonly class ModuleManifest
      * @param string $source Discovery source: vendor, modules, or app
      * @param array<string, string> $autoload PSR-4 autoload configuration from composer.json (namespace => path)
      * @param Closure|null $boot Boot callback to run after bindings are registered (from module.php). Parameters are auto-injected from the container — type-hint any registered dependency, including ContainerInterface.
+     * @param string|null $group Module group identifier for grouping/eviction
+     * @param array<string> $routes Route patterns the module serves (e.g., ["/admin/*"])
+     * @param string|null $idleTimeout Idle timeout duration (e.g., "5m", "1h")
+     * @param bool $isCore Whether this is a core module (never evicted)
      */
     public function __construct(
         public string $name,
@@ -41,5 +45,9 @@ readonly class ModuleManifest
         public string $source = '',
         public array $autoload = [],
         public ?Closure $boot = null,
+        public ?string $group = null,
+        public array $routes = [],
+        public ?string $idleTimeout = null,
+        public bool $isCore = false,
     ) {}
 }

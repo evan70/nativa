@@ -42,7 +42,7 @@ use App\View;
             
             <div class="navbar__menu">
                 <a href="/" class="navbar__link <?= $_SERVER['REQUEST_URI'] === '/' ? 'navbar__link--active' : '' ?>">Home</a>
-                <a href="/blog" class="navbar__link <?= str_starts_with($_SERVER['REQUEST_URI'], '/blog') ? 'navbar__link--active' : '' ?>">Blog</a>
+                <a href="/articles/" class="navbar__link <?= str_starts_with($_SERVER['REQUEST_URI'], '/articles/') ? 'navbar__link--active' : '' ?>">Blog</a>
                 <a href="/admin" class="navbar__link">Admin</a>
             </div>
 
@@ -110,7 +110,7 @@ use App\View;
                     <ul class="footer__list">
                         <li><a href="#" class="footer__link">Documentation</a></li>
                         <li><a href="#" class="footer__link">API Reference</a></li>
-                        <li><a href="/blog" class="footer__link">Blog</a></li>
+                        <li><a href="/articles/" class="footer__link">Blog</a></li>
                     </ul>
                 </div>
             </div>

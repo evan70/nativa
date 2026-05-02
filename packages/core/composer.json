@@ -33,7 +33,10 @@
     },
     "extra": {
         "marko": {
-            "module": true
+            "module": true,
+            "group": "core",
+            "routes": [],
+            "isCore": true
         }
     }
 }

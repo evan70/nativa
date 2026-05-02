@@ -30,6 +30,8 @@ use Marko\Core\Exceptions\PreferenceConflictException;
 use Marko\Core\Module\DependencyResolver;
 use Marko\Core\Module\ManifestParser;
 use Marko\Core\Module\ModuleDiscovery;
+use Marko\Core\Module\ModuleGroupManager;
+use Marko\Core\Module\ModuleGroupManagerInterface;
 use Marko\Core\Module\ModuleManifest;
 use Marko\Core\Module\ModuleRepository;
 use Marko\Core\Module\ModuleRepositoryInterface;
@@ -46,9 +48,10 @@ use Marko\Routing\Middleware\MiddlewareInterface;
 use Marko\Routing\Router;
 use Marko\Routing\RoutingBootstrapper;
 use Psr\Container\ContainerExceptionInterface;
+use RuntimeException;
+use DateInterval;
 use ReflectionClass;
 use ReflectionException;
-use RuntimeException;
 
 class Application
 {
@@ -149,6 +152,9 @@ class Application
 
         // Register ProjectPaths for dependency injection (base path derived from vendor path)
         $this->container->instance(ProjectPaths::class, new ProjectPaths($this->resolveBasePath()));
+
+        // Register module group manager for lazy loading and eviction
+        $this->registerModuleGroups();
 
         // Register bindings from all modules
         foreach ($this->modules as $module) {
@@ -414,5 +420,32 @@ class Application
         }
 
         return $middleware;
+    }
+
+    /**
+     * Register module groups for lazy loading and idle eviction.
+     *
+     * Core modules are always bound. Non-core modules with groups are managed by ModuleGroupManager.
+     */
+    private function registerModuleGroups(): void
+    {
+        // Only create if the class exists
+        if (!class_exists(ModuleGroupManager::class)) {
+            return;
+        }
+
+        $groupManager = new ModuleGroupManager(
+            $this->container,
+            null, // uses default
+            true, // eviction enabled
+        );
+
+        // Register all module groups from manifests
+        foreach ($this->modules as $module) {
+            $groupManager->registerGroup($module);
+        }
+
+        // Bind the manager in container for later use
+        $this->container->instance(ModuleGroupManagerInterface::class, $groupManager);
     }
 }
