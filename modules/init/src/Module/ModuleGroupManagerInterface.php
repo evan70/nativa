@@ -17,6 +17,11 @@ interface ModuleGroupManagerInterface
     public function registerGroup(ModuleManifest $manifest): void;
 
     /**
+     * Remove a group from registry entirely (testing).
+     */
+    public function removeGroup(string $name): void;
+
+    /**
      * Mark a group as used (called when route matches).
      */
     public function markUsed(string $groupName): void;

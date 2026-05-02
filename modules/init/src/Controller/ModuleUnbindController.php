@@ -10,7 +10,7 @@ use Marko\Core\Command\Input;
 use Marko\Core\Command\Output;
 use App\Init\Module\ModuleGroupManagerInterface;
 
-#[Command(name: 'module:unbind', description: 'Unbind a module group (for testing idle eviction)')]
+#[Command(name: 'module:unbind', description: 'Unbind a module group')]
 readonly class ModuleUnbindCommand implements CommandInterface
 {
     public function __construct(
@@ -21,13 +21,12 @@ readonly class ModuleUnbindCommand implements CommandInterface
     {
         $allArgs = $input->getArguments();
         
-        // Find first arg - that's the group name
-        // getArguments() returns [0] = first arg (admin), [1] = second arg
         $groupName = $allArgs[0] ?? null;
+        $force = in_array('--force', $allArgs);
 
         if (!$groupName) {
             $output->writeLine('Error: Group name required');
-            $output->writeLine('Usage: module:unbind <group-name>');
+            $output->writeLine('Usage: module:unbind <group-name> [--force]');
             $output->writeLine('');
             $output->writeLine('Available groups:');
 
@@ -43,37 +42,44 @@ readonly class ModuleUnbindCommand implements CommandInterface
             return 1;
         }
 
-        // Check if module group manager exists
         if (!$this->container->has(ModuleGroupManagerInterface::class)) {
             $output->writeLine('Error: ModuleGroupManager not available');
             return 1;
         }
 
         $manager = $this->container->get(ModuleGroupManagerInterface::class);
-
-        // Check if group exists
         $group = $manager->getGroup($groupName);
+
         if (!$group) {
             $output->writeLine("Error: Group '$groupName' not found");
             return 1;
         }
 
-        // Check if it's a core group
         if ($group->isCore) {
             $output->writeLine("Error: Cannot unbind core group '$groupName'");
             return 1;
         }
 
-        // Check if group is active
-        if (!$manager->isGroupActive($groupName)) {
-            $output->writeLine("Group '$groupName' is already inactive");
-            return 0;
+        $isActive = $manager->isGroupActive($groupName);
+
+        if (!$isActive && !$force) {
+            $output->writeLine("Group '$groupName' is already inactive (use --force to remove)");
+            return 1;
         }
 
-        // Unbind the group
-        $manager->deactivateGroup($groupName);
+        if ($force && !$isActive) {
+            // Force remove from registry
+            $manager->removeGroup($groupName);
+            $output->writeLine("OK: Removed group '$groupName' from registry");
+        } elseif ($force && $isActive) {
+            $manager->deactivateGroup($groupName);
+            $manager->removeGroup($groupName);
+            $output->writeLine("OK: Removed group '$groupName'");
+        } else {
+            $manager->deactivateGroup($groupName);
+            $output->writeLine("OK: Unbound group '$groupName'");
+        }
 
-        $output->writeLine("OK: Unbound group '$groupName'");
         $output->writeLine("  module: {$group->moduleName}");
         $output->writeLine("  routes: " . ($group->routes ? implode(', ', $group->routes) : 'none'));
 

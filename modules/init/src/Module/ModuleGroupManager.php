@@ -354,4 +354,26 @@ class ModuleGroupManager implements ModuleGroupManagerInterface
         
         return $summary;
     }
+
+    /**
+     * Remove a group from registry entirely (testing).
+     */
+    public function removeGroup(string $name): void
+    {
+        if (!isset($this->groups[$name])) {
+            return;
+        }
+
+        $group = $this->groups[$name];
+
+        if (!$group->isCore) {
+            unset($this->groups[$name]);
+            unset($this->manifests[$name]);
+            unset($this->activeGroups[$name]);
+            
+            $this->logger?->info('ModuleGroupManager: Removed group {group} from registry', [
+                'group' => $name,
+            ]);
+        }
+    }
 }
