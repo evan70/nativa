@@ -46,10 +46,32 @@ readonly class ModuleGroup
      */
     public function isIdle(string $duration): bool
     {
-        $idleDuration = \DateInterval::createFromDateString($duration);
+        $idleDuration = $this->parseDuration($duration);
         $now = new \DateTimeImmutable();
         
         return $this->lastUsed->add($idleDuration) <= $now;
+    }
+
+    /**
+     * Parse duration string like "5m", "1h", "10m" to DateInterval.
+     */
+    private function parseDuration(string $duration): \DateInterval
+    {
+        // Handle shorthand: 5m = 5 minutes, 1h = 1 hour
+        if (preg_match('/^(\d+)(m|h|d)$/', $duration, $matches)) {
+            $value = (int) $matches[1];
+            $unit = $matches[2];
+
+            return match ($unit) {
+                'm' => new \DateInterval("PT{$value}M"),
+                'h' => new \DateInterval("PT{$value}H"),
+                'd' => new \DateInterval("P{$value}D"),
+                default => new \DateInterval("PT{$value}M"),
+            };
+        }
+
+        // Fallback to standard parsing
+        return new \DateInterval($duration);
     }
 
     /**
