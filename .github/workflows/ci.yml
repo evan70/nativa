@@ -2,77 +2,153 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
+  # Code Quality: Linting & Static Analysis
+  lint:
+    runs-on: ubuntu-latest
+    name: Lint & Static Analysis
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: mbstring, xml, curl, zip, json, dom, pdo_sqlite
+          tools: composer:v2, phpstan
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: |
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run PHPStan Static Analysis
+        run: vendor/bin/phpstan analyse --memory-limit=1G --no-progress
+
+      - name: Run Pest Tests (Quick)
+        run: vendor/bin/pest --parallel --stop-on-failure
+
+  # Security Scanning
+  security:
+    runs-on: ubuntu-latest
+    name: Security
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+
+      - name: Security Audit
+        run: |
+          composer audit --no-progress || true
+
+  # Full Test Suite
+  tests:
+    runs-on: ubuntu-latest
+    name: Tests (PHP 8.5)
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: mbstring, xml, curl, zip, json, dom, pdo_sqlite
+          tools: composer:v2
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: |
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run Database Migrations
+        run: php marko db:migrate
+
+      - name: Run Tests
+        run: vendor/bin/pest --parallel
+
+  # Build & Deploy
   build:
     runs-on: ubuntu-latest
+    name: Build
+    needs: [lint, tests, security]
     
-    strategy:
-      matrix:
-        php-version: ['8.5']
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v5
+      - name: Checkout code
+        uses: actions/checkout@v5
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: ${{ matrix.php-version }}
-        extensions: mbstring, xml, curl, zip, json, dom
-        tools: composer:v2
-        coverage: none
-      env:
-        COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          tools: composer:v2
 
-    - name: Get Composer Cache Directory
-      id: composer-cache
-      run: |
-        echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: |
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
-    - name: Cache Composer dependencies
-      uses: actions/cache@v5
-      with:
-        path: ${{ steps.composer-cache.outputs.dir }}
-        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-composer-
+      - name: Cache Composer dependencies
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
 
-    - name: Install Root Dependencies
-      run: composer install --no-interaction --prefer-dist --optimize-autoloader
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-dev
 
-    - name: Verify Autoload Generation
-      run: |
-        php -r "require 'bootstrap/autoload.php'; echo 'Autoload OK';" || exit 1
+      - name: Build Production Artifact
+        run: |
+          php build.php
+          ls -la dist/
 
-    - name: Run Static Analysis (PHPStan/Psalm - Optional)
-      run: |
-        # Uncomment if you have PHPStan or Psalm configured
-        # vendor/bin/phpstan analyse --memory-limit=1G
-        # vendor/bin/psalm
-        echo "Static analysis skipped (configure as needed)"
-
-    - name: Run Tests (PHPUnit/Pest - Optional)
-      run: |
-        # Uncomment if you have tests
-        # vendor/bin/phpunit
-        # vendor/bin/pest
-        echo "Tests skipped (add your test suite)"
-
-    - name: Build Production Artifact (No Composer in Prod)
-      run: |
-        echo "🚀 Building production artifact..."
-        php build.php
-        echo "✅ Build complete. Contents of ./dist are ready for deployment."
-        ls -la dist/
-
-    - name: Upload Production Artifact
-      uses: actions/upload-artifact@v6
-      with:
-        name: marko-production-build
-        path: dist/
-        retention-days: 5
-        if-no-files-found: error
+      - name: Upload Production Artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: marko-production-build
+          path: dist/
+          retention-days: 5
+          if-no-files-found: error
