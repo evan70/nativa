@@ -12,10 +12,21 @@ use Marko\Core\Container\ContainerInterface;
 return [
     'singletons' => [
         ModuleGroupManagerInterface::class => function (ContainerInterface $container): ModuleGroupManagerInterface {
+            // Get config if available
+            $config = [];
+            if ($container->has(\Marko\Config\ConfigRepositoryInterface::class)) {
+                $configRepo = $container->get(\Marko\Config\ConfigRepositoryInterface::class);
+                $config = $configRepo->get('module', []);
+            }
+
+            $evictionConfig = $config['eviction'] ?? [];
+            $defaultTimeout = $evictionConfig['default'] ?? '5m';
+            $enabled = $evictionConfig['enabled'] ?? true;
+
             $manager = new ModuleGroupManager(
                 $container,
-                '5m',
-                true,
+                $defaultTimeout,
+                $enabled,
             );
 
             return $manager;
