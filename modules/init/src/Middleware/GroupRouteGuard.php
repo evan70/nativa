@@ -18,7 +18,7 @@ readonly class GroupRouteGuard implements MiddlewareInterface
         private ?ModuleGroupManagerInterface $groupManager = null,
     ) {}
 
-    public function process(
+    public function handle(
         Request $request,
         callable $next,
     ): \Marko\Routing\Http\Response {
