@@ -14,11 +14,21 @@ return [
         ModuleGroupManagerInterface::class => function (ContainerInterface $container): ModuleGroupManagerInterface {
             $manager = new ModuleGroupManager(
                 $container,
-                '5m',  // default idle timeout
-                true,   // eviction enabled
+                '5m',
+                true,
             );
 
             return $manager;
         },
     ],
+
+    'boot' => function (ContainerInterface $container): void {
+        // Register groups from all modules
+        $app = $container->get(\Marko\Core\Application::class);
+        $manager = $container->get(ModuleGroupManagerInterface::class);
+
+        foreach ($app->modules as $module) {
+            $manager->registerGroup($module);
+        }
+    },
 ];
