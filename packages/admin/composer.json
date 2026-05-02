@@ -32,7 +32,7 @@
         "marko": {
             "module": true,
             "group": "admin",
-            "routes": ["/admin/*"],
+            "routes": ["/mark/*"],
             "idleTimeout": "5m"
         }
     }

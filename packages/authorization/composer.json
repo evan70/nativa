@@ -33,7 +33,7 @@
         "marko": {
             "module": true,
             "group": "authorization",
-            "routes": ["/admin/*"],
+            "routes": ["/mark/*"],
             "idleTimeout": "5m"
         }
     }

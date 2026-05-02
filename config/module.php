@@ -26,7 +26,6 @@ return [
     // Default routes that trigger group activation
     // These routes will auto-activate their groups
     'auto_activate_routes' => [
-        '/admin/*',
         '/mark/*',
         '/blog/*',
     ],
