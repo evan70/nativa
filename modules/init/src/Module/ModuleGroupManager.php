@@ -121,8 +121,54 @@ class ModuleGroupManager implements ModuleGroupManagerInterface
         return null;
     }
 
-    public function evictIfIdle(string $groupName, string $maxIdle): bool { return false; }
-    public function evictAllIdle(string $maxIdle): array { return []; }
+    public function evictIfIdle(string $groupName, string $maxIdle): bool
+    {
+        if (!isset($this->groups[$groupName])) {
+            return false;
+        }
+
+        $group = $this->groups[$groupName];
+
+        // Never evict core groups
+        if ($group->isCore) {
+            return false;
+        }
+
+        // Must be active to evict
+        if (!isset($this->activeGroups[$groupName])) {
+            return false;
+        }
+
+        $effectiveTimeout = $group->getEffectiveTimeout($maxIdle);
+        
+        if ($group->isIdle($effectiveTimeout)) {
+            $this->deactivateGroup($groupName);
+            
+            $this->logger?->info('ModuleGroupManager: Evicted idle group {group} (timeout: {timeout})', [
+                'group' => $groupName,
+                'timeout' => $effectiveTimeout,
+            ]);
+            
+            return true;
+        }
+
+        return false;
+    }
+
+    public function evictAllIdle(string $maxIdle): array
+    {
+        $evicted = [];
+
+        foreach ($this->groups as $name => $group) {
+            if (!$group->isCore && isset($this->activeGroups[$name])) {
+                if ($this->evictIfIdle($name, $maxIdle)) {
+                    $evicted[] = $name;
+                }
+            }
+        }
+
+        return $evicted;
+    }
     public function isCoreGroup(string $groupName): bool { return $this->groups[$groupName]->isCore ?? false; }
     public function getGroups(): array { return $this->groups; }
     public function getGroup(string $name): ?ModuleGroup { return $this->groups[$name] ?? null; }
