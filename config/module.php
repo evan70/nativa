@@ -7,9 +7,9 @@ return [
     |--------------------------------------------------------------------------
     | Module Groups Configuration
     |--------------------------------------------------------------------------
-    |
+    | 
     | Configuration for module groups and idle eviction.
-    |
+    | 
     */
     
     'eviction' => [
@@ -22,6 +22,9 @@ return [
         // Check interval - how often to check for idle groups
         'check_interval' => '1m', // 1 minute
     ],
+    
+    // Enable route guard - blocks routes if group is not active
+    'route_guard' => false,
     
     // Default routes that trigger group activation
     // These routes will auto-activate their groups
