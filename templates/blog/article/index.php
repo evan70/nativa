@@ -17,13 +17,13 @@
                     <article class="card card--interactive">
                         <div class="card__header">
                             <h3 class="card__title"><?= $this->e($article->title) ?></h3>
-                            <p class="card__subtitle">Article #<?= $this->e($article->id) ?></p>
+                            <p class="card__subtitle"><?= $this->e($article->slug) ?></p>
                         </div>
                         <div class="card__body">
                             <p><?= $this->e(substr($article->content, 0, 100)) ?>...</p>
                         </div>
                         <footer class="card__footer">
-                            <a href="/articles/<?= $this->e($article->id) ?>" class="btn btn--secondary btn--sm">Read More</a>
+                            <a href="/articles/<?= $this->e($article->slug) ?>" class="btn btn--secondary btn--sm">Read More</a>
                         </footer>
                     </article>
                 <?php endforeach ?>
