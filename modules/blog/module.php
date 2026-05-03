@@ -8,7 +8,7 @@ use App\Blog\Service\ArticleService;
 use Marko\Core\Container\ContainerInterface;
 use Marko\Database\Entity\EntityHydrator;
 use Marko\Database\Entity\EntityMetadataFactory;
-use Marko\Log\LoggerInterface;
+use Marko\Log\Contracts\LoggerInterface;
 
 return [
     'bindings' => [

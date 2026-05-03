@@ -10,7 +10,7 @@ use App\Blog\DTO\CreateArticleRequest;
 use App\Blog\DTO\UpdateArticleRequest;
 use App\Blog\Entity\Article;
 use App\Blog\Repository\ArticleRepository;
-use Marko\Log\LoggerInterface;
+use Marko\Log\Contracts\LoggerInterface;
 
 class ArticleService implements ArticleServiceInterface
 {
