@@ -104,7 +104,15 @@ jobs:
 
       - name: Run Database Migrations
         run: |
-          php -r "echo print_r(array_keys((require 'bootstrap/app.php')->modules), true);" 2>&1 || true
+          php -r "
+            require 'vendor/autoload.php';
+            try {
+                \$app = require 'bootstrap/app.php';
+                echo 'App OK' . PHP_EOL;
+            } catch (\Exception \$e) {
+                echo 'Error: ' . \$e->getMessage() . PHP_EOL;
+            }
+          " 2>&1 || true
           php marko db:rebuild --no-interaction || php marko db:migrate || true
 
       - name: Run Tests
