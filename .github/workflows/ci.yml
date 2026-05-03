@@ -102,18 +102,8 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
 
-      - name: Run Database Migrations
-        run: |
-          php -r "
-            require 'vendor/autoload.php';
-            try {
-                \$app = require 'bootstrap/app.php';
-                echo 'App OK' . PHP_EOL;
-            } catch (\Exception \$e) {
-                echo 'Error: ' . \$e->getMessage() . PHP_EOL;
-            }
-          " 2>&1 || true
-          php marko db:rebuild --no-interaction || php marko db:migrate || true
+      # - name: Run Database Migrations
+      #   run: php marko db:rebuild --no-interaction || php marko db:migrate || true
 
       - name: Run Tests
         run: vendor/bin/pest --parallel
