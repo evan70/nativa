@@ -109,10 +109,24 @@ class ArticleApiController
     #[Get('/api/articles/{slug}')]
     public function show(string $slug): Response
     {
+        // Try by slug first, then by ID
         $article = $this->service->findBySlug($slug);
-
+        
         if ($article === null) {
-            throw new ArticleNotFoundException("Article with slug '{$slug}' not found");
+            // Try as ID
+            $id = (int) $slug;
+            if ($id > 0) {
+                $all = $this->service->findPublished(100, 0);
+                foreach ($all as $a) {
+                    if ($a->id === $id) {
+                        return Response::json([
+                            'success' => true,
+                            'data' => $a->toArray(),
+                        ]);
+                    }
+                }
+            }
+            throw new ArticleNotFoundException("Article '{$slug}' not found");
         }
 
         return Response::json([
