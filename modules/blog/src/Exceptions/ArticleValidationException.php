@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Blog\Exceptions;
 
-use Marko\Exceptions\HttpException;
+use Exception;
 
-class ArticleValidationException extends HttpException
+class ArticleValidationException extends Exception
 {
-    public function __construct(string $message = 'Validation failed', ?\Throwable $previous = null)
+    public function __construct(string $message = 'Validation failed')
     {
-        parent::__construct($message, 422, $previous);
+        parent::__construct($message);
     }
 }

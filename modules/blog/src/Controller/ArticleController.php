@@ -29,12 +29,7 @@ class ArticleController
 
         $articles = $categoryId
             ? $this->service->findByCategory($categoryId, $limit, $offset)
-            : $this->repository->findBy(
-                ['published' => true],
-                ['createdAt' => 'DESC'],
-                $limit,
-                $offset,
-            );
+            : $this->service->findPublished($limit, $offset);
 
         return $this->view->render('blog::article/index', [
             'title' => 'Articles',

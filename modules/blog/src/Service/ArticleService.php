@@ -152,31 +152,23 @@ class ArticleService implements ArticleServiceInterface
 
     public function findPublished(int $limit = 10, int $offset = 0): array
     {
-        $articles = $this->repository->findBy(
-            ['published' => true],
-            ['createdAt' => 'DESC'],
-            $limit,
-            $offset,
-        );
-
-        return array_map(
-            fn(Article $article) => ArticleDTO::fromEntity($article),
-            $articles,
-        );
+        $articles = $this->repository->findAll();
+        // Filter published only
+        $filtered = array_values(array_filter($articles, fn($a) => $a->published));
+        // Sort by createdAt DESC
+        usort($filtered, fn($a, $b) => ($b->createdAt ?? '') <=> ($a->createdAt ?? ''));
+        // Apply limit/offset
+        return array_slice($filtered, $offset, $limit);
     }
 
     public function findByCategory(int $categoryId, int $limit = 10, int $offset = 0): array
     {
-        $articles = $this->repository->findBy(
-            ['categoryId' => $categoryId, 'published' => true],
-            ['createdAt' => 'DESC'],
-            $limit,
-            $offset,
-        );
-
-        return array_map(
-            fn(Article $article) => ArticleDTO::fromEntity($article),
-            $articles,
-        );
+        $articles = $this->repository->findAll();
+        // Filter by category and published
+        $filtered = array_values(array_filter($articles, fn($a) => $a->categoryId === $categoryId && $a->published));
+        // Sort by createdAt DESC  
+        usort($filtered, fn($a, $b) => ($b->createdAt ?? '') <=> ($a->createdAt ?? ''));
+        // Apply limit/offset
+        return array_slice($filtered, $offset, $limit);
     }
 }

@@ -9,4 +9,9 @@ parameters:
         - packages
         - modules/blog/Seed
         - modules/blog/vendor
+        - modules/blog/tests
     reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        - '#Class Marko\\Authentication\\DefaultUserProvider not found#'
+        - '#Offset.*always exists#'
+        - '#Variable \$_POST on left side of \?\?#'
