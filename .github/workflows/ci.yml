@@ -68,7 +68,7 @@ jobs:
 
       - name: Security Audit
         run: |
-          composer audit --no-progress || true
+          composer audit || true
 
   # Full Test Suite
   tests:
