@@ -103,7 +103,8 @@ jobs:
         run: composer install --no-interaction --prefer-dist
 
       - name: Run Database Migrations
-        run: |-
+        run: |
+          php -r "echo print_r(array_keys((require 'bootstrap/app.php')->modules), true);" 2>&1 || true
           php marko db:rebuild --no-interaction || php marko db:migrate || true
 
       - name: Run Tests
