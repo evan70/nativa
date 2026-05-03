@@ -10,7 +10,6 @@ use App\Blog\DTO\CreateArticleRequest;
 use App\Blog\DTO\UpdateArticleRequest;
 use App\Blog\Entity\Article;
 use App\Blog\Repository\ArticleRepository;
-use Marko\Log\LoggerInterface;
 
 class ArticleServiceTest extends TestCase
 {
@@ -22,11 +21,11 @@ class ArticleServiceTest extends TestCase
     {
         parent::setUp();
 
-        // Create mocks
+        // Create mock repository
         $this->repository = $this->createMock(ArticleRepository::class);
-        $this->logger = $this->createMock(LoggerInterface::class);
 
-        $this->service = new ArticleService($this->repository, $this->logger);
+        // Create service without logger
+        $this->service = new ArticleService($this->repository);
     }
 
     public function testCreateArticle(): void
