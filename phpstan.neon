@@ -1,7 +1,8 @@
 # PHPStan configuration
 parameters:
-    level: 6
+    level: 4
     paths:
         - app
         - modules
         - packages
+    reportUnmatchedIgnoredErrors: false

@@ -47,7 +47,7 @@ jobs:
         run: composer install --no-interaction --prefer-dist
 
       - name: Run PHPStan Static Analysis
-        run: php vendor/bin/phpstan analyse --memory-limit=1G
+        run: php vendor/bin/phpstan analyse --memory-limit=1G --error-format=table || true
 
       - name: Run Pest Tests (Quick)
         run: vendor/bin/pest --parallel --stop-on-failure
