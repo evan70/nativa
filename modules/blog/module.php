@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Blog\Admin\BlogAdminSection;
 use App\Blog\Contracts\ArticleServiceInterface;
 use App\Blog\Repository\ArticleRepository;
 use App\Blog\Service\ArticleService;
+use Marko\Admin\Contracts\AdminSectionRegistryInterface;
 use Marko\Core\Container\ContainerInterface;
 use Marko\Database\Entity\EntityHydrator;
 use Marko\Database\Entity\EntityMetadataFactory;
@@ -31,4 +33,12 @@ return [
             return new ArticleService($repository, $logger);
         },
     ],
+    
+    'boot' => function (ContainerInterface $container): void {
+        // Register admin section
+        if ($container->has(AdminSectionRegistryInterface::class)) {
+            $registry = $container->get(AdminSectionRegistryInterface::class);
+            $registry->register(new BlogAdminSection());
+        }
+    },
 ];
