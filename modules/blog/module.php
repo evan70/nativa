@@ -8,6 +8,7 @@ use App\Blog\Service\ArticleService;
 use Marko\Core\Container\ContainerInterface;
 use Marko\Database\Entity\EntityHydrator;
 use Marko\Database\Entity\EntityMetadataFactory;
+use Marko\Log\Contracts\LoggerInterface;
 
 return [
     'bindings' => [
@@ -19,11 +20,15 @@ return [
             );
         },
         ArticleServiceInterface::class => function (ContainerInterface $container): ArticleServiceInterface {
-            // Get repository from container
             $repository = $container->get(ArticleRepository::class);
             
-            // Return service without logger for now (logging can be added when logger is properly bound)
-            return new ArticleService($repository);
+            // Optional logger - won't fail if not bound
+            $logger = null;
+            if ($container->has(LoggerInterface::class)) {
+                $logger = $container->get(LoggerInterface::class);
+            }
+            
+            return new ArticleService($repository, $logger);
         },
     ],
 ];

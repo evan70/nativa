@@ -13,15 +13,35 @@ use App\Blog\Repository\ArticleRepository;
 
 class ArticleService implements ArticleServiceInterface
 {
+    private ?object $logger = null;
+
     public function __construct(
         private readonly ArticleRepository $repository,
-    ) {}
+        ?object $logger = null,
+    ) {
+        $this->logger = $logger;
+    }
+
+    private function log(string $level, string $message, array $context = []): void
+    {
+        if ($this->logger !== null && method_exists($this->logger, $level)) {
+            $this->logger->$level($message, $context);
+        }
+    }
 
     public function createArticle(CreateArticleRequest $request): ArticleDTO
     {
+        $this->log('debug', '[BLOG] Creating article', [
+            'title' => $request->title,
+            'slug' => $request->slug,
+        ]);
+
         // Check if slug already exists
         $existing = $this->repository->findOneBy(['slug' => $request->slug]);
         if ($existing !== null) {
+            $this->log('warning', '[BLOG] Article creation failed: slug exists', [
+                'slug' => $request->slug,
+            ]);
             throw new \InvalidArgumentException(
                 "Article with slug '{$request->slug}' already exists"
             );
@@ -41,13 +61,24 @@ class ArticleService implements ArticleServiceInterface
 
         $this->repository->save($article);
 
+        $this->log('info', '[BLOG] Article created', [
+            'id' => $article->id,
+            'title' => $article->title,
+        ]);
+
         return ArticleDTO::fromEntity($article);
     }
 
     public function updateArticle(int $id, UpdateArticleRequest $request): ArticleDTO
     {
+        $this->log('debug', '[BLOG] Updating article', [
+            'id' => $id,
+            'data' => $request->toArray(),
+        ]);
+
         $article = $this->repository->find($id);
         if ($article === null) {
+            $this->log('warning', '[BLOG] Article update failed: not found', ['id' => $id]);
             throw new \InvalidArgumentException("Article with ID {$id} not found");
         }
 
@@ -85,13 +116,21 @@ class ArticleService implements ArticleServiceInterface
 
         $this->repository->save($article);
 
+        $this->log('info', '[BLOG] Article updated', [
+            'id' => $article->id,
+            'title' => $article->title,
+        ]);
+
         return ArticleDTO::fromEntity($article);
     }
 
     public function deleteArticle(int $id): bool
     {
+        $this->log('debug', '[BLOG] Deleting article', ['id' => $id]);
+
         $article = $this->repository->find($id);
         if ($article === null) {
+            $this->log('warning', '[BLOG] Article delete failed: not found', ['id' => $id]);
             return false;
         }
 
