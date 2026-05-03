@@ -1,5 +1,7 @@
 # PHPStan configuration
-includes:
-    - vendor/marko/core/phpstan.neon
-
-level: 6
+parameters:
+    level: 6
+    paths:
+        - app
+        - modules
+        - packages
