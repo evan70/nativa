@@ -49,7 +49,6 @@ readonly class ModuleTemplateResolver implements TemplateResolverInterface
                 $legacyName = ($module->name === 'app/controllers') ? 'app' : $shortName;
 
                 $paths[] = $this->projectPaths->base . '/templates/' . $legacyName . '/' . $templatePath . $extension;
-                $paths[] = $module->path . '/resources/views/' . $templatePath . $extension;
             }
         }
 
