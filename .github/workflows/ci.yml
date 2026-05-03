@@ -103,7 +103,7 @@ jobs:
         run: composer install --no-interaction --prefer-dist
 
       - name: Run Database Migrations
-        run: php marko db:migrate
+        run: php marko db:rebuild --no-interaction || php marko db:migrate
 
       - name: Run Tests
         run: vendor/bin/pest --parallel
