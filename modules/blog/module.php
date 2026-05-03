@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Blog\Admin\BlogAdminSection;
 use App\Blog\Contracts\ArticleServiceInterface;
+use App\Blog\Controller\BlogAdminController;
 use App\Blog\Repository\ArticleRepository;
 use App\Blog\Service\ArticleService;
 use Marko\Admin\Contracts\AdminSectionRegistryInterface;
