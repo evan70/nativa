@@ -29,7 +29,9 @@ The Marko Framework follows a modular architecture where application code reside
 - Logging: Configurable via LOG_LEVEL in .env, using file driver by default
 - Error handling: Structured error responses via Marko's exception handling
 
-## Module Groups
+## Architecture
+See `.ai-factory/ARCHITECTURE.md` for detailed architecture guidelines.
+Pattern: Modular Monolith
 This project uses `modules/init` for module grouping and idle eviction:
 
 ```bash

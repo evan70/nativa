@@ -10,6 +10,11 @@
             "App\\Blog\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "App\\Blog\\Seed\\": "Seed/"
+        }
+    },
     "extra": {
         "marko": {
             "module": true

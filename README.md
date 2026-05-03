@@ -2,81 +2,47 @@
 
 Application skeleton for the [Marko Framework](https://marko.build).
 
-## Installation
+## Quick Start
 
 ```bash
 composer create-project marko/skeleton my-app
 cd my-app
+cp .env.example .env
+composer install
+./marko up
 ```
 
-## What's Included
+Visit http://localhost:8000
 
-- `public/index.php` — Web entry point
-- `app/` — Your application modules
-- `modules/` — Third-party modules
-- `config/` — Root configuration
-- `storage/` — Logs, cache, sessions
-- `.env.example` — Environment template
+## Key Features
 
-## Getting Started
+- **Modular Architecture** — Packages, modules, and app code separation
+- **CLI Tools** — Database migrations, queue workers, dev server
+- **Build-Based Deployment** — Vendorless production builds
+- **SQLite Support** — Configurable to other databases
 
-1. Copy `.env.example` to `.env`
-2. Install dev tools: `composer install`
-3. Install and build frontend assets:
-   ```bash
-   cd templates && pnpm install && pnpm build
-   ```
-4. Run database migrations: `./marko db:migrate`
-5. Start the dev server: `./marko up`
-6. Visit http://localhost:8000
+## Project Structure
 
-## CLI Commands
+| Directory | Purpose |
+|-----------|---------|
+| `app/` | Your application code |
+| `modules/` | Third-party modules |
+| `packages/` | Framework packages |
+| `config/` | Configuration |
+| `public/` | Web entry point |
+| `storage/` | Logs, cache, sessions |
 
-The `marko` CLI provides several useful commands for development:
-
-### Database
-- `./marko db:migrate` — Apply database migrations
-- `./marko db:rollback` — Rollback the last batch of migrations
-- `./marko db:status` — Show migration status
-- `./marko db:diff` — Show differences between entity schema and database
-- `./marko db:rebuild` — Reset and re-run all migrations (clean slate)
-- `./marko db:seed` — Run database seeders
-
-### System
-- `./marko module:list` — Show all modules and their status
-- `./marko log:clear` — Clear old log files
-- `./marko session:gc` — Run session garbage collection
-- `./marko list` — Show all available commands
-
-### Queue
-- `./marko queue:work` — Process jobs from the queue
-- `./marko queue:status` — Show queue statistics
-
-## Next Steps
-
-Create your first controller inside `app/`:
-
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace App\Http\Controllers;
-
-use Marko\Http\Request;
-use Marko\Http\Response;
-
-class HomeController
-{
-    public function index(Request $request): Response
-    {
-        return new Response('Hello, Marko!');
-    }
-}
-```
+---
 
 ## Documentation
 
-- [Your First Application](https://marko.build/docs/getting-started/first-application/)
-- [Project Structure](https://marko.build/docs/getting-started/project-structure/)
-- [Full Documentation](https://marko.build/docs/)
+| Guide | Description |
+|-------|-------------|
+| [Getting Started](docs/getting-started.md) | Installation, setup, first steps |
+| [CLI Reference](docs/cli.md) | All available commands |
+| [Deployment](docs/deployment.md) | Production deployment |
+| [Security](docs/security.md) | Security policy |
+
+## License
+
+MIT

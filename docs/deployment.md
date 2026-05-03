@@ -1,8 +1,12 @@
-# Marko Framework - Production Deployment Guide
+[← CLI Reference](cli.md) · [Back to README](../README.md) · [Security →](security.md)
 
-## 📦 Build Process
+# Deployment Guide
 
-The framework uses a build-based deployment strategy to eliminate the root Composer setup and the `vendor/` directory from production.
+This guide covers building and deploying the Marko Framework application to production.
+
+## Build Process
+
+The framework uses a build-based deployment strategy to eliminate the Composer setup and `vendor/` directory from production.
 
 ### How It Works
 
@@ -17,7 +21,7 @@ The framework uses a build-based deployment strategy to eliminate the root Compo
 - ✅ Boots directly from `packages/`
 - ✅ Preserves `app/`, `modules/`, `packages/`, `bootstrap/`
 
-## 🚀 GitHub Actions Workflow
+## GitHub Actions Workflow
 
 The CI/CD pipeline automatically:
 
@@ -26,9 +30,10 @@ The CI/CD pipeline automatically:
 3. Executes `php build.php` to create a vendorless production artifact
 4. Uploads `dist/` as a deployable artifact
 
-### Deployment Steps
+## Deployment Options
 
-**Option A: Manual Deployment**
+### Option A: Manual Deployment
+
 ```bash
 # 1. Build locally
 php build.php
@@ -41,10 +46,11 @@ chmod -R 755 /var/www/marko-app/storage
 chown -R www-data:www-data /var/www/marko-app/storage
 ```
 
-**Option B: Automated Deployment**
+### Option B: Automated Deployment
+
 Use the uploaded artifact from GitHub Actions in your deployment tool (e.g., Deployer, Envoyer, custom script).
 
-## 📁 Production Structure
+## Production Structure
 
 ```
 /var/www/marko-app/
@@ -54,10 +60,10 @@ Use the uploaded artifact from GitHub Actions in your deployment tool (e.g., Dep
 ├── bootstrap/                # Bootstrap files
 ├── config/                   # Configuration
 ├── routes/                   # Route definitions
-└── storage/                  # Writable directory (create on server)
+└── storage/                # Writable directory (create on server)
 ```
 
-## ⚡ Performance Benefits
+## Performance Benefits
 
 - **No Composer overhead**: Cannot run `composer install` in production
 - **No vendor directory**: Runtime code lives in `packages/`
@@ -65,14 +71,14 @@ Use the uploaded artifact from GitHub Actions in your deployment tool (e.g., Dep
 
 Note: `packages/*/composer.json` files remain in the artifact because Marko uses them as runtime manifests for autoloading and module discovery.
 
-## 🔒 Security Notes
+## Security Notes
 
 - `.env` file is NOT included in build (create on server)
 - Root `composer.json` removed from the artifact
 - Test files excluded from production
 - Ensure `storage/` directory is writable by web server
 
-## 🛠️ Local Testing
+## Local Testing
 
 ```bash
 # Build production artifact
@@ -86,13 +92,16 @@ php -r "require 'bootstrap/autoload.php'; echo 'OK';"
 php bootstrap/app.php
 ```
 
-## 📝 Troubleshooting
+## Troubleshooting
 
-**Issue**: Classes not found in production
-- **Solution**: Ensure all classes are properly namespaced and included in autoload paths
+| Issue | Solution |
+|-------|----------|
+| Classes not found in production | Ensure all classes are properly namespaced and included in autoload paths |
+| Missing dependencies | Run `composer install` before building so the local build environment has dev/runtime dependencies available |
+| Permissions error | Set proper ownership on `storage/` and `bootstrap/cache/` |
 
-**Issue**: Missing dependencies
-- **Solution**: Run `composer install` before building so the local build environment has dev/runtime dependencies available
+## See Also
 
-**Issue**: Permissions error
-- **Solution**: Set proper ownership on `storage/` and `bootstrap/cache/`
+- [Getting Started](getting-started.md) — Initial setup guide
+- [CLI Reference](cli.md) — Available CLI commands
+- [Security](security.md) — Security policy

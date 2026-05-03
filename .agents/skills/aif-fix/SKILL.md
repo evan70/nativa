@@ -325,6 +325,14 @@ function fixedFunction(input) {
 9. **One fix at a time** - Don't scope creep
 10. **Clean up** - Delete FIX_PLAN.md after successful fix execution
 
+## PHP/Marko Framework Context
+
+For Marko Framework projects, use these patterns:
+- Check `vendor/marko/errors/src/Exceptions.php` for Marko exception classes
+- Use `\Marko\Exceptions\HttpException` for HTTP errors with status codes
+- Use the service container for dependency injection, not `new`
+- Marko services are logged via the configured logger (see `config/log.php`)
+
 ## After Fixing
 
 ```

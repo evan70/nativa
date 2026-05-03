@@ -1,0 +1,5 @@
+# PHPStan configuration
+includes:
+    - vendor/marko/core/phpstan.neon
+
+level: 6
