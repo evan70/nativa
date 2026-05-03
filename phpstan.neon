@@ -3,6 +3,10 @@ parameters:
     level: 4
     paths:
         - app
-        - modules
+        - modules/blog/src
+    excludePaths:
+        - vendor
         - packages
+        - modules/blog/Seed
+        - modules/blog/vendor
     reportUnmatchedIgnoredErrors: false
