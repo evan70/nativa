@@ -47,30 +47,25 @@ class ArticleController
         ]);
     }
 
-    #[Get('/articles/{id}')]
-    public function show(int $id): Response
+    #[Get('/articles/{slug}')]
+    public function show(string $slug): Response
     {
-        $article = $this->repository->find($id);
-
-        if ($article === null) {
-            return $this->view->render('blog::article/not-found', [
-                'title' => 'Article Not Found',
-                'message' => 'The requested article does not exist.',
-            ])->withStatus(404);
-        }
-
-        return $this->view->render('blog::article/show', [
-            'title' => $article->title,
-            'article' => $article,
-        ]);
-    }
-
-    #[Get('/articles/slug/{slug}')]
-    public function showBySlug(string $slug): Response
-    {
+        // Try to find by slug first, then by ID
         $article = $this->service->findBySlug($slug);
-
+        
         if ($article === null) {
+            // Try as ID
+            $id = (int) $slug;
+            if ($id > 0) {
+                $entity = $this->repository->find($id);
+                if ($entity !== null) {
+                    return $this->view->render('blog::article/show', [
+                        'title' => $entity->title,
+                        'article' => $entity,
+                    ]);
+                }
+            }
+            
             return $this->view->render('blog::article/not-found', [
                 'title' => 'Article Not Found',
                 'message' => 'The requested article does not exist.',
@@ -79,7 +74,7 @@ class ArticleController
 
         return $this->view->render('blog::article/show', [
             'title' => $article->title,
-            'article' => $article,
+            'article' => (object) $article->toArray(),
         ]);
     }
 
