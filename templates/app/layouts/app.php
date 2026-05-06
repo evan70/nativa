@@ -83,7 +83,7 @@ $page = $currentPage ?? 'home';
     </main>
 
     <!-- FOOTER SECTION -->
-    <footer class="section section--sm">
+    <footer class="section section--sm footer">
         <div class="container">
             <div class="footer__grid">
                 <div class="footer__brand">
