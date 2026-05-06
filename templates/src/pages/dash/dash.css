@@ -22,6 +22,7 @@
 .admin-layout__main {
   grid-area: content;
   padding: var(--space-6);
+  background: var(--color-bg);
 }
 
 /* Collapsed sidebar */
