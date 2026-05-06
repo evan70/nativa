@@ -96,41 +96,48 @@ final class View
 
     public static function vite(string $entry, bool $isPageAsset = false): string
     {
+        return self::viteCss($entry) . self::viteJs($entry);
+    }
+
+    public static function viteCss(string $entry): string
+    {
         $manifest = self::ensureManifestLoaded();
         $basePath = '/dist/';
-
         $match = self::findByName($manifest, $entry);
-
-        if (!$match) {
-            if (str_ends_with($entry, '.css')) {
-                return '<link rel="stylesheet" href="' . $basePath . 'assets/' . $entry . '" />';
-            }
-            if (str_ends_with($entry, '.js')) {
-                return '<script type="module" src="' . $basePath . 'assets/' . $entry . '"></script>';
-            }
-            return '';
-        }
-
         $html = '';
 
-        // Handle CSS dependencies
-        if (isset($match['css'])) {
+        if ($match && isset($match['css'])) {
             foreach ($match['css'] as $css) {
                 $html .= '<link rel="stylesheet" href="' . $basePath . $css . '" />' . "\n";
             }
         }
 
-        // Handle main file
-        if (isset($match['file'])) {
+        if (!$match && str_ends_with($entry, '.css')) {
+            $html .= '<link rel="stylesheet" href="' . $basePath . 'assets/' . $entry . '" />';
+        }
+
+        return $html;
+    }
+
+    public static function viteJs(string $entry): string
+    {
+        $manifest = self::ensureManifestLoaded();
+        $basePath = '/dist/';
+        $match = self::findByName($manifest, $entry);
+        $html = '';
+
+        if ($match && isset($match['file'])) {
             $file = $match['file'];
-            if (str_ends_with($file, '.css')) {
-                $html .= '<link rel="stylesheet" href="' . $basePath . $file . '" />' . "\n";
-            } else {
+            if (str_ends_with($file, '.js')) {
                 $html .= '<script type="module" src="' . $basePath . $file . '"></script>' . "\n";
             }
         }
 
-        return trim($html);
+        if (!$match && str_ends_with($entry, '.js')) {
+            $html .= '<script type="module" src="' . $basePath . 'assets/' . $entry . '"></script>';
+        }
+
+        return $html;
     }
 
     private static function renderFile(

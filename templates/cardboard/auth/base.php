@@ -13,11 +13,12 @@ $page = $currentPage ?? 'auth';
     <?php $origin = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? ''); ?>
     <link rel="preconnect" href="<?= $origin ?>" crossorigin>
     <!-- Always loaded -->
-    <?= View::vite('core') ?>
-    <?= View::vite('init') ?>
-
-    <!-- Page-specific -->
-    <?= View::vite('page-' . $page) ?>
+    <!-- Always loaded: CSS first, then JS -->
+    <?= View::viteCss('core') ?>
+    <?= View::viteCss('page-' . $page) ?>
+    <?= View::viteJs('init') ?>
+    <?= View::viteJs('core') ?>
+    <?= View::viteJs('page-' . $page) ?>
 
     <?= $this->yield('head') ?>
 </head>

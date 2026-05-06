@@ -17,12 +17,12 @@ $page = $currentPage ?? 'home';
     <?php endif; ?>
     <link rel="icon" type="image/svg+xml" href="/mark/favicon.svg" />
 
-    <!-- Always loaded -->
-    <?= View::vite('core') ?>
-    <?= View::vite('init') ?>
-
-    <!-- Page-specific -->
-    <?= View::vite('page-' . $page) ?>
+    <!-- Always loaded: CSS first, then JS -->
+    <?= View::viteCss('core') ?>
+    <?= View::viteCss('page-' . $page) ?>
+    <?= View::viteJs('init') ?>
+    <?= View::viteJs('core') ?>
+    <?= View::viteJs('page-' . $page) ?>
 
     <?= $this->yield('head') ?>
 </head>
