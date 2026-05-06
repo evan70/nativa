@@ -28,7 +28,7 @@ export default defineConfig(() => {
   const frontendInputs = getFrontendInputs(__dirname);
 
   return {
-    base: '/',
+    base: '/dist/',
     publicDir: 'static',
     server: {
       allowedHosts: true,
