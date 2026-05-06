@@ -151,30 +151,14 @@ final class View
         return ob_get_clean() ?: '';
     }
 
-    public static function templatesPath(): string
+    private static function viewsPath(): string
     {
         return dirname(__DIR__, 2) . '/templates';
     }
 
-    private static function viewsPath(): string
-    {
-        return self::templatesPath();
-    }
 
     /**
      * Get bundled critical CSS content for inlining in <head>
      */
-    public static function criticalCss(): string
-    {
-        $tokensPath = self::templatesPath() . '/src/core/tokens';
-        $files = ['reset.css', 'layout-grid.css', 'fonts.css', 'colors.css'];
-        $css = '';
-        foreach ($files as $file) {
-            $path = $tokensPath . '/' . $file;
-            if (is_file($path)) {
-                $css .= file_get_contents($path) . "\n";
-            }
-        }
-        return $css;
-    }
+
 }

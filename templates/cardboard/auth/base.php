@@ -14,9 +14,6 @@ $page = $currentPage ?? 'auth';
     <link rel="preconnect" href="<?= $origin ?>" crossorigin>
     <link rel="preload" href="<?= View::resolve('assets/fonts/inter/Inter-Regular.woff2') ?>" as="font" type="font/woff2" crossorigin>
 
-    <!-- Critical CSS inlined for first paint -->
-    <style><?= View::criticalCss() ?></style>
-
     <!-- Always loaded -->
     <?= View::vite('init') ?>
     <?= View::vite('core') ?>

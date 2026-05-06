@@ -18,9 +18,6 @@ $page = $currentPage ?? 'home';
     <?php endif; ?>
     <link rel="icon" type="image/svg+xml" href="/mark/favicon.svg" />
 
-    <!-- Critical CSS inlined for first paint -->
-    <style><?= View::criticalCss() ?></style>
-
     <!-- Always loaded -->
     <?= View::vite('init') ?>
     <?= View::vite('core') ?>
