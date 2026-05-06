@@ -1,4 +1,5 @@
 /* === AUTH PAGE STYLES === */
+/* Page layout only — all UI components use vanilla-card */
 
 .auth-page {
   min-height: 100vh;
@@ -14,33 +15,7 @@
   max-width: var(--auth-max-width);
 }
 
-.auth-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--card-radius);
-  padding: var(--space-8);
-  box-shadow: var(--shadow-lg);
-}
-
-.auth-card__header {
-  text-align: center;
-  margin-bottom: var(--space-6);
-  position: relative;
-}
-
-.auth-card__title {
-  font-size: var(--text-xl);
-  font-weight: var(--font-bold);
-  color: var(--color-text);
-  margin-bottom: var(--space-2);
-}
-
-.auth-card__subtitle {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  margin-bottom: 0;
-}
-
+/* Auth form — page-specific, not a card component */
 .auth-form {
   display: flex;
   flex-direction: column;
@@ -112,10 +87,7 @@
   text-decoration: underline;
 }
 
-.btn--block {
-  width: 100%;
-}
-
+/* Alerts — page-specific status messages */
 .alert {
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
@@ -132,17 +104,4 @@
   background: rgba(34, 197, 94, 0.1);
   border: 1px solid rgba(34, 197, 94, 0.3);
   color: var(--color-success);
-}
-
-.auth-card__footer {
-  text-align: center;
-  margin-top: var(--space-6);
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--color-border);
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-}
-
-.auth-card__footer p {
-  margin: 0;
 }
