@@ -166,22 +166,15 @@ final class View
      */
     public static function criticalCss(): string
     {
-        $manifest = self::ensureManifestLoaded();
-        $publicPath = dirname(__DIR__, 2) . '/public/dist';
+        $tokensPath = self::templatesPath() . '/src/core/tokens';
+        $files = ['reset.css', 'layout-grid.css', 'fonts.css', 'colors.css'];
         $css = '';
-
-        if ($manifest) {
-            $match = self::findByName($manifest, 'critical');
-            if ($match && isset($match['css'])) {
-                foreach ($match['css'] as $cssFile) {
-                    $filePath = $publicPath . '/' . $cssFile;
-                    if (is_file($filePath)) {
-                        $css .= file_get_contents($filePath);
-                    }
-                }
+        foreach ($files as $file) {
+            $path = $tokensPath . '/' . $file;
+            if (is_file($path)) {
+                $css .= file_get_contents($path) . "\n";
             }
         }
-
         return $css;
     }
 }

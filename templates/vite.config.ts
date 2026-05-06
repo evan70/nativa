@@ -48,7 +48,6 @@ export default defineConfig(() => {
           // Always loaded
           init: resolve(__dirname, 'src/init.ts'),
           core: resolve(__dirname, 'src/core.ts'),
-          critical: resolve(__dirname, 'src/core/tokens/critical.ts'),
 
           // Page-specific
           'page-home': resolve(__dirname, 'src/pages/home/home.ts'),

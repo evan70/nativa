@@ -33,27 +33,6 @@ if ($path !== '/' && file_exists($file) && is_file($file)) {
         header('Content-Type: ' . $mimeTypes[$ext]);
     }
 
-    // Cache control based on file type
-    $cacheRules = [
-        'woff2' => 'public, max-age=31536000, immutable',
-        'woff'  => 'public, max-age=31536000, immutable',
-        'ttf'   => 'public, max-age=31536000, immutable',
-        'css'   => 'public, max-age=31536000, immutable',
-        'js'    => 'public, max-age=31536000, immutable',
-        'json'  => 'public, max-age=31536000, immutable',
-        'png'   => 'public, max-age=2592000',
-        'jpg'   => 'public, max-age=2592000',
-        'jpeg'  => 'public, max-age=2592000',
-        'gif'   => 'public, max-age=2592000',
-        'svg'   => 'public, max-age=2592000',
-        'webp'  => 'public, max-age=2592000',
-        'ico'   => 'public, max-age=2592000',
-        'map'   => 'public, max-age=31536000, immutable',
-    ];
-    if (isset($cacheRules[$ext])) {
-        header('Cache-Control: ' . $cacheRules[$ext]);
-    }
-
     readfile($file);
     exit;
 }
