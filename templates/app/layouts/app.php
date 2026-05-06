@@ -3,7 +3,7 @@ use App\View;
 $page = $currentPage ?? 'home';
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -17,10 +17,10 @@ $page = $currentPage ?? 'home';
     <?php endif; ?>
     <link rel="icon" type="image/svg+xml" href="/mark/favicon.svg" />
 
-    <!-- Always loaded: CSS first, then JS -->
+    <!-- Init first (theme FOUC prevention), then CSS, then app JS -->
+    <?= View::viteJs('init') ?>
     <?= View::viteCss('core') ?>
     <?= View::viteCss('page-' . $page) ?>
-    <?= View::viteJs('init') ?>
     <?= View::viteJs('core') ?>
     <?= View::viteJs('page-' . $page) ?>
 

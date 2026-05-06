@@ -13,10 +13,10 @@ $page = $currentPage ?? 'dash';
 
     <?php $origin = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? ''); ?>
     <link rel="preconnect" href="<?= $origin ?>" crossorigin>
-    <!-- Always loaded: CSS first, then JS -->
+    <!-- Init first (theme), then CSS, then app JS -->
+    <?= View::viteJs('init') ?>
     <?= View::viteCss('core') ?>
     <?= View::viteCss('page-' . $page) ?>
-    <?= View::viteJs('init') ?>
     <?= View::viteJs('core') ?>
     <?= View::viteJs('page-' . $page) ?>
 
