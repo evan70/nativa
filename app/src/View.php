@@ -151,8 +151,13 @@ final class View
         return ob_get_clean() ?: '';
     }
 
-    private static function viewsPath(): string
+    public static function templatesPath(): string
     {
         return dirname(__DIR__, 2) . '/templates';
+    }
+
+    private static function viewsPath(): string
+    {
+        return self::templatesPath();
     }
 }

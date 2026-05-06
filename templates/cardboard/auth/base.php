@@ -15,7 +15,7 @@ $page = $currentPage ?? 'auth';
     <link rel="preload" href="<?= View::resolve('assets/fonts/inter/Inter-Regular.woff2') ?>" as="font" type="font/woff2" crossorigin>
 
     <!-- Critical CSS inlined for first paint -->
-    <style><?= file_get_contents(dirname(__DIR__, 4) . '/templates/src/core/tokens/critical.css') ?></style>
+    <style><?= file_get_contents(View::templatesPath() . '/src/core/tokens/critical.css') ?></style>
 
     <!-- Always loaded -->
     <?= View::vite('init') ?>
