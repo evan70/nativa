@@ -56,9 +56,6 @@ Perform thorough code reviews focusing on correctness, security, performance, an
 - [ ] Proper naming conventions
 - [ ] SOLID principles
 - [ ] DRY principle
-- [ ] Use strict_types (`declare(strict_types=1);`) in new PHP files
-- [ ] No `new` in constructors — use dependency injection
-- [ ] Code passes PHPStan level 6
 
 ### Testing
 - [ ] Test coverage for new code

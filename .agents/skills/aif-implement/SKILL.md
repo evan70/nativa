@@ -467,7 +467,6 @@ Shows progress without executing.
 - ✅ Create files mentioned in task description
 - ✅ Handle edge cases mentioned in task
 - ✅ Stop and ask if task is unclear
-- ✅ For Marko Framework: follow the module system pattern (module.php returns ModuleInterface)
 
 ### DON'T:
 - ❌ Write tests (unless explicitly in task list)

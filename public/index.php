@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 // Serve static files directly with correct MIME types
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+$path = strtok($path, '?');
 $file = __DIR__ . $path;
 
 if ($path !== '/' && file_exists($file) && is_file($file)) {
