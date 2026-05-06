@@ -19,8 +19,8 @@ $page = $currentPage ?? 'home';
     <link rel="icon" type="image/svg+xml" href="/mark/favicon.svg" />
 
     <!-- Always loaded -->
-    <?= View::vite('init') ?>
     <?= View::vite('core') ?>
+    <?= View::vite('init') ?>
 
     <!-- Page-specific -->
     <?= View::vite('page-' . $page) ?>

@@ -65,11 +65,7 @@ export default defineConfig(() => {
               ? 'assets/[name]-[hash].css'
               : 'assets/[name]-[hash][extname]';
           },
-          manualChunks(id) {
-            if (id.includes('node_modules/chart.js')) {
-              return 'vendor';
-            }
-          },
+
         },
       },
     },
