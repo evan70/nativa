@@ -158,7 +158,19 @@ final class View
 
 
     /**
-     * Get bundled critical CSS content for inlining in <head>
+     * Get bundled font URL from manifest by partial name match
      */
+    public static function fontUrl(string $name): string
+    {
+        $manifest = self::ensureManifestLoaded();
+        if ($manifest) {
+            foreach ($manifest as $entry) {
+                if (isset($entry['file']) && str_contains($entry['file'], $name)) {
+                    return '/dist/' . $entry['file'];
+                }
+            }
+        }
+        return '/dist/assets/fonts/' . $name;
+    }
 
 }
