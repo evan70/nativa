@@ -88,9 +88,7 @@ final class View
         $basePath = '/dist/';
 
         if ($manifest && isset($manifest[$path]['file'])) {
-            $file = $manifest[$path]['file'];
-            $file = ltrim(str_replace('assets/', '', $file), '/');
-            return $basePath . $file;
+            return $basePath . $manifest[$path]['file'];
         }
 
         return $basePath . ltrim($path, '/');
@@ -105,10 +103,10 @@ final class View
 
         if (!$match) {
             if (str_ends_with($entry, '.css')) {
-                return '<link rel="stylesheet" href="' . $basePath . $entry . '" />';
+                return '<link rel="stylesheet" href="' . $basePath . 'assets/' . $entry . '" />';
             }
             if (str_ends_with($entry, '.js')) {
-                return '<script type="module" src="' . $basePath . $entry . '"></script>';
+                return '<script type="module" src="' . $basePath . 'assets/' . $entry . '"></script>';
             }
             return '';
         }
@@ -118,20 +116,17 @@ final class View
         // Handle CSS dependencies
         if (isset($match['css'])) {
             foreach ($match['css'] as $css) {
-                $cssFile = ltrim(str_replace('assets/', '', $css), '/');
-                $cssPath = $basePath . $cssFile;
-                $html .= '<link rel="stylesheet" href="' . $cssPath . '" />' . "\n";
+                $html .= '<link rel="stylesheet" href="' . $basePath . $css . '" />' . "\n";
             }
         }
 
         // Handle main file
         if (isset($match['file'])) {
             $file = $match['file'];
-            $filePath = $basePath . ltrim(str_replace('assets/', '', $file), '/');
             if (str_ends_with($file, '.css')) {
-                $html .= '<link rel="stylesheet" href="' . $filePath . '" />' . "\n";
+                $html .= '<link rel="stylesheet" href="' . $basePath . $file . '" />' . "\n";
             } else {
-                $html .= '<script type="module" src="' . $filePath . '"></script>' . "\n";
+                $html .= '<script type="module" src="' . $basePath . $file . '"></script>' . "\n";
             }
         }
 
