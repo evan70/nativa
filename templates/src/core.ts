@@ -37,4 +37,18 @@ if (document.readyState === 'loading') {
 function init() {
   SectionLoader.loadSections();
   CookieConsent.init();
+  initThemeSwitcher();
+}
+
+// Theme switcher — toggle between dark/light
+function initThemeSwitcher() {
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest('.theme-toggle');
+    if (!btn) return;
+    e.preventDefault();
+    const isDark = document.documentElement.dataset.theme === 'dark';
+    const newTheme = isDark ? 'light' : 'dark';
+    document.documentElement.dataset.theme = newTheme;
+    localStorage.setItem('nativa-theme', newTheme);
+  });
 }
