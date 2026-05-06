@@ -19,11 +19,15 @@ class HomeController
         if ($this->shouldLogDebug()) {
             $this->logDebug('HomeController::index called', ['path' => $request->path()]);
         }
-        return $this->view->render('app.home', [
-            'eyebrow' => 'Nativa',
-            'title' => 'Welcome to Nativa',
-            'message' => 'Hello, Marko!',
-        ]);
+        
+        // Pridáme home-specific CSS (home sections: hero, features, stats, cta)
+        return $this->view
+            ->withAssets('app/home', [], ['home-css'])
+            ->render('app.home', [
+                'eyebrow' => 'Nativa',
+                'title' => 'Welcome to Nativa',
+                'message' => 'Hello, Marko!',
+            ]);
     }
 
     private function shouldLogDebug(): bool

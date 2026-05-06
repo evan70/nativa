@@ -15,20 +15,52 @@ final class View
 
     private static ?array $manifest = null;
 
-    /**
-     * @param array<string, mixed> $data
-     * @param string[] $pageAssets
-     */
+    public static ?string $currentTemplate = null;
+    public static ?string $currentPage = null;
+
+    private static function ensureManifestLoaded(): ?array
+    {
+        if (self::$manifest === null) {
+            $path = dirname(__DIR__, 2) . '/public/dist/manifest.json';
+            if (is_file($path)) {
+                self::$manifest = json_decode(file_get_contents($path), true);
+            }
+        }
+        return self::$manifest;
+    }
+
+    private static function findByName(?array $manifest, string $name): ?array
+    {
+        if (!$manifest) return null;
+
+        foreach ($manifest as $entry) {
+            if (isset($entry['name']) && $entry['name'] === $name) {
+                return $entry;
+            }
+        }
+        return null;
+    }
+
     public static function render(
         string $template,
         array $data = [],
-        ?string $layout = 'app/layouts/app',
+        ?string $layout = null,
         array $pageAssets = [],
         ?string $lcpImage = null,
     ): string {
         self::$pageAssets = $pageAssets;
         self::$lcpImage = $lcpImage;
         $template = str_replace('.', '/', $template);
+        self::$currentTemplate = $template;
+
+        // Auto-detect page type and layout
+        $page = PageLayout::detect($template);
+        self::$currentPage = $page;
+
+        if ($layout === null) {
+            $layout = PageLayout::layoutFile($page);
+        }
+
         if ($layout) {
             $layout = str_replace('.', '/', $layout);
         }
@@ -39,12 +71,9 @@ final class View
             return $content;
         }
 
-        return self::renderFile($layout, [...$data, 'content' => $content]);
+        return self::renderFile($layout, [...$data, 'content' => $content, 'currentPage' => $page]);
     }
 
-    /**
-     * @param array<string, mixed> $data
-     */
     public static function partial(
         string $template,
         array $data = [],
@@ -53,97 +82,54 @@ final class View
         return self::renderFile($template, $data);
     }
 
-    /**
-     * Resolve a path to its hashed version from the manifest
-     */
     public static function resolve(string $path): string
     {
-        self::ensureManifestLoaded();
+        $manifest = self::ensureManifestLoaded();
+        $basePath = '/dist/';
 
-        if (isset(self::$manifest[$path]['file'])) {
-            return '/cardboard-assets/' . ltrim(self::$manifest[$path]['file'], '/');
+        if ($manifest && isset($manifest[$path]['file'])) {
+            $file = $manifest[$path]['file'];
+            $file = ltrim(str_replace('assets/', '', $file), '/');
+            return $basePath . $file;
         }
 
-        return '/cardboard-assets/' . ltrim($path, '/');
-    }
-
-    private static function ensureManifestLoaded(): void
-    {
-        if (self::$manifest !== null) {
-            return;
-        }
-
-        $manifestPath = dirname(__DIR__, 2) . '/public/cardboard-assets/vanilla-cards-manifest.json';
-        if (is_file($manifestPath)) {
-            self::$manifest = json_decode(file_get_contents($manifestPath), true);
-        } else {
-            self::$manifest = [];
-        }
+        return $basePath . ltrim($path, '/');
     }
 
     public static function vite(string $entry, bool $isPageAsset = false): string
     {
-        self::ensureManifestLoaded();
+        $manifest = self::ensureManifestLoaded();
+        $basePath = '/dist/';
 
-        // Try to find the entry in the manifest
-        $match = null;
-        
-        // 1. Exact match by key
-        if (isset(self::$manifest[$entry])) {
-            $match = self::$manifest[$entry];
-        } 
-        // 2. Match by name property
-        else {
-            foreach (self::$manifest as $data) {
-                if (isset($data['name']) && $data['name'] === $entry) {
-                    $match = $data;
-                    break;
-                }
-            }
-        }
+        $match = self::findByName($manifest, $entry);
 
         if (!$match) {
-            // Fallback for direct files or missed matches
             if (str_ends_with($entry, '.css')) {
-                if ($isPageAsset) {
-                return '<link rel="preload" href="/cardboard-assets/' . ltrim($entry, '/') . '" as="style" fetchpriority="high" />' . "\n" .
-                       '<link rel="stylesheet" href="/cardboard-assets/' . ltrim($entry, '/') . '" fetchpriority="high" />';
-                }
-                return '<link rel="stylesheet" href="/cardboard-assets/' . ltrim($entry, '/') . '" fetchpriority="high" />';
+                return '<link rel="stylesheet" href="' . $basePath . $entry . '" />';
             }
-            if (str_ends_with($entry, '.js') || str_ends_with($entry, '.ts')) {
-                return '<script type="module" src="/cardboard-assets/' . ltrim($entry, '/') . '"></script>';
+            if (str_ends_with($entry, '.js')) {
+                return '<script type="module" src="' . $basePath . $entry . '"></script>';
             }
-            // If it's just a name without extension, we can't do much without manifest match
             return '';
         }
 
         $html = '';
-        
+
         // Handle CSS dependencies
         if (isset($match['css'])) {
             foreach ($match['css'] as $css) {
-                $cssPath = '/cardboard-assets/' . ltrim($css, '/');
-                if ($isPageAsset) {
-                    $html .= '<link rel="preload" href="' . $cssPath . '" as="style" fetchpriority="high" />' . "\n";
-                    $html .= '<link rel="stylesheet" href="' . $cssPath . '" fetchpriority="high" />' . "\n";
-                } else {
-                    $html .= '<link rel="stylesheet" href="' . $cssPath . '" fetchpriority="high" />' . "\n";
-                }
+                $cssFile = ltrim(str_replace('assets/', '', $css), '/');
+                $cssPath = $basePath . $cssFile;
+                $html .= '<link rel="stylesheet" href="' . $cssPath . '" />' . "\n";
             }
         }
 
-        // Handle the main file
+        // Handle main file
         if (isset($match['file'])) {
             $file = $match['file'];
-            $filePath = '/cardboard-assets/' . ltrim($file, '/');
+            $filePath = $basePath . ltrim(str_replace('assets/', '', $file), '/');
             if (str_ends_with($file, '.css')) {
-                if ($isPageAsset) {
-                    $html .= '<link rel="preload" href="' . $filePath . '" as="style" fetchpriority="high" />' . "\n";
-                    $html .= '<link rel="stylesheet" href="' . $filePath . '" fetchpriority="high" />' . "\n";
-                } else {
-                    $html .= '<link rel="stylesheet" href="' . $filePath . '" fetchpriority="high" />' . "\n";
-                }
+                $html .= '<link rel="stylesheet" href="' . $filePath . '" />' . "\n";
             } else {
                 $html .= '<script type="module" src="' . $filePath . '"></script>' . "\n";
             }
@@ -152,9 +138,6 @@ final class View
         return trim($html);
     }
 
-    /**
-     * @param array<string, mixed> $data
-     */
     private static function renderFile(
         string $template,
         array $data = [],

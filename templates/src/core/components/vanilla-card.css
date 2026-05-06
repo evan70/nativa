@@ -1,9 +1,9 @@
 .card {
   display: flex;
   flex-direction: column;
-  background-color: var(--color-bg);
+  background-color: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--card-radius);
   overflow: hidden;
   transition: transform var(--transition-transform), box-shadow var(--transition-transform), border-color var(--transition-fast);
   

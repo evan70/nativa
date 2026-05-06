@@ -1,7 +1,48 @@
+/* === FRONT LAYOUT UTILITIES === */
+
 .container {
-  max-width: 1200px;
+  width: 100%;
+  max-width: var(--content-max-width);
   margin: 0 auto;
-  padding: 0 var(--space-4);
+  padding: 0 var(--section-padding-x);
+}
+
+.container--narrow {
+  max-width: var(--content-narrow-width);
+}
+
+.container--wide {
+  max-width: var(--content-wide-width);
+}
+
+.section {
+  padding: var(--section-padding-y) 0;
+}
+
+.section--sm {
+  padding: var(--section-padding-y-sm) 0;
+}
+
+/* Grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols, 12), 1fr);
+  gap: var(--grid-gap);
+}
+
+.grid--sm {
+  gap: var(--grid-gap-sm);
+}
+
+.grid--lg {
+  gap: var(--grid-gap-lg);
+}
+
+/* Card grid — auto-fill responsive */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: var(--card-gap);
 }
 
 @media (min-width: 769px) {

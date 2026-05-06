@@ -1,0 +1,58 @@
+/* === LAYOUT GRID TOKENS === */
+
+:root {
+  /* Grid system */
+  --grid-cols: 12;
+  --grid-gap: var(--space-6);
+  --grid-gap-sm: var(--space-4);
+  --grid-gap-lg: var(--space-8);
+
+  /* Content widths */
+  --content-max-width: 1200px;
+  --content-narrow-width: 720px;
+
+  /* Page spacing */
+  --section-padding-y: var(--space-12);
+  --section-padding-y-sm: var(--space-8);
+  --section-padding-x: var(--space-4);
+
+  /* Component sizing */
+  --card-gap: var(--space-6);
+  --card-padding: var(--space-6);
+  --card-radius: var(--radius-lg);
+
+  /* Dashboard layout */
+  --dash-sidebar-width: 260px;
+  --dash-sidebar-collapsed: 64px;
+  --dash-header-height: 60px;
+
+  /* Auth layout */
+  --auth-max-width: 420px;
+
+  /* Spacing scale */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Border radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 400ms ease;
+  --transition-transform: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}

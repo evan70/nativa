@@ -1,0 +1,5 @@
+/* Home page sections */
+@import '../core/sections/hero/hero.css';
+@import '../core/sections/features/features.css';
+@import '../core/sections/stats/stats.css';
+@import '../core/sections/cta/cta.css';

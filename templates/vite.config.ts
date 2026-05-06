@@ -1,22 +1,21 @@
 import { defineConfig } from 'vite';
-import { resolve, join } from 'path';
+import { resolve } from 'path';
 import fs from 'fs';
 
-function getFrontendInputs(baseDir: string) {
+function getFrontendInputs(baseDir: string): Record<string, string> {
   const inputs: Record<string, string> = {};
   const frontendDir = resolve(baseDir, 'src/frontend');
-  
+
   if (!fs.existsSync(frontendDir)) return inputs;
 
   const walk = (dir: string, prefix = '') => {
-    const files = fs.readdirSync(dir, { withFileTypes: true });
-    for (const file of files) {
+    for (const file of fs.readdirSync(dir, { withFileTypes: true })) {
+      const prefixedName = prefix ? `${prefix}/${file.name}` : file.name;
       if (file.isDirectory()) {
-        walk(join(dir, file.name), join(prefix, file.name));
+        walk(resolve(dir, file.name), prefixedName);
       } else if (file.name.endsWith('.ts') || file.name.endsWith('.css')) {
-        const name = join(prefix, file.name.replace(/\.(ts|css)$/, '')).replace(/\\/g, '/');
-        const inputKey = file.name.endsWith('.css') ? `${name}-style` : name;
-        inputs[inputKey] = resolve(dir, file.name);
+        const name = prefixedName.replace(/\.(ts|css)$/, '').replace(/\\/g, '/');
+        inputs[file.name.endsWith('.css') ? `${name}-style` : name] = resolve(dir, file.name);
       }
     }
   };
@@ -25,11 +24,11 @@ function getFrontendInputs(baseDir: string) {
   return inputs;
 }
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(() => {
   const frontendInputs = getFrontendInputs(__dirname);
 
   return {
-    base: '/cardboard-assets/',
+    base: '/',
     publicDir: 'static',
     server: {
       allowedHosts: true,
@@ -41,34 +40,33 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       target: ['chrome67', 'es2015'],
-      outDir: '../public/cardboard-assets',
+      outDir: '../public/dist',
       emptyOutDir: true,
-      manifest: 'vanilla-cards-manifest.json',
+      manifest: 'manifest.json',
       rollupOptions: {
         input: {
+          // Always loaded
           init: resolve(__dirname, 'src/init.ts'),
-          'core-app': resolve(__dirname, 'src/app.ts'),
-          'core-css': resolve(__dirname, 'src/css.ts'),
-          'theme-switcher': resolve(__dirname, 'src/dev/theme-switcher.ts'),
-          'auth-app': resolve(__dirname, 'src/auth/app.ts'),
-          'auth-style': resolve(__dirname, 'src/auth/styles.css'),
-          // Cardboard admin page-specific
-          'cardboard-app': resolve(__dirname, 'src/cardboard/app.ts'),
-          'cardboard-style': resolve(__dirname, 'src/cardboard/styles/cardboard.css'),
-          ...frontendInputs
+          core: resolve(__dirname, 'src/core.ts'),
+
+          // Page-specific
+          'page-home': resolve(__dirname, 'src/pages/home/home.ts'),
+          'page-dash': resolve(__dirname, 'src/pages/dash/dash.ts'),
+          'page-auth': resolve(__dirname, 'src/pages/auth/auth.ts'),
+
+          // Auto-discovered frontend sections
+          ...frontendInputs,
         },
         output: {
-          entryFileNames: `[name]-[hash].js`,
-          chunkFileNames: `[name]-[hash].js`,
+          entryFileNames: 'assets/[name]-[hash].js',
+          chunkFileNames: 'assets/[name]-[hash].js',
           assetFileNames: (assetInfo) => {
-            const name = assetInfo.name || '';
-            if (name.endsWith('.css')) {
-              return `[name]-[hash].css`;
-            }
-            return `[name]-[hash][extname]`;
-          }
-        }
-      }
-    }
+            return assetInfo.name?.endsWith('.css')
+              ? 'assets/[name]-[hash].css'
+              : 'assets/[name]-[hash][extname]';
+          },
+        },
+      },
+    },
   };
 });

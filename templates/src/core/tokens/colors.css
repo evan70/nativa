@@ -1,0 +1,62 @@
+/* === COLOR TOKENS === */
+
+:root {
+  /* === BRAND COLORS (constant across themes) === */
+  --brand-gold: #d4af37;
+  --brand-gold-light: #f4cf57;
+  --brand-gold-dark: #b8941f;
+
+  --brand-emerald: #10b981;
+  --brand-ruby: #ef4444;
+  --brand-sapphire: #0891b2;
+  --brand-amethyst: #7c3aed;
+
+  /* === THEME COLORS (dark default) === */
+  --color-bg: #0a0a0a;
+  --color-bg-alt: #1a1a1a;
+  --color-bg-hover: #252525;
+  --color-surface: var(--color-bg-alt);
+  --color-border: #2d2d2d;
+
+  --color-text: #ffffff;
+  --color-text-muted: #a1a1aa;
+  --color-text-inverse: #0a0a0a;
+
+  /* === SEMANTIC ALIASES === */
+  --color-brand: var(--brand-gold);
+  --color-brand-rgb: 212, 175, 55;
+
+  --color-success: var(--brand-emerald);
+  --color-error: var(--brand-ruby);
+  --color-info: var(--brand-sapphire);
+  --color-accent: var(--brand-amethyst);
+
+  /* === SHADOWS === */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+  --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.25);
+
+  /* === FOCUS === */
+  --focus-ring: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--brand-gold);
+}
+
+/* === LIGHT THEME OVERRIDES === */
+[data-theme="light"] {
+  --color-bg: #ffffff;
+  --color-bg-alt: #f8fafc;
+  --color-bg-hover: #f1f5f9;
+  --color-surface: var(--color-bg-alt);
+  --color-border: #e2e8f0;
+
+  --color-text: #1e293b;
+  --color-text-muted: #475569;
+  --color-text-inverse: #ffffff;
+
+  --brand-gold: #926f00;
+  --brand-gold-dark: #7a5c00;
+  --brand-gold-light: #af8600;
+  --color-brand-rgb: 146, 111, 0;
+}

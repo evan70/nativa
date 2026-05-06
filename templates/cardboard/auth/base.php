@@ -1,25 +1,30 @@
+<?php
+use App\View;
+$page = $currentPage ?? 'auth';
+?>
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Marko Admin - Authentication" />
-    <title><?= $this->e($pageTitle ?? 'Marko Admin | Authentication') ?></title>
-    <link rel="icon" type="image/svg+xml" href="/cardboard-assets/favicon.svg" />
-      
-    <!-- Auth-specific Assets -->
-    <?= \App\View::vite('init') ?>
-    <?= \App\View::vite('auth-style', true) ?>
-    <?= \App\View::vite('auth-app') ?>
+    <title><?= $this->e($pageTitle ?? 'Login') ?></title>
+    <link rel="icon" type="image/svg+xml" href="/mark/favicon.svg" />
+
+    <!-- Always loaded -->
+    <?= View::vite('init') ?>
+    <?= View::vite('core') ?>
+
+    <!-- Page-specific -->
+    <?= View::vite('page-' . $page) ?>
 
     <?= $this->yield('head') ?>
 </head>
-<body class="auth-layout">
-
-    <div class="auth-container">
-        <?= $this->include('cardboard::partials/flash', ['flashMessages' => $flashMessages ?? []]) ?>
-        <?= $this->yield('content') ?>
-    </div>
+<body class="auth-page">
+    <main class="auth-layout">
+        <div class="auth-container">
+            <?= $this->yield('content') ?>
+        </div>
+    </main>
 
     <?= $this->yield('scripts') ?>
 </body>

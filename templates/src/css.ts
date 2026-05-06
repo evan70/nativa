@@ -12,9 +12,3 @@ import './core/components/icon.css';
 import './core/components/icon-button.css';
 import './core/components/notification.css';
 import './core/components/footer.css';
-
-// Core Sections
-import './core/sections/hero/hero.css';
-import './core/sections/features/features.css';
-import './core/sections/stats/stats.css';
-import './core/sections/cta/cta.css';

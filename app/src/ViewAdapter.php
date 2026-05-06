@@ -40,7 +40,11 @@ class ViewAdapter implements ViewInterface
     public function renderToString(string $template, array $data = []): string
     {
         $templatePath = str_replace('.', '/', $template);
-        
+
+        // Set current template and page for asset resolution
+        View::$currentTemplate = $templatePath;
+        View::$currentPage = PageLayout::detect($templatePath);
+
         // Detect assets for the page
         $js = [$templatePath];
         $css = [];
@@ -50,7 +54,6 @@ class ViewAdapter implements ViewInterface
             $css = array_merge($css, $this->customAssets[$templatePath]['css']);
         }
 
-        // Set the assets in View so the layout can access them
         View::$pageAssets = array_merge($js, $css);
         View::$lcpImage = $this->lcpImage;
 

@@ -3,6 +3,12 @@
 <?php $this->section('content') ?>
 <div class="auth-card">
     <div class="auth-card__header">
+        <div class="auth-card__theme-toggle">
+            <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+                <span class="theme-toggle__sun">☀️</span>
+                <span class="theme-toggle__moon">🌙</span>
+            </button>
+        </div>
         <h1 class="auth-card__title">Sign in</h1>
         <p class="auth-card__subtitle">Enter your credentials to access your account</p>
     </div>

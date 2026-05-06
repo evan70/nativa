@@ -1,5 +1,6 @@
 <?php
 use App\View;
+$page = $currentPage ?? 'home';
 ?>
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
@@ -14,21 +15,17 @@ use App\View;
         <link rel="preload" as="image" href="<?= View::$lcpImage ?>" fetchpriority="high">
     <?php endif; ?>
     <link rel="icon" type="image/svg+xml" href="/mark/favicon.svg" />
-    
-    <!-- Core Styles -->
-    <?= View::vite('core-css') ?>
-    
-    <!-- Page Specific Assets -->
-    <?php foreach (View::$pageAssets as $asset): ?>
-        <?= View::vite($asset, true) ?>
-    <?php endforeach; ?>
 
-    <!-- Scripts -->
+    <!-- Always loaded -->
     <?= View::vite('init') ?>
-    <?= View::vite('core-app') ?>
-    <?= View::vite('theme-switcher') ?>
+    <?= View::vite('core') ?>
+
+    <!-- Page-specific -->
+    <?= View::vite('page-' . $page) ?>
+
+    <?= $this->yield('head') ?>
 </head>
-<body class="home-page">
+<body class="front-page">
 
     <!-- NAVBAR SECTION -->
     <nav class="navbar" data-section="navbar">
@@ -39,11 +36,11 @@ use App\View;
                 </svg>
                 Nativa
             </a>
-            
+
             <div class="navbar__menu">
                 <a href="/" class="navbar__link <?= $_SERVER['REQUEST_URI'] === '/' ? 'navbar__link--active' : '' ?>">Home</a>
                 <a href="/articles/" class="navbar__link <?= str_starts_with($_SERVER['REQUEST_URI'], '/articles/') ? 'navbar__link--active' : '' ?>">Blog</a>
-                <a href="/admin" class="navbar__link">Admin</a>
+                <a href="/mark" class="navbar__link">Mark</a>
             </div>
 
             <div class="navbar__actions">
@@ -86,8 +83,8 @@ use App\View;
     </main>
 
     <!-- FOOTER SECTION -->
-    <footer class="footer">
-        <div class="footer__container">
+    <footer class="section section--sm">
+        <div class="container">
             <div class="footer__grid">
                 <div class="footer__brand">
                     <h3 class="footer__brand-name">Nativa</h3>
@@ -95,7 +92,7 @@ use App\View;
                         Building the next generation of web applications with vanilla performance and BEM architecture.
                     </p>
                 </div>
-                
+
                 <div class="footer__column">
                     <h4 class="footer__title">Product</h4>
                     <ul class="footer__list">
@@ -116,9 +113,11 @@ use App\View;
             </div>
 
             <div class="footer__bottom">
-                <p class="footer__copyright">© 2026 Nativa. All rights reserved.</p>
+                <p class="footer__copyright">&copy; 2026 Nativa. All rights reserved.</p>
             </div>
         </div>
     </footer>
+
+    <?= $this->yield('scripts') ?>
 </body>
 </html>
