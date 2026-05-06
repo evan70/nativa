@@ -13,8 +13,6 @@ $page = $currentPage ?? 'dash';
 
     <?php $origin = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? ''); ?>
     <link rel="preconnect" href="<?= $origin ?>" crossorigin>
-    <link rel="preload" href="<?= View::fontUrl('Inter-Regular') ?>" as="font" type="font/woff2" crossorigin>
-
     <!-- Always loaded -->
     <?= View::vite('core') ?>
     <?= View::vite('init') ?>

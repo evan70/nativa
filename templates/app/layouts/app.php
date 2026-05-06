@@ -12,7 +12,6 @@ $page = $currentPage ?? 'home';
     <?php $origin = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? ''); ?>
     <link rel="preconnect" href="<?= $origin ?>" crossorigin>
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
-    <link rel="preload" href="<?= View::fontUrl('Inter-Regular') ?>" as="font" type="font/woff2" crossorigin fetchpriority="high">
     <?php if (View::$lcpImage): ?>
         <link rel="preload" as="image" href="<?= View::$lcpImage ?>" fetchpriority="high">
     <?php endif; ?>
