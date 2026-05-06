@@ -9,12 +9,17 @@ $page = $currentPage ?? 'home';
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Vanilla Cards Architecture - Fast, lightweight BEM component-based UI for Nativa CMS." />
     <title><?= $this->e($title ?? 'Nativa Vanilla Cards') ?></title>
+    <?php $origin = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? ''); ?>
+    <link rel="preconnect" href="<?= $origin ?>" crossorigin>
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
     <link rel="preload" href="<?= View::resolve('src/assets/fonts/inter/Inter-Regular.woff2') ?>" as="font" type="font/woff2" crossorigin fetchpriority="high">
     <?php if (View::$lcpImage): ?>
         <link rel="preload" as="image" href="<?= View::$lcpImage ?>" fetchpriority="high">
     <?php endif; ?>
     <link rel="icon" type="image/svg+xml" href="/mark/favicon.svg" />
+
+    <!-- Critical CSS inlined for first paint -->
+    <style><?= file_get_contents(dirname(__DIR__, 4) . '/templates/src/core/tokens/critical.css') ?></style>
 
     <!-- Always loaded -->
     <?= View::vite('init') ?>

@@ -10,6 +10,13 @@ $page = $currentPage ?? 'auth';
     <title><?= $this->e($pageTitle ?? 'Login') ?></title>
     <link rel="icon" type="image/svg+xml" href="/mark/favicon.svg" />
 
+    <?php $origin = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? ''); ?>
+    <link rel="preconnect" href="<?= $origin ?>" crossorigin>
+    <link rel="preload" href="<?= View::resolve('assets/fonts/inter/Inter-Regular.woff2') ?>" as="font" type="font/woff2" crossorigin>
+
+    <!-- Critical CSS inlined for first paint -->
+    <style><?= file_get_contents(dirname(__DIR__, 4) . '/templates/src/core/tokens/critical.css') ?></style>
+
     <!-- Always loaded -->
     <?= View::vite('init') ?>
     <?= View::vite('core') ?>

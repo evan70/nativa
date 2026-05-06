@@ -39,7 +39,7 @@ export default defineConfig(() => {
       port: 4173,
     },
     build: {
-      target: ['chrome67', 'es2015'],
+      target: 'es2020',
       outDir: '../public/dist',
       emptyOutDir: true,
       manifest: 'manifest.json',
@@ -64,6 +64,11 @@ export default defineConfig(() => {
             return assetInfo.name?.endsWith('.css')
               ? 'assets/[name]-[hash].css'
               : 'assets/[name]-[hash][extname]';
+          },
+          manualChunks(id) {
+            if (id.includes('node_modules/chart.js')) {
+              return 'vendor';
+            }
           },
         },
       },
