@@ -27,27 +27,14 @@ console.log('Core initialized');
 // Expose to window for legacy support
 (window as any).NotificationManager = NotificationManager;
 
-document.addEventListener('DOMContentLoaded', () => {
+// Init when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+
+function init() {
   SectionLoader.loadSections();
   CookieConsent.init();
-  initThemeSwitcher();
-});
-
-// Theme switcher — toggle between dark/light
-function initThemeSwitcher() {
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-
-  const setTheme = (dark: boolean) => {
-    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-    localStorage.setItem('nativa-theme', dark ? 'dark' : 'light');
-  };
-
-  // Bind all theme toggle buttons
-  document.addEventListener('click', (e) => {
-    const btn = (e.target as HTMLElement).closest('.theme-toggle');
-    if (!btn) return;
-    e.preventDefault();
-    const isDark = document.documentElement.dataset.theme === 'dark';
-    setTheme(!isDark);
-  });
 }
