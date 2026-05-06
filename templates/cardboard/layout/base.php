@@ -16,7 +16,7 @@ $page = $currentPage ?? 'dash';
     <link rel="preload" href="<?= View::resolve('assets/fonts/inter/Inter-Regular.woff2') ?>" as="font" type="font/woff2" crossorigin>
 
     <!-- Critical CSS inlined for first paint -->
-    <style><?= file_get_contents(View::templatesPath() . '/src/core/tokens/critical.css') ?></style>
+    <style><?= View::criticalCss() ?></style>
 
     <!-- Always loaded -->
     <?= View::vite('init') ?>

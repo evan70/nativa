@@ -1,10 +1,5 @@
-/* === CRITICAL CSS — above-the-fold, inlined in <head> */
-/* Reset + tokens + navbar — everything needed for first paint */
-
-@import './reset.css';
-@import './layout-grid.css';
-@import './fonts.css';
-@import './colors.css';
+/* === CRITICAL INLINE STYLES === */
+/* Above-the-fold styles that need to be in the critical CSS bundle */
 
 /* Body defaults */
 body {
@@ -102,7 +97,7 @@ body {
   padding: 0 var(--section-padding-x);
 }
 
-@media (min-width: 769px) {
+@media (min-width: 768px) {
   .container {
     padding: 0 var(--space-8);
   }

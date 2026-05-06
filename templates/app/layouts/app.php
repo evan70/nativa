@@ -19,7 +19,7 @@ $page = $currentPage ?? 'home';
     <link rel="icon" type="image/svg+xml" href="/mark/favicon.svg" />
 
     <!-- Critical CSS inlined for first paint -->
-    <style><?= file_get_contents(View::templatesPath() . '/src/core/tokens/critical.css') ?></style>
+    <style><?= View::criticalCss() ?></style>
 
     <!-- Always loaded -->
     <?= View::vite('init') ?>

@@ -160,4 +160,28 @@ final class View
     {
         return self::templatesPath();
     }
+
+    /**
+     * Get bundled critical CSS content for inlining in <head>
+     */
+    public static function criticalCss(): string
+    {
+        $manifest = self::ensureManifestLoaded();
+        $publicPath = dirname(__DIR__, 2) . '/public/dist';
+        $css = '';
+
+        if ($manifest) {
+            $match = self::findByName($manifest, 'critical');
+            if ($match && isset($match['css'])) {
+                foreach ($match['css'] as $cssFile) {
+                    $filePath = $publicPath . '/' . $cssFile;
+                    if (is_file($filePath)) {
+                        $css .= file_get_contents($filePath);
+                    }
+                }
+            }
+        }
+
+        return $css;
+    }
 }
