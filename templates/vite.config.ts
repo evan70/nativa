@@ -1,35 +1,11 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
-import fs from 'fs';
-
-function getFrontendInputs(baseDir: string): Record<string, string> {
-  const inputs: Record<string, string> = {};
-  const frontendDir = resolve(baseDir, 'src/frontend');
-
-  if (!fs.existsSync(frontendDir)) return inputs;
-
-  const walk = (dir: string, prefix = '') => {
-    for (const file of fs.readdirSync(dir, { withFileTypes: true })) {
-      const prefixedName = prefix ? `${prefix}/${file.name}` : file.name;
-      if (file.isDirectory()) {
-        walk(resolve(dir, file.name), prefixedName);
-      } else if (file.name.endsWith('.ts') || file.name.endsWith('.css')) {
-        const name = prefixedName.replace(/\.(ts|css)$/, '').replace(/\\/g, '/');
-        inputs[file.name.endsWith('.css') ? `${name}-style` : name] = resolve(dir, file.name);
-      }
-    }
-  };
-
-  walk(frontendDir);
-  return inputs;
-}
 
 export default defineConfig(() => {
-  const frontendInputs = getFrontendInputs(__dirname);
-
   return {
     base: '/dist/',
     publicDir: 'static',
+    appType: 'custom',
     server: {
       allowedHosts: true,
       port: 5173,
@@ -51,14 +27,12 @@ export default defineConfig(() => {
 
           // Page-specific
           'page-home': resolve(__dirname, 'src/pages/home/home.ts'),
+          'page-portfolio': resolve(__dirname, 'src/pages/portfolio/portfolio.ts'),
           'page-dash': resolve(__dirname, 'src/pages/dash/dash.ts'),
           'page-auth': resolve(__dirname, 'src/pages/auth/auth.ts'),
 
           // Dev tools
-          'theme-switcher': resolve(__dirname, 'src/dev/theme-switcher.ts'),
-
-          // Auto-discovered frontend sections
-          ...frontendInputs,
+          'page-dev': resolve(__dirname, 'src/dev/theme-switcher.ts'),
         },
         output: {
           entryFileNames: 'assets/[name]-[hash].js',
@@ -68,7 +42,6 @@ export default defineConfig(() => {
               ? 'assets/[name]-[hash].css'
               : 'assets/[name]-[hash][extname]';
           },
-
         },
       },
     },

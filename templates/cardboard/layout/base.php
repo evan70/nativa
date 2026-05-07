@@ -9,7 +9,7 @@ $page = $currentPage ?? 'dash';
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Marko Admin Dashboard - Powered by Nativa Vanilla Cards" />
     <title><?= $this->e($pageTitle ?? 'Marko Admin | Dashboard') ?></title>
-    <link rel="icon" type="image/svg+xml" href="/mark/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/dist/favicon.svg" />
 
     <?php $origin = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? ''); ?>
     <link rel="preconnect" href="<?= $origin ?>" crossorigin>

@@ -20,6 +20,7 @@ import './core/components/notification.css';
 import './core/components/footer.css';
 
 // Shared JS components
+import { initThemeSwitcher } from './dev/theme-switcher.ts';
 import { SectionLoader } from './core/sections/SectionLoader.ts';
 import { NotificationManager } from './core/components/NotificationManager.ts';
 import { CookieConsent } from './core/components/CookieConsent.ts';
@@ -39,4 +40,5 @@ if (document.readyState === 'loading') {
 function init() {
   SectionLoader.loadSections();
   CookieConsent.init();
+  initThemeSwitcher();
 }

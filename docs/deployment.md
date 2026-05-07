@@ -20,15 +20,18 @@ The framework uses a build-based deployment strategy to eliminate the Composer s
 - ✅ Excludes the root `composer.json` and `composer.lock`
 - ✅ Boots directly from `packages/`
 - ✅ Preserves `app/`, `modules/`, `packages/`, `bootstrap/`
+- ✅ Can skip rebuilding frontend assets when CI already built them (`MARKO_SKIP_FRONTEND_BUILD=1`)
 
 ## GitHub Actions Workflow
 
 The CI/CD pipeline automatically:
 
-1. Installs dependencies for root, packages, and modules
-2. Runs tests and static analysis (if configured)
-3. Executes `php build.php` to create a vendorless production artifact
-4. Uploads `dist/` as a deployable artifact
+1. Installs PHP + frontend dependencies
+2. Runs composer validation, static analysis, tests, and security audit
+3. Builds frontend assets and a vendorless production `dist/`
+4. Seeds the database for the generated artifact
+5. Smoke tests `/`, `/articles`, and `/portfolio` from the built `dist/`
+6. Uploads `dist/` as a deployable artifact
 
 ## Deployment Options
 

@@ -22,11 +22,15 @@ if (is_dir($distDir)) {
 }
 mkdir($distDir, 0755, true);
 
-// 1.5. Build frontend assets
-echo "Building frontend assets...\n";
+// 1.5. Build frontend assets (can be skipped when CI already built them)
+$skipFrontendBuild = getenv('MARKO_SKIP_FRONTEND_BUILD') === '1';
 $assetDir = $rootDir . '/templates';
-if (is_dir($assetDir)) {
-    passthru("cd " . escapeshellarg($assetDir) . " && pnpm install && pnpm build", $exitCode);
+
+if ($skipFrontendBuild) {
+    echo "Skipping frontend asset build (MARKO_SKIP_FRONTEND_BUILD=1).\n";
+} elseif (is_dir($assetDir)) {
+    echo "Building frontend assets...\n";
+    passthru("cd " . escapeshellarg($assetDir) . " && pnpm install --frozen-lockfile && pnpm build", $exitCode);
     if ($exitCode !== 0) {
         echo "Warning: Frontend asset build failed. Proceeding with existing assets in public/mark if any.\n";
     }

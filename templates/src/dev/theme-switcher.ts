@@ -1,7 +1,7 @@
 import neonCssUrl from '../theme/neon/theme.css?url';
 import fireShowCssUrl from '../theme/fire-show/theme.css?url';
 
-document.addEventListener('DOMContentLoaded', () => {
+export function initThemeSwitcher() {
   const neonSwitcher = document.getElementById('dev-theme-switcher');
   const fireSwitcher = document.getElementById('fire-theme-switcher');
 
@@ -55,4 +55,4 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-});
+}

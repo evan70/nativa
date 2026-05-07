@@ -20,6 +20,9 @@ class PortfolioItem extends Entity
     #[Column]
     public string $slug = '';
 
+    #[Column]
+    public string $subtitle = '';
+
     #[Column(type: 'TEXT')]
     public string $description = '';
 
@@ -27,5 +30,17 @@ class PortfolioItem extends Entity
     public string $category = '';
 
     #[Column]
+    public string $role = '';
+
+    #[Column]
+    public string $year = '';
+
+    #[Column(type: 'TEXT')]
+    public string $stack = '';
+
+    #[Column]
     public string $image = '';
+
+    #[Column('display_order')]
+    public int $displayOrder = 0;
 }

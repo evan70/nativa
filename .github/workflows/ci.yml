@@ -13,12 +13,17 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  PHP_VERSION: '8.5'
+  NODE_VERSION: '20'
+  APP_ENV: development
+  MARKO_ENV: development
+
 jobs:
-  # Code Quality: Linting & Static Analysis
-  lint:
+  quality:
     runs-on: ubuntu-latest
-    name: Lint & Static Analysis
-    
+    name: Quality
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -26,14 +31,24 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.5'
+          php-version: ${{ env.PHP_VERSION }}
           extensions: mbstring, xml, curl, zip, json, dom, pdo_sqlite
-          tools: composer:v2, phpstan
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: templates/pnpm-lock.yaml
+
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Get Composer Cache Directory
         id: composer-cache
-        run: |
-          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
 
       - name: Cache Composer dependencies
         uses: actions/cache@v5
@@ -43,77 +58,30 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-composer-
 
-      - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
 
-      - name: Run PHPStan Static Analysis
-        run: php vendor/bin/phpstan analyse --memory-limit=1G --error-format=table || true
+      - name: Install frontend dependencies
+        working-directory: templates
+        run: pnpm install --frozen-lockfile
 
-      - name: Run Pest Tests (Quick)
+      - name: Composer validate
+        run: composer validate --strict
+
+      - name: PHPStan
+        run: vendor/bin/phpstan analyse --memory-limit=1G --error-format=table
+
+      - name: Tests
         run: vendor/bin/pest --parallel --stop-on-failure
 
-  # Security Scanning
-  security:
-    runs-on: ubuntu-latest
-    name: Security
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
+      - name: Security audit
+        run: composer audit --no-interaction
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.5'
-
-      - name: Security Audit
-        run: |
-          composer audit || true
-
-  # Full Test Suite
-  tests:
-    runs-on: ubuntu-latest
-    name: Tests (PHP 8.5)
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.5'
-          extensions: mbstring, xml, curl, zip, json, dom, pdo_sqlite
-          tools: composer:v2
-
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: |
-          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@v5
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
-
-      - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist
-
-      # - name: Run Database Migrations
-      #   run: php marko db:rebuild --no-interaction || php marko db:migrate || true
-
-      - name: Run Tests
-        run: vendor/bin/pest --parallel
-
-  # Build & Deploy
   build:
     runs-on: ubuntu-latest
-    name: Build
-    needs: [lint, tests, security]
-    
+    name: Build dist artifact
+    needs: [quality]
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -121,13 +89,24 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.5'
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, xml, curl, zip, json, dom, pdo_sqlite
           tools: composer:v2
+          coverage: none
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: templates/pnpm-lock.yaml
+
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Get Composer Cache Directory
         id: composer-cache
-        run: |
-          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
 
       - name: Cache Composer dependencies
         uses: actions/cache@v5
@@ -137,18 +116,56 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-composer-
 
-      - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist --no-dev
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist --no-dev
 
-      - name: Build Production Artifact
+      - name: Install frontend dependencies
+        working-directory: templates
+        run: pnpm install --frozen-lockfile
+
+      - name: Build frontend assets
+        working-directory: templates
+        run: pnpm build
+
+      - name: Prepare database
+        run: mkdir -p storage/data storage/framework
+
+      - name: Run migrations
+        run: php marko db:migrate --no-interaction --no-generate
+
+      - name: Seed data
+        run: php marko db:seed --no-interaction
+
+      - name: Build production dist
+        run: MARKO_SKIP_FRONTEND_BUILD=1 php build.php
+
+      - name: Smoke test dist pages
         run: |
-          php build.php
-          ls -la dist/
+          php -S 127.0.0.1:8080 -t dist/public dist/public/index.php > /tmp/marko-smoke.log 2>&1 &
+          SERVER_PID=$!
+          cleanup() {
+            kill "$SERVER_PID" || true
+          }
+          trap cleanup EXIT
 
-      - name: Upload Production Artifact
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:8080/ >/tmp/home.html; then
+              break
+            fi
+            sleep 1
+          done
+
+          curl -fsS http://127.0.0.1:8080/articles >/tmp/articles.html
+          curl -fsS http://127.0.0.1:8080/portfolio >/tmp/portfolio.html
+
+          grep -q "Welcome to Nativa" /tmp/home.html
+          grep -q "Articles" /tmp/articles.html
+          grep -q "Selected Projects" /tmp/portfolio.html
+
+      - name: Upload dist artifact
         uses: actions/upload-artifact@v6
         with:
-          name: marko-production-build
+          name: nativa-dist
           path: dist/
-          retention-days: 5
+          retention-days: 7
           if-no-files-found: error
