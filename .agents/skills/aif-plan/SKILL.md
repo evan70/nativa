@@ -442,6 +442,24 @@ If the worktree path doesn't exist, check `git worktree list` and suggest the co
 
 ---
 
+## PHP / Marko Framework Task Guidance
+
+When creating tasks for this project:
+
+- **File paths follow Marko conventions**:
+  - Controllers → `app/src/Controllers/<Name>Controller.php`
+  - Entities → `app/src/Entity/<Name>.php`
+  - Services → `app/src/Services/<Name>Service.php`
+  - Commands → `app/src/Command/<Name>Command.php`
+  - Migrations → `database/migrations/<Description>.php`
+  - Module config → `<module>/module.php`
+- **Every new PHP file must include**: `declare(strict_types=1);`
+- **Controllers**: Specify routing attribute (e.g., `#[Get('/path')]`) and DI dependencies
+- **Entities**: Specify `#[Table]` and `#[Column]` attributes
+- **Module tasks**: Include `module.php` bindings/singletons when creating new modules
+- **CLI commands**: Use `php marko <command>` for migrations, seeding, module management
+- **Testing**: PHPUnit tests go in `tests/` directory
+
 ## Task Description Requirements
 
 Every `TaskCreate` item MUST include:

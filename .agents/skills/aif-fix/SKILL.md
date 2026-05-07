@@ -312,6 +312,22 @@ function fixedFunction(input) {
 4. Add logging for validation failures
 5. Suggest unit test with edge cases
 
+## PHP / Marko Framework Context
+
+When fixing bugs in this project:
+
+- **Marko exception classes**: Check `vendor/marko/errors/src/Exceptions.php` for Marko exception classes
+  - Use `\Marko\Exceptions\HttpException` for HTTP errors
+  - Use the service container for dependency injection
+- **Common Marko error patterns**:
+  - DI resolution failures → check `module.php` bindings
+  - Migration errors → run `php marko db:migrate` and check migration files in `database/migrations/`
+  - Module not found → verify `composer.json` has `extra.marko.module: true`
+  - Routing errors → check controller has proper `#[Get]`, `#[Post]`, etc. attributes
+  - Entity mapping errors → verify `#[Table]` and `#[Column]` attributes match DB schema
+- **Logging**: Use `log_add_debug($message, $context)` or the Marko logger via DI
+- **Environment**: Check `.env` for `LOG_LEVEL=debug` to enable verbose logging
+
 ## Important Rules
 
 1. **Check FIX_PLAN.md first** - Always check for existing plan before anything else
