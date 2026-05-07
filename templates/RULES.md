@@ -17,6 +17,8 @@ This document outlines the rules and guidelines for development in the Vanilla C
 - Use TypeScript for all logic.
 - Sections must be auto-instantiated via the `SectionLoader` and `data-section` attributes.
 - Keep the core bundle small; put page-specific logic in dedicated entry points.
+- **Event handling:** Use simple `click` listeners only. Do NOT use `touchstart` + `preventDefault()` — it blocks Android Chrome touch handling. Do NOT use delegated document-level listeners for navbar/theme — put handlers directly in `NavbarSection`.
+- **Vite target:** Always use `target: 'es2015'` in `vite.config.ts`. `es2020` generates optional chaining (`?.`), arrow functions, and `class` syntax that older Android Chrome versions (Android 9+) do not support.
 
 ## GitHub Workflow
 - GitHub Actions is used for CI/CD.

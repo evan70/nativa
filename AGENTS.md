@@ -88,3 +88,4 @@ Application skeleton for the Marko Framework, a PHP framework for building web a
 | .ai-factory/ARCHITECTURE.md | Architecture decisions and guidelines |
 | CLAUDE.md | Agent instructions and preferences (if exists) |
 | .mcp.json | MCP server configuration (if exists) |
+| templates/RULES.md | Frontend development rules (BEM, events, Vite config) |
