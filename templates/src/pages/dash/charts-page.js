@@ -13,7 +13,7 @@ function initRealtimeUpdates() {
 }
 
 function updateRandomStat() {
-  const stats = document.querySelectorAll('.stat-card__value');
+  const stats = document.querySelectorAll('.card--stat h2');
   if (stats.length === 0) return;  
   
   const randomStat = stats[Math.floor(Math.random() * stats.length)];

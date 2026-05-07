@@ -7,7 +7,7 @@ export function initDashboard() {
 }
 
 function initWelcomeMessage() {
-  const header = document.querySelector('.dashboard-header');
+  const header = document.querySelector('.page-header');
   if (!header) return;
   
   // Add animation on load
@@ -22,7 +22,7 @@ function initWelcomeMessage() {
 }
 
 function initStatCards() {
-  const cards = document.querySelectorAll('.stat-card');
+  const cards = document.querySelectorAll('.card--stat');
   cards.forEach((card, index) => {
     card.style.opacity = '0';
     card.style.transform = 'translateY(20px)';

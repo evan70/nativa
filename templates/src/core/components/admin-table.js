@@ -1,7 +1,7 @@
 // Admin table functionality
 export function initAdminTables() {
   // Make tables interactive
-  const tables = document.querySelectorAll('.admin-table');
+  const tables = document.querySelectorAll('.table');
     
   tables.forEach(table => {
     // Add sort functionality if needed
