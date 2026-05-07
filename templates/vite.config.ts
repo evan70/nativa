@@ -54,6 +54,9 @@ export default defineConfig(() => {
           'page-dash': resolve(__dirname, 'src/pages/dash/dash.ts'),
           'page-auth': resolve(__dirname, 'src/pages/auth/auth.ts'),
 
+          // Dev tools
+          'theme-switcher': resolve(__dirname, 'src/dev/theme-switcher.ts'),
+
           // Auto-discovered frontend sections
           ...frontendInputs,
         },

@@ -66,6 +66,11 @@
   border-color: var(--brand-gold);
 }
 
+#fire-theme-switcher.navbar__dev-toggle--active {
+  color: var(--brand-ruby) !important;
+  border-color: var(--brand-ruby);
+}
+
 .navbar__toggle {
   display: flex;
 }
