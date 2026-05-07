@@ -39,7 +39,7 @@ export default defineConfig(() => {
       port: 4173,
     },
     build: {
-      target: 'es2020',
+      target: 'es2015',
       outDir: '../public/dist',
       emptyOutDir: true,
       manifest: 'manifest.json',
