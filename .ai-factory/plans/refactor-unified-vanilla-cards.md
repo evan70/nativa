@@ -13,7 +13,7 @@
 
 ---
 
-## Phase 1: Audit & Map Current Naming
+## Phase 1: Audit & Map Current Naming ✅
 
 Map all page-specific class names to vanilla-card equivalents.
 
@@ -50,9 +50,9 @@ Map all page-specific class names to vanilla-card equivalents.
 
 ---
 
-## Phase 2: Core Tokens & Components
+## Phase 2: Core Tokens & Components ✅
 
-### Task 2.1: Add missing generic tokens to core
+### Task 2.1: Add missing generic tokens to core ✅
 
 **Files:**
 - `templates/src/core/tokens/unified.css` — add page-level tokens
@@ -76,7 +76,7 @@ Map all page-specific class names to vanilla-card equivalents.
 
 4. Update `core.ts` to import new files.
 
-### Task 2.2: Add card modifiers to vanilla-card
+### Task 2.2: Add card modifiers to vanilla-card ✅
 
 **Files:**
 - `templates/src/core/components/vanilla-card.css`
@@ -88,9 +88,9 @@ Add card modifiers used by dash:
 
 ---
 
-## Phase 3: Auth Page Unification
+## Phase 3: Auth Page Unification ✅
 
-### Task 3.1: Rename auth CSS to generic naming
+### Task 3.1: Rename auth CSS to generic naming ✅
 
 **Files:**
 - `templates/src/pages/auth/auth.css`
@@ -102,7 +102,7 @@ Add card modifiers used by dash:
 4. Remove auth-specific alert styles — rely on core `notification.css`
 5. Keep form styles (`.form-group`, `.form-label`, `.form-input`, `.checkbox`, `.link`) — these are page-specific
 
-### Task 3.2: Update auth template
+### Task 3.2: Update auth template ✅
 
 **Files:**
 - `templates/cardboard/auth/login.php`
@@ -112,7 +112,7 @@ Add card modifiers used by dash:
 2. Replace alert divs to use `notification--error` / `notification--success` classes
 3. Card markup already uses `.card` — no change needed
 
-### Task 3.3: Update auth layout
+### Task 3.3: Update auth layout ✅
 
 **Files:**
 - `templates/cardboard/auth/base.php`
@@ -123,9 +123,9 @@ Add card modifiers used by dash:
 
 ---
 
-## Phase 4: Dash Page Unification
+## Phase 4: Dash Page Unification ✅
 
-### Task 4.1: Rename dash CSS to generic naming
+### Task 4.1: Rename dash CSS to generic naming ✅
 
 **Files:**
 - `templates/src/pages/dash/dash.css`
@@ -140,7 +140,7 @@ Add card modifiers used by dash:
    - Flash message overrides (remove — use core notification)
 5. Remove `.stat-card` — replace with `.card--stat` modifier in `vanilla-card.css`
 
-### Task 4.2: Update dashboard template
+### Task 4.2: Update dashboard template ✅
 
 **Files:**
 - `templates/cardboard/dashboard/index.php`
@@ -152,7 +152,7 @@ Add card modifiers used by dash:
 4. Remove inline `style` attributes from flash messages — use core notification classes
 5. Replace `class="admin-table"` → `class="table"`
 
-### Task 4.3: Update dash layout
+### Task 4.3: Update dash layout ✅
 
 **Files:**
 - `templates/cardboard/layout/base.php`
@@ -161,7 +161,7 @@ Add card modifiers used by dash:
 1. Change `<body class="admin-layout">` → `<body class="layout-admin">`
 2. Update grid area classes to match `.layout-admin__*`
 
-### Task 4.4: Update dash partials
+### Task 4.4: Update dash partials ✅
 
 **Files:**
 - `templates/cardboard/partials/sidebar.php`
@@ -175,9 +175,9 @@ Add card modifiers used by dash:
 
 ---
 
-## Phase 5: Home Page Alignment
+## Phase 5: Home Page Alignment ✅
 
-### Task 5.1: Rename home body class
+### Task 5.1: Rename home body class ✅
 
 **Files:**
 - `templates/app/layouts/app.php`
@@ -188,9 +188,9 @@ Add card modifiers used by dash:
 
 ---
 
-## Phase 6: Theme System
+## Phase 6: Theme System ✅
 
-### Task 6.1: Populate default theme
+### Task 6.1: Populate default theme ✅
 
 **Files:**
 - `templates/src/core/theme/default/theme.css`
@@ -201,7 +201,7 @@ Move theme-specific values from `colors.css` into `theme.css`:
 2. Light theme overrides → `theme.css`
 3. Keep only structural tokens in `colors.css` (shadows, focus ring)
 
-### Task 6.2: Create theme loader
+### Task 6.2: Create theme loader ✅
 
 **Files:**
 - `templates/src/core.ts`
@@ -213,9 +213,9 @@ Move theme-specific values from `colors.css` into `theme.css`:
 
 ---
 
-## Phase 7: Cleanup
+## Phase 7: Cleanup ✅
 
-### Task 7.1: Remove dead CSS
+### Task 7.1: Remove dead CSS ✅
 
 **Files:**
 - `templates/src/pages/auth/auth.css`
@@ -224,7 +224,7 @@ Move theme-specific values from `colors.css` into `theme.css`:
 **What:**
 After migration, remove any empty or near-empty CSS files. If a page CSS has < 10 lines of actual page-specific styles, consider inlining or removing.
 
-### Task 7.2: Verify no visual regression
+### Task 7.2: Verify no visual regression ✅
 
 **What:**
 1. Build: `cd templates && npx vite build`
