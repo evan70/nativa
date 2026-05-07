@@ -36,6 +36,12 @@ jobs:
           tools: composer:v2
           coverage: none
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -93,6 +99,12 @@ jobs:
           extensions: mbstring, xml, curl, zip, json, dom, pdo_sqlite
           tools: composer:v2
           coverage: none
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
