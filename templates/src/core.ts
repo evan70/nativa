@@ -5,6 +5,9 @@ import './core/tokens/unified.css';
 import './core/components/table.css';
 import './core/components/page-header.css';
 
+// Theme (brand colors + theme-specific overrides)
+import './core/theme/default/theme.css';
+
 // Shared component styles
 import './core/global/utilities.css';
 import './core/components/navbar.css';
@@ -48,6 +51,6 @@ function initThemeSwitcher() {
     const isDark = document.documentElement.dataset.theme === 'dark';
     const newTheme = isDark ? 'light' : 'dark';
     document.documentElement.dataset.theme = newTheme;
-    localStorage.setItem('nativa-theme', newTheme);
+    try { localStorage.setItem('nativa-theme', newTheme); } catch {}
   });
 }
