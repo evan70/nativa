@@ -1,10 +1,9 @@
 // core.ts — Shared layout + components (always loaded)
 
 // Tokens + reset
-import './core/tokens/reset.css';
-import './core/tokens/layout-grid.css';
-import './core/tokens/fonts.css';
-import './core/tokens/colors.css';
+import './core/tokens/unified.css';
+import './core/components/table.css';
+import './core/components/page-header.css';
 
 // Shared component styles
 import './core/global/utilities.css';

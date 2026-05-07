@@ -1,0 +1,14 @@
+/* === PAGE HEADER COMPONENT === */
+/* Generic page header — not page-specific */
+
+.page-header {
+  margin-bottom: var(--space-8);
+}
+
+.page-header__title {
+  margin-bottom: var(--space-2);
+}
+
+.page-header__subtitle {
+  color: var(--color-text-muted);
+}

@@ -141,3 +141,13 @@
 .card--success {
   border-color: var(--brand-emerald);
 }
+
+/* === STAT CARD === */
+.card--stat .card__body {
+  text-align: center;
+}
+
+/* === CHART CARD === */
+.card--chart .card__body {
+  padding: 0;
+}

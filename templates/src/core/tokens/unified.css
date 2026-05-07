@@ -12,3 +12,48 @@ body {
   color: var(--color-text);
   overflow-x: hidden;
 }
+
+/* === PAGE BODY CLASSES === */
+/* Used for page-specific scoping without page-specific naming */
+.page-home,
+.page-auth,
+.page-dash {
+  /* Base page class — minimal, just for scoping */
+}
+
+/* === ADMIN LAYOUT (generic name, not dash-specific) === */
+.layout-admin {
+  display: grid;
+  grid-template-columns: var(--dash-sidebar-width) 1fr;
+  grid-template-rows: var(--dash-header-height) 1fr;
+  grid-template-areas:
+    "sidebar navbar"
+    "sidebar content";
+  min-height: 100vh;
+}
+
+.layout-admin__sidebar {
+  grid-area: sidebar;
+}
+
+.layout-admin__navbar {
+  grid-area: navbar;
+}
+
+.layout-admin__main {
+  grid-area: content;
+  padding: var(--space-6);
+  background: var(--color-bg);
+}
+
+.layout-admin.is-collapsed {
+  grid-template-columns: var(--dash-sidebar-collapsed) 1fr;
+  transition: grid-template-columns var(--transition-base);
+}
+
+/* === CONTAINER MODIFIERS === */
+.container--narrow {
+  max-width: var(--content-narrow-width);
+  margin-left: auto;
+  margin-right: auto;
+}
