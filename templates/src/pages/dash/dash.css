@@ -1,37 +1,19 @@
 /* === DASHBOARD PAGE STYLES === */
+/* Layout grid (.layout-admin__*) moved to core/tokens/unified.css */
+/* Table (.table) moved to core/components/table.css */
+/* Page header (.page-header) moved to core/components/page-header.css */
 
-/* Admin layout grid */
-.admin-layout {
-  display: grid;
-  grid-template-columns: var(--dash-sidebar-width) 1fr;
-  grid-template-rows: var(--dash-header-height) 1fr;
-  grid-template-areas:
-    "sidebar navbar"
-    "sidebar content";
-  min-height: 100vh;
+/* === FLASH MESSAGES (static, not toast) === */
+.flash-messages {
+  margin-bottom: var(--space-4);
 }
 
-.admin-layout__sidebar {
-  grid-area: sidebar;
+.flash-messages .notification {
+  transform: none;
+  opacity: 1;
 }
 
-.admin-layout__navbar {
-  grid-area: navbar;
-}
-
-.admin-layout__main {
-  grid-area: content;
-  padding: var(--space-6);
-  background: var(--color-bg);
-}
-
-/* Collapsed sidebar */
-.admin-layout.is-collapsed {
-  grid-template-columns: var(--dash-sidebar-collapsed) 1fr;
-  transition: grid-template-columns var(--transition-base);
-}
-
-/* === SIDEBAR === */
+/* === SIDEBAR (sub-component of .layout-admin__sidebar) === */
 .sidebar {
   position: sticky;
   inset-block-start: 0;
@@ -94,67 +76,4 @@
 .sidebar__link--active {
   background: var(--color-brand);
   color: var(--color-text-inverse);
-}
-
-/* === NAVBAR === */
-.navbar {
-  position: sticky;
-  inset-block-start: 0;
-  height: var(--dash-header-height);
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 var(--space-4);
-  z-index: 50;
-}
-
-/* === TABLES === */
-.admin-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.admin-table th,
-.admin-table td {
-  padding: var(--space-3) var(--space-4);
-  text-align: left;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.admin-table th {
-  font-weight: var(--font-medium);
-  background: var(--color-bg);
-}
-
-/* === FLASH MESSAGES === */
-.flash-messages {
-  margin-bottom: var(--space-4);
-}
-
-.flash-message {
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--space-2);
-}
-
-.flash-message--success {
-  background: rgba(34, 197, 94, 0.1);
-  border: 1px solid rgba(34, 197, 94, 0.3);
-  color: var(--color-success);
-}
-
-.flash-message--error {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: var(--color-error);
-}
-
-/* === CHARTS === */
-.chart-container {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
 }

@@ -22,17 +22,17 @@ $page = $currentPage ?? 'dash';
 
     <?= $this->yield('head') ?>
 </head>
-<body class="admin-layout">
+<body class="layout-admin">
 
-    <aside class="admin-layout__sidebar sidebar">
+    <aside class="layout-admin__sidebar sidebar">
         <?= $this->include('cardboard::partials/sidebar', ['menuItems' => $menuItems ?? []]) ?>
     </aside>
 
-    <header class="admin-layout__navbar navbar">
+    <header class="layout-admin__navbar navbar">
         <?= $this->include('cardboard::partials/navbar', ['currentUser' => $currentUser ?? null]) ?>
     </header>
 
-    <main class="admin-layout__main">
+    <main class="layout-admin__main">
         <?= $this->include('cardboard::partials/flash', ['flashMessages' => $flashMessages ?? []]) ?>
         <?= $this->yield('content') ?>
     </main>

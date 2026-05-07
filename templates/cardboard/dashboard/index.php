@@ -1,51 +1,49 @@
 <?php $this->layout('cardboard::layout/base') ?>
 
 <?php $this->section('content') ?>
-<header class="dashboard-header" style="margin-bottom: var(--space-8);">
-    <h1 class="dashboard-header__title" style="margin-bottom: var(--space-2);">Welcome to the admin panel.</h1>
-    <p class="dashboard-header__subtitle" style="color: var(--color-text-muted);">Dashboard / Overview</p>
+<header class="page-header">
+    <h1>Welcome to the admin panel.</h1>
+    <p class="page-header__subtitle">Dashboard / Overview</p>
 </header>
 
 <div class="card-grid card-grid--cols-4" style="margin-bottom: var(--space-8);">
-    <article class="card stat-card">
+    <article class="card card--stat">
         <div class="card__body">
             <p style="font-size: var(--text-xs); color: var(--color-text-muted); text-transform: uppercase; font-weight: var(--font-bold);">Total Revenue</p>
-            <h2 class="stat-card__value" style="margin: var(--space-2) 0;">$45,231.89</h2>
+            <h2 style="margin: var(--space-2) 0;">$45,231.89</h2>
             <p style="font-size: var(--text-xs); color: var(--brand-emerald);">+20.1% from last month</p>
         </div>
     </article>
-    <article class="card stat-card">
+    <article class="card card--stat">
         <div class="card__body">
             <p style="font-size: var(--text-xs); color: var(--color-text-muted); text-transform: uppercase; font-weight: var(--font-bold);">Subscriptions</p>
-            <h2 class="stat-card__value" style="margin: var(--space-2) 0;">+2,350</h2>
+            <h2 style="margin: var(--space-2) 0;">+2,350</h2>
             <p style="font-size: var(--text-xs); color: var(--brand-emerald);">+180.1% from last month</p>
         </div>
     </article>
-    <article class="card stat-card">
+    <article class="card card--stat">
         <div class="card__body">
             <p style="font-size: var(--text-xs); color: var(--color-text-muted); text-transform: uppercase; font-weight: var(--font-bold);">Sales</p>
-            <h2 class="stat-card__value" style="margin: var(--space-2) 0;">+12,234</h2>
+            <h2 style="margin: var(--space-2) 0;">+12,234</h2>
             <p style="font-size: var(--text-xs); color: var(--brand-emerald);">+19% from last month</p>
         </div>
     </article>
-    <article class="card stat-card">
+    <article class="card card--stat">
         <div class="card__body">
             <p style="font-size: var(--text-xs); color: var(--color-text-muted); text-transform: uppercase; font-weight: var(--font-bold);">Active Now</p>
-            <h2 class="stat-card__value" style="margin: var(--space-2) 0;">+573</h2>
+            <h2 style="margin: var(--space-2) 0;">+573</h2>
             <p style="font-size: var(--text-xs); color: var(--brand-emerald);">+201 since last hour</p>
         </div>
     </article>
 </div>
 
 <!-- Revenue Chart -->
-<div class="card" style="margin-bottom: var(--space-8);">
+<div class="card card--chart" style="margin-bottom: var(--space-8);">
     <div class="card__header">
         <h3 class="card__title">Revenue Trend</h3>
     </div>
     <div class="card__body">
-        <div class="chart-container">
-            <canvas id="revenue-chart"></canvas>
-        </div>
+        <canvas id="revenue-chart"></canvas>
     </div>
 </div>
 
@@ -97,26 +95,22 @@
 </div>
 
 <!-- Subscriptions Chart -->
-<div class="card" style="margin-bottom: var(--space-8);">
+<div class="card card--chart" style="margin-bottom: var(--space-8);">
     <div class="card__header">
         <h3 class="card__title">Subscriptions by Quarter</h3>
     </div>
     <div class="card__body">
-        <div class="chart-container chart-container--small">
-            <canvas id="subscriptions-chart"></canvas>
-        </div>
+        <canvas id="subscriptions-chart"></canvas>
     </div>
 </div>
 
 <!-- Sales Doughnut Chart -->
-<div class="card" style="margin-bottom: var(--space-8);">
+<div class="card card--chart" style="margin-bottom: var(--space-8);">
     <div class="card__header">
         <h3 class="card__title">Sales Distribution</h3>
     </div>
     <div class="card__body">
-        <div class="chart-container chart-container--small">
-            <canvas id="sales-chart"></canvas>
-        </div>
+        <canvas id="sales-chart"></canvas>
     </div>
 </div>
 <?php $this->endSection() ?>
