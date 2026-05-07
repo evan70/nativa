@@ -21,6 +21,9 @@
   --card-padding: var(--space-6);
   --card-radius: var(--radius-lg);
 
+  /* Navbar */
+  --navbar-height: 60px;
+
   /* Dashboard layout */
   --dash-sidebar-width: 260px;
   --dash-sidebar-collapsed: 64px;

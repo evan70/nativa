@@ -9,6 +9,7 @@
   color: var(--color-text);
   cursor: pointer;
   transition: all var(--transition-fast);
+  touch-action: manipulation;
 }
 
 .icon-btn:hover:not(:disabled) {

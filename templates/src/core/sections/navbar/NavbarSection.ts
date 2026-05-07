@@ -7,10 +7,16 @@ export class NavbarSection extends BaseSection {
 
   private initMobileMenu(): void {
     const toggleBtn = this.element.querySelector('.navbar__toggle');
-    if (toggleBtn) {
-      toggleBtn.addEventListener('click', () => {
-        this.element.classList.toggle('navbar--menu-open');
-      });
-    }
+    if (!toggleBtn) return;
+
+    // Use touchstart + click for Android Chrome (300ms click delay fix)
+    // touchstart fires immediately on tap, click provides desktop fallback
+    const handler = (e: Event) => {
+      e.preventDefault();
+      this.element.classList.toggle('navbar--menu-open');
+    };
+
+    toggleBtn.addEventListener('touchstart', handler, { passive: false });
+    toggleBtn.addEventListener('click', handler);
   }
 }

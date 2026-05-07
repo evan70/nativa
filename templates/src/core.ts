@@ -43,8 +43,9 @@ function init() {
 }
 
 // Theme switcher — toggle between dark/light
+// Uses both touchstart and click for Android Chrome (300ms click delay fix)
 function initThemeSwitcher() {
-  document.addEventListener('click', (e) => {
+  const handler = (e: Event) => {
     const btn = (e.target as HTMLElement).closest('.theme-toggle');
     if (!btn) return;
     e.preventDefault();
@@ -52,5 +53,8 @@ function initThemeSwitcher() {
     const newTheme = isDark ? 'light' : 'dark';
     document.documentElement.dataset.theme = newTheme;
     try { localStorage.setItem('nativa-theme', newTheme); } catch {}
-  });
+  };
+
+  document.addEventListener('touchstart', handler, { passive: false });
+  document.addEventListener('click', handler);
 }

@@ -68,6 +68,7 @@
 
 .navbar__toggle {
   display: flex;
+  touch-action: manipulation;
 }
 
 .navbar__toggle-icon--meatball,
