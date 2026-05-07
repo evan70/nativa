@@ -34,9 +34,9 @@ final class PageLayout
     public static function bodyClass(string $page): string
     {
         return match ($page) {
-            'dash'  => 'admin-layout',
-            'auth'  => 'auth-page',
-            default => 'front-page',
+            'dash'  => 'layout-admin',
+            'auth'  => 'page-auth',
+            default => 'page-home',
         };
     }
 

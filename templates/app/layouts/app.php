@@ -26,7 +26,7 @@ $page = $currentPage ?? 'home';
 
     <?= $this->yield('head') ?>
 </head>
-<body class="front-page">
+<body class="page-home">
 
     <!-- NAVBAR SECTION -->
     <nav class="navbar" data-section="navbar">
