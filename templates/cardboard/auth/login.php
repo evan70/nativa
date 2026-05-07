@@ -13,8 +13,8 @@
             <input type="hidden" name="_token" value="<?= $this->e($csrfToken ?? '') ?>" />
 
             <?php if (!empty($error)): ?>
-                <div class="alert alert--error">
-                    <?= $this->e($error) ?>
+                <div class="notification notification--error">
+                    <p class="notification__message"><?= $this->e($error) ?></p>
                 </div>
             <?php endif ?>
 

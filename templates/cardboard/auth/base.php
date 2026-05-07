@@ -12,19 +12,18 @@ $page = $currentPage ?? 'auth';
 
     <?php $origin = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? ''); ?>
     <link rel="preconnect" href="<?= $origin ?>" crossorigin>
-    <!-- Always loaded -->
-    <!-- Always loaded: CSS first, then JS -->
+    <!-- Init first (theme FOUC prevention), then CSS, then app JS -->
+    <?= View::viteJs('init') ?>
     <?= View::viteCss('core') ?>
     <?= View::viteCss('page-' . $page) ?>
-    <?= View::viteJs('init') ?>
     <?= View::viteJs('core') ?>
     <?= View::viteJs('page-' . $page) ?>
 
     <?= $this->yield('head') ?>
 </head>
-<body class="auth-page">
-    <main class="auth-layout">
-        <div class="auth-container">
+<body class="page-auth">
+    <main>
+        <div class="container container--narrow">
             <?= $this->yield('content') ?>
         </div>
     </main>

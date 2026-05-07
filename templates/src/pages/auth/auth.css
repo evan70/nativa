@@ -1,18 +1,13 @@
 /* === AUTH PAGE STYLES === */
-/* Page layout only — all UI components use vanilla-card */
+/* Page layout only — all UI components use vanilla-card + core tokens */
 
-.auth-page {
+.page-auth {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, var(--color-bg) 0%, var(--color-surface) 100%);
   padding: var(--section-padding-x);
-}
-
-.auth-container {
-  width: 100%;
-  max-width: var(--auth-max-width);
 }
 
 /* Auth form — page-specific, not a card component */
@@ -85,23 +80,4 @@
 
 .link:hover {
   text-decoration: underline;
-}
-
-/* Alerts — page-specific status messages */
-.alert {
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-}
-
-.alert--error {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: var(--color-error);
-}
-
-.alert--success {
-  background: rgba(34, 197, 94, 0.1);
-  border: 1px solid rgba(34, 197, 94, 0.3);
-  color: var(--color-success);
 }
