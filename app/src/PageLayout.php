@@ -82,7 +82,7 @@ final class PageLayout
     /**
      * Get the layout file path for a page.
      */
-    public static function layoutFile(string $page): ?string
+    public static function layoutFile(string $page): string
     {
         return self::LAYOUT_MAP[$page] ?? 'layouts/app';
     }

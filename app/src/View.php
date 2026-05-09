@@ -57,21 +57,25 @@ final class View
         $page = PageLayout::detect($template);
         self::$currentPage = $page;
 
-        if ($layout === null) {
-            $layout = PageLayout::layoutFile($page);
-        }
+        // Use caller's layout, or default from PageLayout
+        // Empty string '' means "no layout"
+        $layoutFile = match (true) {
+            $layout === '' => null,
+            $layout !== null => $layout,
+            default => PageLayout::layoutFile($page),
+        };
 
-        if ($layout) {
-            $layout = str_replace('.', '/', $layout);
+        if ($layoutFile) {
+            $layoutFile = str_replace('.', '/', $layoutFile);
         }
 
         $content = self::renderFile($template, $data);
 
-        if ($layout === null) {
+        if ($layoutFile === null) {
             return $content;
         }
 
-        return self::renderFile($layout, [...$data, 'content' => $content, 'currentPage' => $page]);
+        return self::renderFile($layoutFile, [...$data, 'content' => $content, 'currentPage' => $page]);
     }
 
     public static function partial(

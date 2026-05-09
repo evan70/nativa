@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Contracts;
 
+use Marko\View\ViewInterface;
+
 /**
  * Extended view interface with asset management support.
  */
-interface AssetAwareViewInterface
+interface AssetAwareViewInterface extends ViewInterface
 {
     /**
      * Set assets for the page.

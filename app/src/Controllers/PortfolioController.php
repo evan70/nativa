@@ -51,10 +51,10 @@ readonly class PortfolioController
 
         return $this->view
             ->render('pages/portfolio/show', [
-                'title' => $project?->title ?? 'Project not found | Nativa',
+                'title' => $project->title . ' | Nativa',
                 'eyebrow' => $project === null ? 'Our Work' : 'Case Study',
-                'heading' => $project?->title ?? 'Project not found',
-                'description' => $project?->description ?? 'The requested project does not exist.',
+                'heading' => $project->title,
+                'description' => $project->description,
                 'project' => $project,
                 'projects' => $this->loadProjects(),
             ])
