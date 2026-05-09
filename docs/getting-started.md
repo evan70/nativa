@@ -50,13 +50,17 @@ cd my-app
 
 | Directory | Purpose |
 |-----------|---------|
-| `app/` | Your application modules |
+| `app/` | Application code (controllers, services, entities) |
 | `modules/` | Third-party modules |
 | `packages/` | Framework packages |
 | `config/` | Configuration files |
 | `public/` | Web entry point |
 | `storage/` | Logs, cache, sessions |
-| `templates/` | Frontend templates |
+| `templates/` | Frontend templates and assets |
+| `templates/pages/` | PHP page templates (flat structure) |
+| `templates/layouts/` | PHP layouts (app, admin, auth) |
+| `templates/partials/` | Shared partials (sidebar, navbar, flash) |
+| `templates/src/` | Frontend source (Vite entries, CSS, TS) |
 
 ## Your First Controller
 
