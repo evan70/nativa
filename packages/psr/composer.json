@@ -1,0 +1,9 @@
+{
+    "name": "marko/psr",
+    "description": "PSR interfaces",
+    "autoload": {
+        "psr-4": {
+            "Psr\\Container\\": "src/"
+        }
+    }
+}
