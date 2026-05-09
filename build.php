@@ -77,8 +77,11 @@ writeRuntimeManifest($distDir);
 removeComposerFiles($distDir);
 replaceAutoloadForProduction($distDir);
 
-// Copy .env.example as production .env template
-if (is_file($rootDir . '/.env.example')) {
+// Copy .env.production as production .env (or .env.example as fallback)
+if (is_file($rootDir . '/.env.production')) {
+    copy($rootDir . '/.env.production', $distDir . '/.env');
+    echo "   Copying .env.production as .env\n";
+} elseif (is_file($rootDir . '/.env.example')) {
     copy($rootDir . '/.env.example', $distDir . '/.env');
     echo "   Copying .env.example as .env template\n";
 }
