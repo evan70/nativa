@@ -72,6 +72,7 @@ if (is_file($rootDir . '/marko')) {
 
 writeRuntimeManifest($distDir);
 removeComposerFiles($distDir);
+replaceAutoloadForProduction($distDir);
 
 // Create a minimal .gitignore for dist
 file_put_contents($distDir . '/.gitignore', "*\n!.gitignore\n");
@@ -84,6 +85,7 @@ echo "   - All required marko/* runtime packages moved into packages/\n";
 echo "   - NO vendor directory\n";
 echo "   - NO root composer.json / composer.lock\n";
 echo "   - NO package composer.json files (runtime manifest generated)\n";
+echo "   - autoload.php updated for production (no vendor dependency)\n";
 echo "\nDeploy the contents of './dist' to production.\n";
 
 /**
@@ -222,4 +224,238 @@ function copyDirectory(
 
         copy($item->getPathname(), $destinationPath);
     }
+}
+
+/**
+ * Replace autoload.php with production version that doesn't depend on vendor.
+ */
+function replaceAutoloadForProduction(string $distDir): void
+{
+    $productionAutoload = <<<'PHP'
+<?php
+
+declare(strict_types=1);
+
+// Production autoloader - no vendor dependency
+$runtimeManifestFile = __DIR__ . '/runtime-manifest.php';
+$runtimeManifest = is_file($runtimeManifestFile)
+    ? require $runtimeManifestFile
+    : [];
+
+class MarkoAutoloader
+{
+    private array $classMap = [];
+    private array $psr4Map = [];
+
+    public function __construct(
+        private string $packagesPath,
+        private string $basePath,
+        private array $runtimeManifest = [],
+    ) {
+        $this->additionalPaths = [$packagesPath];
+    }
+
+    public function addPath(string $path): void
+    {
+        if (is_dir($path)) {
+            $this->additionalPaths[] = $path;
+        }
+    }
+
+    private array $additionalPaths = [];
+
+    public function register(): void
+    {
+        spl_autoload_register([$this, 'loadClass'], true, true);
+        $this->registerFunctions();
+    }
+
+    private function registerFunctions(): void
+    {
+        $envPackagePath = $this->packagesPath . '/env';
+        if (is_dir($envPackagePath)) {
+            $functionsFile = $envPackagePath . '/src/functions.php';
+            if (file_exists($functionsFile)) {
+                require_once $functionsFile;
+            }
+        }
+    }
+
+    public function build(): void
+    {
+        $this->classMap = [];
+        $this->psr4Map = [];
+        foreach ($this->additionalPaths as $rootPath) {
+            $this->scanPath($rootPath);
+        }
+    }
+
+    private function scanPath(string $rootPath): void
+    {
+        $packages = glob($rootPath . '/*', GLOB_ONLYDIR);
+        if (!$packages) {
+            return;
+        }
+        foreach ($packages as $packageDir) {
+            $composer = $this->packageMetadata($packageDir);
+            if ($composer === null) {
+                continue;
+            }
+            $this->registerPackage($packageDir, $composer);
+            $this->loadModule($packageDir);
+        }
+    }
+
+    private function packageMetadata(string $packageDir): ?array
+    {
+        $relativePath = $this->relativePath($packageDir);
+        if ($relativePath !== null && isset($this->runtimeManifest[$relativePath])) {
+            $metadata = $this->runtimeManifest[$relativePath];
+            return is_array($metadata) ? $metadata : null;
+        }
+        $composerFile = $packageDir . '/composer.json';
+        if (!is_file($composerFile)) {
+            return null;
+        }
+        $composer = json_decode(file_get_contents($composerFile), true);
+        return is_array($composer) ? $composer : null;
+    }
+
+    private function registerPackage(string $packageDir, array $composer): void
+    {
+        $autoload = $composer['autoload'] ?? [];
+        if (!empty($autoload['psr-4'])) {
+            foreach ($autoload['psr-4'] as $namespace => $path) {
+                $fullPath = $packageDir . '/' . $path;
+                if (is_dir($fullPath)) {
+                    $this->psr4Map[$namespace] = $fullPath;
+                }
+            }
+        }
+        if (!empty($autoload['classmap'])) {
+            foreach ($autoload['classmap'] as $classPath) {
+                $fullPath = rtrim($packageDir . '/' . $classPath, '/*');
+                if (is_dir($fullPath)) {
+                    $this->addClassesFromDirectory($fullPath);
+                } elseif (is_file($fullPath)) {
+                    $this->classMap[$this->extractClass($fullPath)] = $fullPath;
+                }
+            }
+        }
+    }
+
+    private function addClassesFromDirectory(string $directory): void
+    {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS)
+        );
+        foreach ($iterator as $file) {
+            if ($file->getExtension() !== 'php') {
+                continue;
+            }
+            $className = $this->extractClass($file->getPathname());
+            if ($className) {
+                $this->classMap[$className] = $file->getPathname();
+            }
+        }
+    }
+
+    private function extractClass(string $filePath): ?string
+    {
+        static $cache = [];
+        $realPath = realpath($filePath);
+        if (!$realPath) {
+            return null;
+        }
+        if (isset($cache[$realPath])) {
+            return $cache[$realPath];
+        }
+        $content = file_get_contents($filePath);
+        if (!$content) {
+            return null;
+        }
+        $tokens = token_get_all($content);
+        $namespace = null;
+        $class = null;
+        for ($i = 0; $i < count($tokens); $i++) {
+            if (is_array($tokens[$i])) {
+                if ($tokens[$i][0] === T_NAMESPACE) {
+                    $namespace = '';
+                    for ($j = $i + 2; $j < count($tokens); $j++) {
+                        if (is_array($tokens[$j])) {
+                            if ($tokens[$j][0] === T_STRING || $tokens[$j][0] === T_NAME_QUALIFIED) {
+                                $namespace .= $tokens[$j][1];
+                            }
+                        } elseif ($tokens[$j] === ';' || is_array($tokens[$j])) {
+                            break;
+                        } else {
+                            $namespace .= $tokens[$j];
+                        }
+                    }
+                }
+                if ($tokens[$i][0] === T_CLASS || $tokens[$i][0] === T_INTERFACE || $tokens[$i][0] === T_TRAIT) {
+                    $class = $tokens[$i + 2][1] ?? null;
+                    break;
+                }
+            }
+        }
+        $result = $class ? ($namespace ? $namespace . '\\' : '') . $class : null;
+        $cache[$realPath] = $result;
+        return $result;
+    }
+
+    private function loadModule(string $packageDir): void
+    {
+        $moduleFile = $packageDir . '/module.php';
+        if (file_exists($moduleFile)) {
+            require_once $moduleFile;
+        }
+    }
+
+    private function relativePath(string $absolutePath): ?string
+    {
+        $normalizedBase = rtrim(str_replace('\\', '/', $this->basePath), '/');
+        $normalizedPath = str_replace('\\', '/', $absolutePath);
+        if (!str_starts_with($normalizedPath, $normalizedBase . '/')) {
+            return null;
+        }
+        return substr($normalizedPath, strlen($normalizedBase) + 1);
+    }
+
+    public function loadClass(string $className): bool
+    {
+        if (isset($this->classMap[$className])) {
+            require_once $this->classMap[$className];
+            return class_exists($className, false) || interface_exists($className, false) || trait_exists($className, false);
+        }
+        foreach ($this->psr4Map as $namespace => $path) {
+            if (str_starts_with($className, $namespace)) {
+                $relativeClass = substr($className, strlen($namespace));
+                $filePath = $path . str_replace('\\', '/', $relativeClass) . '.php';
+                if (file_exists($filePath)) {
+                    require_once $filePath;
+                    return class_exists($className, false) || interface_exists($className, false) || trait_exists($className, false);
+                }
+            }
+        }
+        return false;
+    }
+}
+
+$corePackagesPath = dirname(__DIR__) . '/packages';
+$modulesPath = dirname(__DIR__) . '/modules';
+$basePath = dirname(__DIR__);
+
+$autoloader = new MarkoAutoloader($corePackagesPath, $basePath, is_array($runtimeManifest) ? $runtimeManifest : []);
+$autoloader->addPath($modulesPath);
+$autoloader->addPath($basePath . '/app');
+$autoloader->build();
+$autoloader->register();
+
+return $autoloader;
+PHP;
+
+    $autoloadPath = $distDir . '/bootstrap/autoload.php';
+    file_put_contents($autoloadPath, $productionAutoload);
+    echo "   Updating autoload.php for production (no vendor)...\n";
 }
