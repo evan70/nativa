@@ -112,11 +112,14 @@ final class View
 
         if ($match && isset($match['css'])) {
             foreach ($match['css'] as $css) {
+                // Add preconnect for CSS origin
+                $html .= '<link rel="preconnect" href="//' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '" crossorigin>' . "\n";
                 $html .= '<link rel="stylesheet" href="' . $basePath . $css . '" />' . "\n";
             }
         }
 
         if (!$match && str_ends_with($entry, '.css')) {
+            $html .= '<link rel="preconnect" href="//' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '" crossorigin>' . "\n";
             $html .= '<link rel="stylesheet" href="' . $basePath . 'assets/' . $entry . '" />';
         }
 
