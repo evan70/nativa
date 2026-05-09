@@ -98,9 +98,10 @@ export class NotificationManager {
 
     container.appendChild(notification);
 
-    // Trigger reflow for animation
-    notification.offsetHeight;
-    notification.classList.add('notification--visible');
+    // Trigger reflow for animation (use requestAnimationFrame to batch with paint)
+    requestAnimationFrame(() => {
+        notification.classList.add('notification--visible');
+    });
 
     const closeBtn = notification.querySelector('.notification__close');
     closeBtn?.addEventListener('click', () => this.hide(notification, position));
