@@ -51,6 +51,7 @@ jobs:
           cache-dependency-path: templates/pnpm-lock.yaml
 
       - name: Install frontend dependencies
+        working-directory: templates
         run: pnpm install --frozen-lockfile
 
       - name: Composer validate
