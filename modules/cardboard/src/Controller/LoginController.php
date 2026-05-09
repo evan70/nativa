@@ -28,7 +28,7 @@ class LoginController
             return Response::redirect($this->adminConfig->getRoutePrefix());
         }
 
-        return $this->view->render('cardboard::auth/login', [
+        return $this->view->render('pages/auth/login', [
             'loginUrl' => $this->adminConfig->getRoutePrefix() . '/login',
         ]);
     }
@@ -46,7 +46,7 @@ class LoginController
             return Response::redirect($this->adminConfig->getRoutePrefix());
         }
 
-        return $this->view->render('cardboard::auth/login', [
+        return $this->view->render('pages/auth/login', [
             'loginUrl' => $this->adminConfig->getRoutePrefix() . '/login',
             'error' => 'Invalid email or password.',
         ]);
