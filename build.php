@@ -83,6 +83,21 @@ if (is_file($rootDir . '/.env.example')) {
     echo "   Copying .env.example as .env template\n";
 }
 
+// Create storage directories for production
+$storageDirs = [
+    'storage/data',
+    'storage/framework/sessions',
+    'storage/framework/cache',
+    'storage/framework/views',
+];
+foreach ($storageDirs as $dir) {
+    $path = $distDir . '/' . $dir;
+    if (!is_dir($path)) {
+        mkdir($path, 0755, true);
+        echo "   Creating $dir/\n";
+    }
+}
+
 // Create a minimal .gitignore for dist
 file_put_contents($distDir . '/.gitignore', "*\n!.gitignore\n");
 
