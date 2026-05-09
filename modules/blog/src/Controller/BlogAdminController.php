@@ -26,7 +26,7 @@ class BlogAdminController
     public function index(): Response
     {
         $articles = $this->articleRepository->findAll();
-        return $this->view->render('blog::admin/index', [
+        return $this->view->render('pages/dash/admin-articles', [
             'title' => 'Articles Administration',
             'articles' => $articles,
         ]);
@@ -38,7 +38,7 @@ class BlogAdminController
     #[Get(path: '/mark/articles/new')]
     public function create(): Response
     {
-        return $this->view->render('blog::admin/create', [
+        return $this->view->render('pages/auth/login', [
             'title' => 'Create New Article',
         ]);
     }

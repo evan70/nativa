@@ -50,7 +50,7 @@ class ArticleController
         $total = $this->service->countPublished();
         $hasMore = ($page * self::PER_PAGE) < $total;
 
-        return $this->view->render('blog::article/index', [
+        return $this->view->render('pages/articles/index', [
             'title' => 'Articles',
             'currentPage' => 'articles',
             'message' => 'Read existing articles.',
@@ -96,13 +96,13 @@ class ArticleController
         }
 
         if ($article === null) {
-            return $this->view->render('blog::article/not-found', [
+            return $this->view->render('pages/articles/not-found', [
                 'title' => 'Article Not Found',
                 'message' => 'The requested article does not exist.',
             ])->withStatus(404);
         }
 
-        return $this->view->render('blog::article/show', [
+        return $this->view->render('pages/articles/show', [
             'title' => $article->title,
             'article' => $article,
         ]);
