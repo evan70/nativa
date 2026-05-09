@@ -32,9 +32,6 @@ export default defineConfig(() => {
           'page-dash': resolve(__dirname, 'src/pages/dash/dash.ts'),
           'page-auth': resolve(__dirname, 'src/pages/auth/auth.ts'),
           'page-errors': resolve(__dirname, 'src/pages/errors/errors.ts'),
-
-          // Dev tools
-          'page-dev': resolve(__dirname, 'src/dev/theme-switcher.ts'),
         },
         output: {
           entryFileNames: 'assets/[name]-[hash].js',
