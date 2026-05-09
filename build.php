@@ -51,8 +51,8 @@ if (!is_dir($rootDir . '/vendor')) {
 echo "Preparing production artifacts...\n";
 
 // Copy source code directories
-// Note: vendor is included for production deployment (run composer install --no-dev after deploy)
-$sourceDirs = ['app', 'bootstrap', 'modules', 'packages', 'config', 'database', 'routes', 'public', 'storage', 'templates', 'vendor'];
+// Note: vendor is NOT included - production deploy runs: composer install --no-dev
+$sourceDirs = ['app', 'bootstrap', 'modules', 'packages', 'config', 'database', 'routes', 'public', 'storage', 'templates'];
 foreach ($sourceDirs as $dir) {
     if (is_dir($rootDir . '/' . $dir)) {
         echo "   Copying $dir...\n";

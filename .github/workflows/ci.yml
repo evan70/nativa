@@ -134,6 +134,9 @@ jobs:
       - name: Build production dist
         run: MARKO_SKIP_FRONTEND_BUILD=1 php build.php
 
+      - name: Copy vendor for smoke test (remove in production deploy)
+        run: cp -r vendor dist/vendor
+
       - name: Smoke test dist pages
         run: |
           php -S 127.0.0.1:8080 -t dist/public dist/public/index.php > /tmp/marko-smoke.log 2>&1 &
