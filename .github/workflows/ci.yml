@@ -54,6 +54,9 @@ jobs:
         working-directory: templates
         run: pnpm install --frozen-lockfile
 
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
       - name: Composer validate
         run: composer validate --strict
 
