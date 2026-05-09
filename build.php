@@ -56,9 +56,12 @@ $sourceDirs = ['app', 'bootstrap', 'modules', 'packages', 'config', 'database', 
 foreach ($sourceDirs as $dir) {
     if (is_dir($rootDir . '/' . $dir)) {
         echo "   Copying $dir...\n";
-        // Use rsync or cp for speed, ignoring git files
-        exec("cp -r " . escapeshellarg($rootDir . '/' . $dir) . " " . escapeshellarg($distDir . '/'));
-        // Remove .gitkeep or test files if needed here
+        // Exclude node_modules from templates
+        if ($dir === 'templates') {
+            exec("rsync -a --exclude='node_modules' " . escapeshellarg($rootDir . '/' . $dir) . "/ " . escapeshellarg($distDir . '/' . $dir . '/'));
+        } else {
+            exec("cp -r " . escapeshellarg($rootDir . '/' . $dir) . " " . escapeshellarg($distDir . '/'));
+        }
     }
 }
 
@@ -73,6 +76,12 @@ if (is_file($rootDir . '/marko')) {
 writeRuntimeManifest($distDir);
 removeComposerFiles($distDir);
 replaceAutoloadForProduction($distDir);
+
+// Copy .env.example as production .env template
+if (is_file($rootDir . '/.env.example')) {
+    copy($rootDir . '/.env.example', $distDir . '/.env');
+    echo "   Copying .env.example as .env template\n";
+}
 
 // Create a minimal .gitignore for dist
 file_put_contents($distDir . '/.gitignore', "*\n!.gitignore\n");
