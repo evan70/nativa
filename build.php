@@ -98,6 +98,16 @@ foreach ($storageDirs as $dir) {
     }
 }
 
+// Initialize database (run migrations and seed)
+if (is_file($distDir . '/marko')) {
+    echo "   Running database migrations...\n";
+    chdir($distDir);
+    passthru('php marko db:migrate --no-interaction --no-generate', $exitCode);
+    echo "   Running database seeding...\n";
+    passthru('php marko db:seed --no-interaction', $exitCode);
+    chdir($rootDir);
+}
+
 // Create a minimal .gitignore for dist
 file_put_contents($distDir . '/.gitignore', "*\n!.gitignore\n");
 
