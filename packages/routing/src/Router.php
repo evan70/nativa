@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Marko\Routing;
 
 use Marko\Core\Container\ContainerInterface;
+use Marko\Core\Path\ProjectPaths;
 use Marko\Core\Plugin\PluginInterceptedInterface;
 use Marko\Routing\Http\Request;
 use Marko\Routing\Http\Response;
@@ -43,8 +44,10 @@ readonly class Router
         $matched = $this->matcher->match($request->method(), $request->path());
 
         if ($matched === null) {
-            return new Response('Not Found', 404);
+            file_put_contents('/tmp/router_debug.log', "NO_MATCH: " . $request->method() . ' ' . $request->path() . "\n", FILE_APPEND);
+            return $this->renderNotFoundResponse($request);
         }
+        file_put_contents('/tmp/router_debug.log', "MATCHED: " . $request->path() . "\n", FILE_APPEND);
 
         $handler = function (Request $request) use ($matched): Response {
             $controller = $this->container->get($matched->route->controller);
@@ -149,5 +152,31 @@ readonly class Router
         }
 
         return new Response((string) $result);
+    }
+
+    /**
+     * Render a 404 response using the self-contained errors/404 template.
+     */
+    private function renderNotFoundResponse(Request $request): Response
+    {
+        $template = 'pages/errors/404';
+        $projectPaths = $this->container->get(ProjectPaths::class);
+        $viewPath = $projectPaths->templates . '/' . $template . '.php';
+
+        if (!is_file($viewPath)) {
+            return new Response('<h1>404 - Page Not Found</h1><pre>DEBUG: viewPath=' . $viewPath . ' exists=' . (is_file($viewPath) ? 'yes' : 'no') . '</pre>', 404);
+        }
+
+        $data = [
+            'heading'     => 'Page not found',
+            'description' => 'The page you are looking for does not exist.',
+        ];
+
+        extract($data, EXTR_SKIP);
+        ob_start();
+        include $viewPath;
+        $content = ob_get_clean() ?: '';
+
+        return new Response($content, 404);
     }
 }

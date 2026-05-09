@@ -7,12 +7,16 @@ namespace App\Blog\Controller;
 use App\Blog\Contracts\ArticleServiceInterface;
 use App\Blog\DTO\ArticleDTO;
 use App\Blog\Repository\ArticleRepository;
+use App\Htmx\HtmxContext;
 use Marko\Routing\Attributes\Get;
+use Marko\Routing\Http\Request;
 use Marko\Routing\Http\Response;
 use Marko\View\ViewInterface;
 
 class ArticleController
 {
+    private const PER_PAGE = 6;
+
     public function __construct(
         private readonly ArticleRepository $repository,
         private readonly ArticleServiceInterface $service,
@@ -20,34 +24,56 @@ class ArticleController
     ) {}
 
     #[Get('/articles')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $limit = (int) ($_GET['limit'] ?? 10);
-        $offset = (int) ($_GET['offset'] ?? 0);
-        $categoryId = isset($_GET['category_id']) ? (int) $_GET['category_id'] : null;
+        $htmx = HtmxContext::fromRequest($request);
+        $page = max(1, (int) ($_GET['page'] ?? 1));
 
-        $articles = $categoryId
-            ? $this->service->findByCategory($categoryId, $limit, $offset)
-            : $this->service->findPublished($limit, $offset);
+        // If HTMX swap request targeting article-list, return partial
+        if ($htmx !== null && $htmx->target() === 'article-list') {
+            return $this->renderPartial($page);
+        }
+
+        $articles = $this->service->findPublished(
+            limit: self::PER_PAGE,
+            offset: ($page - 1) * self::PER_PAGE
+        );
+        $articles = array_map(
+            static fn (object $article): ArticleDTO => ArticleDTO::fromEntity($article),
+            $articles ?: []
+        );
 
         if ($articles === []) {
             $articles = $this->defaultArticles();
-        } else {
-            $articles = array_map(
-                static fn (object $article): ArticleDTO => ArticleDTO::fromEntity($article),
-                $articles,
-            );
         }
+
+        $total = $this->service->countPublished();
+        $hasMore = ($page * self::PER_PAGE) < $total;
 
         return $this->view->render('blog::article/index', [
             'title' => 'Articles',
+            'currentPage' => 'articles',
             'message' => 'Read existing articles.',
             'articles' => $articles,
             'pagination' => [
-                'limit' => $limit,
-                'offset' => $offset,
+                'limit' => self::PER_PAGE,
+                'page' => $page,
+                'has_more' => $hasMore,
+                'total' => $total,
             ],
         ]);
+    }
+
+    /**
+     * Load more articles via HTMX
+     * Target: #article-list
+     */
+    #[Get('/articles/load')]
+    public function loadMore(): Response
+    {
+        $page = max(1, (int) ($_GET['page'] ?? 2));
+
+        return $this->renderPartial($page);
     }
 
     #[Get('/articles/{slug}')]
@@ -80,6 +106,89 @@ class ArticleController
             'title' => $article->title,
             'article' => $article,
         ]);
+    }
+
+    private function renderPartial(int $page): Response
+    {
+        $articles = $this->service->findPublished(
+            limit: self::PER_PAGE,
+            offset: ($page - 1) * self::PER_PAGE
+        );
+
+        if ($articles === []) {
+            return Response::html('');
+        }
+
+        $html = $this->renderArticlesHtml($articles, $page);
+
+        return Response::html($html);
+    }
+
+    private function renderArticlesHtml(array $articles, int $page): string
+    {
+        $items = '';
+        foreach ($articles as $article) {
+            $dto = ArticleDTO::fromEntity($article);
+            $imageHtml = $dto->image
+                ? '<div class="card__image"><img src="' . htmlspecialchars($dto->image) . '" alt="' . htmlspecialchars($dto->title) . '"></div>'
+                : '';
+
+            $items .= <<<HTML
+                <article class="card card--interactive" data-article-id="{$dto->id}">
+                    <a href="/articles/{$dto->slug}" class="card__link">
+                        {$imageHtml}
+                        <div class="card__body">
+                            <h3 class="card__title">{$this->h($dto->title)}</h3>
+                            <p class="card__excerpt">{$this->h($dto->excerpt)}</p>
+                            <div class="card__meta">
+                                <span class="card__date">{$this->formatDate($dto->createdAt)}</span>
+                            </div>
+                        </div>
+                    </a>
+                </article>
+            HTML;
+        }
+
+        $total = $this->service->countPublished();
+        $hasMore = ($page * self::PER_PAGE) < $total;
+
+        $loadMore = '';
+        if ($hasMore) {
+            $nextPage = $page + 1;
+            $loadMore = <<<HTML
+                <div class="load-more-container" id="load-more-container">
+                    <button
+                        class="btn btn--secondary load-more-btn"
+                        hx-get="/articles/load?page={$nextPage}"
+                        hx-target="#article-list"
+                        hx-swap="beforeend"
+                        hx-trigger="click"
+                        hx-indicator="#load-more-spinner"
+                    >
+                        <span class="btn__text">Load More</span>
+                        <span id="load-more-spinner" class="htmx-indicator">
+                            <svg class="spinner" viewBox="0 0 24 24" width="20" height="20">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4">
+                                    <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
+                                </svg>
+                            </span>
+                        </span>
+                    </button>
+                </div>
+            HTML;
+        }
+
+        return $items . $loadMore;
+    }
+
+    private function h(string $s): string
+    {
+        return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
+    }
+
+    private function formatDate(?\DateTimeInterface $date): string
+    {
+        return $date ? $date->format('j M Y') : '';
     }
 
     /**

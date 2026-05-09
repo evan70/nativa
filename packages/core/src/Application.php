@@ -151,9 +151,6 @@ class Application
         // Register ProjectPaths for dependency injection (base path derived from vendor path)
         $this->container->instance(ProjectPaths::class, new ProjectPaths($this->resolveBasePath()));
 
-        // Register module group manager for lazy loading and eviction
-        $this->registerModuleGroups();
-
         // Register bindings from all modules
         foreach ($this->modules as $module) {
             $bindingRegistry->registerModule($module);
@@ -358,11 +355,26 @@ class Application
 
         $this->commandRunner = new CommandRunner($this->container, $this->commandRegistry);
     }
+    /**
+     * Discover available global middleware classes from modules.
+     *
+     * @return array<class-string<MiddlewareInterface>>
+     */
+    private function discoverGlobalMiddleware(): array
+    {
+        $middleware = [];
 
-    private const array GLOBAL_MIDDLEWARE = [
-        'Marko\\Session\\Middleware\\SessionMiddleware',
-        'Marko\\Layout\\Middleware\\LayoutMiddleware',
-    ];
+        foreach ($this->modules as $module) {
+            foreach ($module->middleware as $class) {
+                if (class_exists($class)) {
+                    $middleware[] = $class;
+                }
+            }
+        }
+
+        return $middleware;
+    }
+
 
     /**
      * @throws RouteException|RouteConflictException|ReflectionException
@@ -402,46 +414,4 @@ class Application
         $response->send();
     }
 
-    /**
-     * Discover available global middleware classes.
-     *
-     * @return array<class-string<MiddlewareInterface>>
-     */
-    private function discoverGlobalMiddleware(): array
-    {
-        $middleware = [];
-
-        foreach (self::GLOBAL_MIDDLEWARE as $class) {
-            if (class_exists($class)) {
-                $middleware[] = $class;
-            }
-        }
-
-        return $middleware;
-    }
-
-    /**
-     * Register module groups for lazy loading and idle eviction.
-     *
-     * Loads ModuleGroupManager from app/init module if available.
-     */
-    private function registerModuleGroups(): void
-    {
-        // Try to load from app/init module
-        if (!class_exists(\App\Init\Module\ModuleGroupManager::class)) {
-            return;
-        }
-
-        $groupManager = new \App\Init\Module\ModuleGroupManager(
-            $this->container,
-            null,
-            true,
-        );
-
-        foreach ($this->modules as $module) {
-            $groupManager->registerGroup($module);
-        }
-
-        $this->container->instance(\App\Init\Module\ModuleGroupManagerInterface::class, $groupManager);
-    }
 }

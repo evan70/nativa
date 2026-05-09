@@ -68,6 +68,7 @@ class ManifestParser
             routes: $composerData['extra']['marko']['routes'] ?? [],
             idleTimeout: $composerData['extra']['marko']['idleTimeout'] ?? null,
             isCore: $composerData['extra']['marko']['isCore'] ?? false,
+            middleware: $moduleData['middleware'] ?? [],
         );
     }
 

@@ -155,8 +155,14 @@ class ArticleService implements ArticleServiceInterface
         $articles = $this->repository->findAll();
         // Filter published only
         $filtered = array_values(array_filter($articles, fn($a) => $a->published));
-        // Sort by createdAt DESC
-        usort($filtered, fn($a, $b) => ($b->createdAt ?? '') <=> ($a->createdAt ?? ''));
+        // Sort by createdAt DESC, then by ID DESC for consistent ordering
+        usort($filtered, function ($a, $b): int {
+            $cmp = strcmp($b->createdAt ?? '', $a->createdAt ?? '');
+            if ($cmp !== 0) {
+                return $cmp;
+            }
+            return $b->id <=> $a->id;
+        });
         // Apply limit/offset
         return array_slice($filtered, $offset, $limit);
     }
@@ -170,5 +176,11 @@ class ArticleService implements ArticleServiceInterface
         usort($filtered, fn($a, $b) => ($b->createdAt ?? '') <=> ($a->createdAt ?? ''));
         // Apply limit/offset
         return array_slice($filtered, $offset, $limit);
+    }
+
+    public function countPublished(): int
+    {
+        $articles = $this->repository->findAll();
+        return count(array_filter($articles, fn($a) => $a->published));
     }
 }

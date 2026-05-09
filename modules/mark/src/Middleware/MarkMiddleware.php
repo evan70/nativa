@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Marko\Mark\Middleware;
 
 use JsonException;
-use Marko\Admin\Config\AdminConfigInterface;
 use Marko\Mark\Attributes\RequiresPermission;
 use Marko\Mark\Contracts\PermissionRegistryInterface;
 use Marko\Mark\Entity\MarkInterface;
@@ -20,7 +19,6 @@ readonly class MarkMiddleware implements MiddlewareInterface
 {
     public function __construct(
         private GuardInterface $guard,
-        private AdminConfigInterface $adminConfig,
         private PermissionRegistryInterface $permissionRegistry,
         private ?string $controller = null,
         private ?string $action = null,

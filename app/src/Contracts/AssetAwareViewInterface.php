@@ -1,0 +1,21 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Contracts;
+
+/**
+ * Extended view interface with asset management support.
+ */
+interface AssetAwareViewInterface
+{
+    /**
+     * Set assets for the page.
+     *
+     * @param string $page Page identifier (e.g., 'app/home')
+     * @param array<int, string> $js JS asset handles to include
+     * @param array<int, string> $css CSS asset handles to include
+     * @return self Fluent interface
+     */
+    public function withAssets(string $page, array $js, array $css): self;
+}

@@ -1,0 +1,127 @@
+// @ts-check
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+import { readFileSync } from 'node:fs';
+
+const arcadeDark = JSON.parse(
+	readFileSync(new URL('./src/themes/arcade-dark.json', import.meta.url), 'utf-8')
+);
+
+// https://astro.build/config
+export default defineConfig({
+	site: 'https://marko.build',
+	base: '/docs',
+	integrations: [
+		starlight({
+			title: 'MARKO DOCS',
+			components: {
+				ThemeSelect: './src/components/ThemeSelect.astro',
+			},
+			expressiveCode: {
+				themes: [arcadeDark],
+			},
+			social: [
+				{ icon: 'github', label: 'GitHub', href: 'https://github.com/markshust/marko' },
+			],
+			editLink: {
+				baseUrl: 'https://github.com/markshust/marko/edit/develop/docs/',
+			},
+			customCss: [
+				'./src/styles/custom.css',
+				'@fontsource/press-start-2p/400.css',
+				'@fontsource/inter/400.css',
+				'@fontsource/inter/600.css',
+				'@fontsource/jetbrains-mono/400.css',
+				'@fontsource/jetbrains-mono/600.css',
+			],
+			head: [
+				{
+					tag: 'script',
+					attrs: { async: true, src: 'https://www.googletagmanager.com/gtag/js?id=G-GL7RRCK8GN' },
+				},
+				{
+					tag: 'script',
+					content: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-GL7RRCK8GN');`,
+				},
+				{
+					tag: 'meta',
+					attrs: {
+						property: 'og:image',
+						content: 'https://marko.build/docs/og-image.png',
+					},
+				},
+				{
+					tag: 'meta',
+					attrs: {
+						name: 'color-scheme',
+						content: 'dark',
+					},
+				},
+				{
+					tag: 'script',
+					attrs: { is: 'inline' },
+					content: `document.documentElement.dataset.theme='dark';try{localStorage.setItem('starlight-theme','dark')}catch(e){}`,
+				},
+				{
+					tag: 'script',
+					content: `document.addEventListener('DOMContentLoaded',()=>{document.documentElement.dataset.theme='dark';document.querySelectorAll('.social-icons a').forEach(a=>{a.setAttribute('target','_blank');a.setAttribute('rel','me noopener')})})`,
+				},
+			],
+			sidebar: [
+				{
+					label: 'Getting Started',
+					items: [
+						{ label: 'Introduction', slug: 'getting-started/introduction' },
+						{ label: 'Installation', slug: 'getting-started/installation' },
+						{ label: 'Your First Application', slug: 'getting-started/first-application' },
+						{ label: 'Project Structure', slug: 'getting-started/project-structure' },
+						{ label: 'Configuration', slug: 'getting-started/configuration' },
+					],
+				},
+				{
+					label: 'Concepts',
+					items: [
+						{ label: 'Modularity', slug: 'concepts/modularity' },
+						{ label: 'Dependency Injection', slug: 'concepts/dependency-injection' },
+						{ label: 'Preferences', slug: 'concepts/preferences' },
+						{ label: 'Plugins', slug: 'concepts/plugins' },
+						{ label: 'Events & Observers', slug: 'concepts/events' },
+					],
+				},
+				{
+					label: 'Packages',
+					autogenerate: { directory: 'packages' },
+				},
+				{
+					label: 'Guides',
+					items: [
+						{ label: 'Routing', slug: 'guides/routing' },
+						{ label: 'Database', slug: 'guides/database' },
+						{ label: 'Authentication', slug: 'guides/authentication' },
+						{ label: 'Caching', slug: 'guides/caching' },
+						{ label: 'Mail', slug: 'guides/mail' },
+						{ label: 'Queues', slug: 'guides/queues' },
+						{ label: 'Real-time Events', slug: 'guides/real-time' },
+						{ label: 'File Storage', slug: 'guides/file-storage' },
+						{ label: 'Notifications', slug: 'guides/notifications' },
+						{ label: 'Scheduling', slug: 'guides/scheduling' },
+						{ label: 'Logging', slug: 'guides/logging' },
+						{ label: 'Validation', slug: 'guides/validation' },
+						{ label: 'Error Handling', slug: 'guides/error-handling' },
+						{ label: 'Testing', slug: 'guides/testing' },
+					],
+				},
+				{
+					label: 'Tutorials',
+					items: [
+						{ label: 'Create a Custom Module', slug: 'tutorials/custom-module' },
+						{ label: 'Build a Blog', slug: 'tutorials/build-a-blog' },
+						{ label: 'Build a REST API', slug: 'tutorials/build-a-rest-api' },
+						{ label: 'Build a Real-time Chat', slug: 'tutorials/build-a-chat' },
+						{ label: 'Build an Admin Panel', slug: 'tutorials/build-an-admin-panel' },
+					],
+				},
+			],
+		}),
+	],
+});

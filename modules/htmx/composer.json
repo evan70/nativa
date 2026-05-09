@@ -1,0 +1,19 @@
+{
+    "name": "app/htmx",
+    "description": "HTMX support for Marko framework",
+    "type": "marko-module",
+    "require": {
+        "php": "^8.5",
+        "marko/routing": "self.version"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\Htmx\\": "src/"
+        }
+    },
+    "extra": {
+        "marko": {
+            "module": true
+        }
+    }
+}

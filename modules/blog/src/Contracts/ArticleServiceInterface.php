@@ -39,4 +39,9 @@ interface ArticleServiceInterface
      * Find articles by category
      */
     public function findByCategory(int $categoryId, int $limit = 10, int $offset = 0): array;
+
+    /**
+     * Count all published articles
+     */
+    public function countPublished(): int;
 }

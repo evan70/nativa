@@ -15,6 +15,8 @@ readonly class ProjectPaths
 {
     public string $base;
 
+    public string $templates;
+
     public string $vendor;
 
     public string $packages;
@@ -31,6 +33,7 @@ readonly class ProjectPaths
         ?string $basePath = null,
     ) {
         $this->base = $basePath ?? getcwd();
+        $this->templates = $this->base . '/templates';
         $this->packages = self::resolvePackagesRoot($this->base);
         $this->vendor = $this->packages;
         $this->modules = $this->base . '/modules';

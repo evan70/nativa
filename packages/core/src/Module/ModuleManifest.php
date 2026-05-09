@@ -31,6 +31,7 @@ readonly class ModuleManifest
      * @param array<string> $routes Route patterns the module serves (e.g., ["/admin/*"])
      * @param string|null $idleTimeout Idle timeout duration (e.g., "5m", "1h")
      * @param bool $isCore Whether this is a core module (never evicted)
+     * @param array<class-string> $middleware Global middleware classes to run on every request (from module.php)
      */
     public function __construct(
         public string $name,
@@ -49,5 +50,6 @@ readonly class ModuleManifest
         public array $routes = [],
         public ?string $idleTimeout = null,
         public bool $isCore = false,
+        public array $middleware = [],
     ) {}
 }

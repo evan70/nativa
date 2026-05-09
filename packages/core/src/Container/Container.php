@@ -219,7 +219,7 @@ class Container implements ContainerInterface
 
                 if (
                     $segment !== ''
-                    && class_exists($noDriverClass)
+                    && class_exists($noDriverClass, true)
                     && method_exists($noDriverClass, 'noDriverInstalled')
                 ) {
                     throw $noDriverClass::noDriverInstalled();

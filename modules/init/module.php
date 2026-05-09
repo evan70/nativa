@@ -16,7 +16,7 @@ return [
             $config = [];
             if ($container->has(\Marko\Config\ConfigRepositoryInterface::class)) {
                 $configRepo = $container->get(\Marko\Config\ConfigRepositoryInterface::class);
-                $config = $configRepo->get('module', []);
+                $config = $configRepo->get('module') ?? [];
             }
 
             $evictionConfig = $config['eviction'] ?? [];

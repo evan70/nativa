@@ -1,0 +1,14 @@
+{
+    "name": "app/view-simple",
+    "description": "Simple PHP-native view driver for Marko framework",
+    "autoload": {
+        "psr-4": {
+            "App\\ViewSimple\\": "src/"
+        }
+    },
+    "extra": {
+        "marko": {
+            "module": true
+        }
+    }
+}

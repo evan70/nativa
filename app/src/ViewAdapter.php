@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App;
 
+use App\Contracts\AssetAwareViewInterface;
 use Marko\Routing\Http\Response;
 use Marko\View\ViewInterface;
 
-class ViewAdapter implements ViewInterface
+class ViewAdapter implements ViewInterface, AssetAwareViewInterface
 {
     private array $customAssets = [];
     private ?string $lcpImage = null;
@@ -60,6 +61,10 @@ class ViewAdapter implements ViewInterface
         if (isset($data['lcpImage'])) {
             View::$lcpImage = $data['lcpImage'];
         }
+
+        // Pass current page and template to the view so layouts can access them
+        $data['currentPage'] = View::$currentPage;
+        $data['currentTemplate'] = View::$currentTemplate;
 
         return $this->view->renderToString($templatePath, $data);
     }

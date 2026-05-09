@@ -38,6 +38,14 @@ readonly class Response
         return new self($this->body, $statusCode, $this->headers);
     }
 
+    public function withHeader(string $name, string $value): self
+    {
+        $headers = $this->headers;
+        $headers[$name] = $value;
+
+        return new self($this->body, $this->statusCode, $headers);
+    }
+
     public static function json(
         mixed $data,
         int $statusCode = 200,

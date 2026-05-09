@@ -18,7 +18,7 @@ $formatDate = static function (?\DateTimeInterface $value): ?string {
 
     <section class="features-section" data-section="features">
         <div class="container">
-            <div class="card-grid card-grid--cols-3">
+            <div class="card-grid card-grid--cols-3" id="article-list">
                 <?php foreach ($articles as $article): ?>
                     <article class="card card--interactive">
                         <?php if (!empty($article->image)): ?>
@@ -56,6 +56,28 @@ $formatDate = static function (?\DateTimeInterface $value): ?string {
                     </article>
                 <?php endforeach ?>
             </div>
+
+            <?php if (!empty($pagination['has_more'])): ?>
+                <div class="load-more-section" id="load-more-section">
+                    <button
+                        class="btn btn--secondary load-more-btn"
+                        hx-get="/articles/load?page=2"
+                        hx-target="#article-list"
+                        hx-swap="beforeend"
+                        hx-trigger="click"
+                        hx-indicator="#load-more-spinner"
+                    >
+                        <span class="btn__text">Load More Articles</span>
+                        <span id="load-more-spinner" class="htmx-indicator" aria-hidden="true">
+                            <svg class="spinner" viewBox="0 0 24 24" width="20" height="20">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4">
+                                    <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
+                                </circle>
+                            </svg>
+                        </span>
+                    </button>
+                </div>
+            <?php endif; ?>
 
             <div class="section section--sm">
                 <article class="card">

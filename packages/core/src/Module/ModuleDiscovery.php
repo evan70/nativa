@@ -176,6 +176,7 @@ readonly class ModuleDiscovery
             routes: $manifest->routes,
             idleTimeout: $manifest->idleTimeout,
             isCore: $manifest->isCore,
+            middleware: $manifest->middleware,
         );
     }
 

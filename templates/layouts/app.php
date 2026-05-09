@@ -1,8 +1,28 @@
 <?php
 use App\View;
 use App\PageLayout;
-$page = $currentPage ?? PageLayout::detect($currentTemplate ?? 'home');
-$bodyClass = PageLayout::bodyClass($page);
+
+// Support both PhpView context ($this->e, $this->yield) and plain include context ($e, $yield)
+if (!isset($page) || $page === null) {
+    $page = $currentPage ?? PageLayout::detect($currentTemplate ?? 'home');
+}
+if (!isset($bodyClass) || $bodyClass === null) {
+    $bodyClass = PageLayout::bodyClass($page);
+}
+
+// Escape helper: works as $this->e() in PhpView, or plain function in include context
+if (!isset($e) || !is_callable($e)) {
+    $e = function ($value) {
+        return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
+    };
+}
+
+// Yield helper: works as $this->yield() in PhpView, or uses $data variable in include context
+$yieldHead = $head ?? '';
+$yieldScripts = $scripts ?? '';
+
+// Support both $this->yield() from PhpView and $content from plain includes
+$yieldContent = (isset($this) && method_exists($this, 'yield')) ? $this->yield('content') : ($content ?? '');
 ?>
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
@@ -10,7 +30,7 @@ $bodyClass = PageLayout::bodyClass($page);
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Vanilla Cards Architecture - Fast, lightweight BEM component-based UI for Nativa CMS." />
-    <title><?= $this->e($title ?? 'Nativa Vanilla Cards') ?></title>
+    <title><?= $e($title ?? 'Nativa Vanilla Cards') ?></title>
     <?php $origin = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? ''); ?>
     <link rel="preconnect" href="<?= $origin ?>" crossorigin>
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
@@ -26,7 +46,7 @@ $bodyClass = PageLayout::bodyClass($page);
     <?= View::viteJs('core') ?>
     <?= View::viteJs('page-' . $page) ?>
 
-    <?= $this->yield('head') ?>
+    <?= $yieldHead ?>
 </head>
 <body class="<?= $bodyClass ?>">
 
@@ -91,7 +111,7 @@ $bodyClass = PageLayout::bodyClass($page);
 
     <!-- MAIN LANDMARK -->
     <main>
-        <?= $this->yield('content') ?>
+        <?= $yieldContent ?>
     </main>
 
     <!-- FOOTER SECTION -->
@@ -130,6 +150,6 @@ $bodyClass = PageLayout::bodyClass($page);
         </div>
     </footer>
 
-    <?= $this->yield('scripts') ?>
+    <?= $yieldScripts ?>
 </body>
 </html>

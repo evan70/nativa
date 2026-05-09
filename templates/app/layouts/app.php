@@ -26,7 +26,7 @@ $page = $currentPage ?? 'home';
 
     <?= $this->yield('head') ?>
 </head>
-<body class="page-home">
+<body class="page-<?= $page ?>">
 
     <!-- NAVBAR SECTION -->
     <nav class="navbar" data-section="navbar">
@@ -41,7 +41,7 @@ $page = $currentPage ?? 'home';
             <div class="navbar__menu">
                 <a href="/" class="navbar__link <?= $_SERVER['REQUEST_URI'] === '/' ? 'navbar__link--active' : '' ?>">Home</a>
                 <a href="/portfolio" class="navbar__link <?= str_starts_with($_SERVER['REQUEST_URI'], '/portfolio') ? 'navbar__link--active' : '' ?>">Portfolio</a>
-                <a href="/articles" class="navbar__link <?= str_starts_with($_SERVER['REQUEST_URI'], '/articles') ? 'navbar__link--active' : '' ?>">Blog</a>
+                <a href="/articles/" class="navbar__link <?= str_starts_with($_SERVER['REQUEST_URI'], '/articles/') ? 'navbar__link--active' : '' ?>">Blog</a>
                 <a href="/mark" class="navbar__link">Mark</a>
             </div>
 
@@ -117,7 +117,7 @@ $page = $currentPage ?? 'home';
                     <ul class="footer__list">
                         <li><a href="#" class="footer__link">Documentation</a></li>
                         <li><a href="#" class="footer__link">API Reference</a></li>
-                        <li><a href="/articles" class="footer__link">Blog</a></li>
+                        <li><a href="/articles/" class="footer__link">Blog</a></li>
                     </ul>
                 </div>
             </div>
