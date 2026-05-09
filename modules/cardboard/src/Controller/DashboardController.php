@@ -45,7 +45,7 @@ class DashboardController
     ): Response {
         $sections = $this->sectionRegistry->all();
         
-        return $this->view->render('cardboard::dashboard/index', [
+        return $this->view->render('pages/dash/index', [
             'sections' => $sections,
             'currentUser' => $this->guard->user(),
             'menuItems' => $this->buildMenuItems(),
