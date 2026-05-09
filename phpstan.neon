@@ -8,7 +8,6 @@ parameters:
         - vendor
         - packages
         - modules/blog/Seed
-        - modules/blog/vendor (?)
         - modules/blog/tests
     reportUnmatchedIgnoredErrors: false
     ignoreErrors:
