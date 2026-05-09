@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Contracts\AssetAwareViewInterface;
 use Marko\Routing\Http\Request;
 use Marko\Routing\Http\Response;
 use Marko\Routing\Attributes\Get;
@@ -11,7 +12,7 @@ use Marko\View\ViewInterface;
 
 class HomeController
 {
-    public function __construct(private readonly ViewInterface $view) {}
+    public function __construct(private readonly AssetAwareViewInterface $view) {}
 
     #[Get(path: '/')]
     public function index(Request $request): Response
@@ -20,10 +21,8 @@ class HomeController
             $this->logDebug('HomeController::index called', ['path' => $request->path()]);
         }
         
-        // Pridáme home-specific CSS (home sections: hero, features, stats, cta)
         return $this->view
-            ->withAssets('app/home', [], ['home-css'])
-            ->render('app.home', [
+            ->render('pages/home/template', [
                 'eyebrow' => 'Nativa',
                 'title' => 'Welcome to Nativa',
                 'message' => 'Hello, Marko!',

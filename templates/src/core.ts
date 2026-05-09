@@ -1,5 +1,17 @@
 // core.ts — Shared layout + components (always loaded)
 
+// HTMX - enable dynamic HTML behavior
+import 'htmx.org';
+
+// HTMX indicator styles (spinner during requests)
+const style = document.createElement('style');
+style.textContent = `
+    .htmx-indicator { opacity: 0; }
+    .htmx-request .htmx-indicator { opacity: 1; }
+    .htmx-request > .btn__text { opacity: 0.3; }
+`;
+document.head.appendChild(style);
+
 // Tokens + reset
 import './core/tokens/unified.css';
 import './core/components/table.css';
@@ -18,6 +30,7 @@ import './core/components/icon.css';
 import './core/components/icon-button.css';
 import './core/components/notification.css';
 import './core/components/footer.css';
+import './core/components/form.css';
 
 // Shared JS components
 import { initThemeSwitcher } from './dev/theme-switcher.ts';

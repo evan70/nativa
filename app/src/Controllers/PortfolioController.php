@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Contracts\AssetAwareViewInterface;
 use App\Entity\PortfolioItem;
 use App\Repository\PortfolioItemRepository;
 use Marko\Routing\Attributes\Get;
@@ -15,7 +16,7 @@ readonly class PortfolioController
 {
     public function __construct(
         private readonly PortfolioItemRepository $repository,
-        private readonly ViewInterface $view,
+        private readonly AssetAwareViewInterface $view,
     ) {}
 
     #[Get(path: '/portfolio')]
@@ -26,8 +27,7 @@ readonly class PortfolioController
         }
 
         return $this->view
-            ->withAssets('app/portfolio', [], ['portfolio-css'])
-            ->render('app.portfolio', [
+            ->render('pages/portfolio/index', [
                 'title' => 'Portfolio | Nativa',
                 'eyebrow' => 'Our Work',
                 'heading' => 'Selected Projects',
@@ -50,8 +50,7 @@ readonly class PortfolioController
         }
 
         return $this->view
-            ->withAssets('app/portfolio', [], ['portfolio-css'])
-            ->render('app.portfolio-show', [
+            ->render('pages/portfolio/show', [
                 'title' => $project?->title ?? 'Project not found | Nativa',
                 'eyebrow' => $project === null ? 'Our Work' : 'Case Study',
                 'heading' => $project?->title ?? 'Project not found',
@@ -141,6 +140,30 @@ readonly class PortfolioController
                 'stack' => 'React, Node.js, PostgreSQL',
                 'image' => '/dist/assets/images/c492faf34ca219ceccfbde6eedaf2b6b.webp',
                 'displayOrder' => 30,
+            ],
+            [
+                'title' => 'DevOps Toolkit',
+                'slug' => 'devops-toolkit',
+                'subtitle' => 'CI/CD automation suite',
+                'description' => 'Automated deployment pipelines with rollback support. GitHub Actions integration and environment monitoring.',
+                'category' => 'DevOps',
+                'role' => 'Delivery automation',
+                'year' => '2026',
+                'stack' => 'Docker, GitHub Actions, Bash',
+                'image' => '/dist/assets/images/d1a18cb5ea2f538c0a8d06e4f6e74264.webp',
+                'displayOrder' => 40,
+            ],
+            [
+                'title' => 'Mobile SDK',
+                'slug' => 'mobile-sdk',
+                'subtitle' => 'Cross-platform toolkit',
+                'description' => 'Native modules for iOS and Android with a unified JavaScript bridge. Offline-first architecture and sync engine.',
+                'category' => 'Mobile',
+                'role' => 'Platform tooling',
+                'year' => '2026',
+                'stack' => 'Swift, Kotlin, React Native',
+                'image' => '/dist/assets/images/d76d493024744f5142823636a88bb4dd.webp',
+                'displayOrder' => 50,
             ],
         ] as $data) {
             $item = new PortfolioItem();

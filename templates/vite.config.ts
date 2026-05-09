@@ -28,8 +28,10 @@ export default defineConfig(() => {
           // Page-specific
           'page-home': resolve(__dirname, 'src/pages/home/home.ts'),
           'page-portfolio': resolve(__dirname, 'src/pages/portfolio/portfolio.ts'),
+          'page-articles': resolve(__dirname, 'src/pages/articles/articles.ts'),
           'page-dash': resolve(__dirname, 'src/pages/dash/dash.ts'),
           'page-auth': resolve(__dirname, 'src/pages/auth/auth.ts'),
+          'page-errors': resolve(__dirname, 'src/pages/errors/errors.ts'),
 
           // Dev tools
           'page-dev': resolve(__dirname, 'src/dev/theme-switcher.ts'),

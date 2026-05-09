@@ -1,6 +1,8 @@
 /* === AUTH PAGE STYLES === */
 /* Page layout only — all UI components use vanilla-card + core tokens */
 
+@import '../../core/components/form.css';
+
 .page-auth {
   min-height: 100vh;
   display: flex;
@@ -15,69 +17,4 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.form-group--row {
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.form-label {
-  font-size: var(--text-sm);
-  font-weight: var(--font-medium);
-  color: var(--color-text);
-}
-
-.form-input {
-  padding: var(--space-2) var(--space-3);
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  color: var(--color-text);
-  font-size: var(--text-base);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: var(--color-brand);
-  box-shadow: 0 0 0 3px rgba(var(--color-brand-rgb), 0.1);
-}
-
-.form-hint {
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
-  margin: 0;
-}
-
-.checkbox {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  cursor: pointer;
-}
-
-.checkbox input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--color-brand);
-}
-
-.link {
-  color: var(--color-brand);
-  text-decoration: none;
-  font-size: var(--text-sm);
-}
-
-.link:hover {
-  text-decoration: underline;
 }
