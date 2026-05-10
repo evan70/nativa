@@ -12,6 +12,11 @@ use Marko\View\ViewInterface;
 interface AssetAwareViewInterface extends ViewInterface
 {
     /**
+     * Set LCP (Largest Contentful Paint) image URL for preload.
+     */
+    public function withLcpImage(string $url): self;
+
+    /**
      * Set assets for the page.
      *
      * @param string $page Page identifier (e.g., 'app/home')

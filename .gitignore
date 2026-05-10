@@ -39,7 +39,9 @@ storage/framework/
 dist/
 build/
 public/mark/*
-!public/mark/.htaccess
+# Environment-specific (not committed)
+public/.htaccess
+public/router.php
 !public/mark/vanilla-cards-manifest.json
 !public/mark/favicon.svg
 !public/mark/favicon.ico

@@ -23,7 +23,7 @@ $stackTags = static function (string $stack): array {
                         <img class="card__image"
                              src="<?= $this->e($project->image) ?>"
                              alt="<?= $this->e($project->title) ?> project screenshot"
-                             loading="lazy" width="400" height="250">
+                             loading="lazy" decoding="async" width="400" height="250">
                         <div class="card__header">
                             <h2 class="card__title"><?= $this->e($project->title) ?></h2>
                             <p class="card__subtitle"><?= $this->e($project->subtitle) ?></p>

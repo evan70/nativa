@@ -49,7 +49,11 @@ final class View
         ?string $lcpImage = null,
     ): string {
         self::$pageAssets = $pageAssets;
-        self::$lcpImage = $lcpImage;
+        
+        // Only override LCP if explicitly passed (don't reset controller's value)
+        if ($lcpImage !== null) {
+            self::$lcpImage = $lcpImage;
+        }
         $template = str_replace('.', '/', $template);
         self::$currentTemplate = $template;
 
@@ -188,4 +192,31 @@ final class View
         return '/dist/assets/fonts/' . $name;
     }
 
+    /**
+     * Generate <link rel="preload"> for fonts used on this page
+     * These fonts are in core bundle and needed early to prevent FOUT
+     */
+    public static function fontPreloads(): string
+    {
+        $manifest = self::ensureManifestLoaded();
+        if (!$manifest) {
+            return '';
+        }
+
+        $html = '';
+
+        // Find font assets from core bundle (which is always loaded)
+        foreach ($manifest as $entry) {
+            if (isset($entry['assets'])) {
+                foreach ($entry['assets'] as $asset) {
+                    if (preg_match('/\.(woff2?|ttf|otf)$/', $asset)) {
+                        $type = str_ends_with($asset, '.woff2') ? 'font/woff2' : 'font/ttf';
+                        $html .= '<link rel="preload" href="/dist/' . $asset . '" as="font" type="' . $type . '" crossorigin>' . "\n";
+                    }
+                }
+            }
+        }
+
+        return $html;
+    }
 }

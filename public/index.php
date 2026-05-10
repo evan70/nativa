@@ -2,6 +2,16 @@
 
 declare(strict_types=1);
 
+// Gzip compression (only if browser supports it and extension is available)
+// Don't create new buffer if we're already buffering
+
+// Cache headers pre verziovane assety (PHP built-in server)
+// V produkcii to rieši .htaccess / nginx
+$uri = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+if (preg_match('#/dist/assets/.+\.(css|js|woff2?|ttf|otf|webp|ico|svg|png|jpg)$#', $uri)) {
+    header('Cache-Control: public, max-age=31536000, immutable');
+}
+
 // Serve static files directly with correct MIME types
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
 $path = strtok($path, '?');

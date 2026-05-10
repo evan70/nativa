@@ -56,10 +56,10 @@ class ViewAdapter implements ViewInterface, AssetAwareViewInterface
         }
 
         View::$pageAssets = array_merge($js, $css);
-        View::$lcpImage = $this->lcpImage;
-
-        if (isset($data['lcpImage'])) {
-            View::$lcpImage = $data['lcpImage'];
+        
+        // Only override LCP if adapter explicitly set it (don't reset controller's value)
+        if ($this->lcpImage !== null) {
+            View::$lcpImage = $this->lcpImage;
         }
 
         // Pass current page and template to the view so layouts can access them

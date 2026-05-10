@@ -1,0 +1,35 @@
+# Cache Control for Versioned Assets (immutable)
+# Assets with content hashes don't change, so we can cache forever
+
+<IfModule mod_headers.c>
+    # All assets in /dist/assets/ have content hash in filename
+    <FilesMatch "\.(js|css|woff2?|ttf|otf|webp)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+
+    # Static assets without version hash (24h cache)
+    <FilesMatch "^(favicon\.ico|favicon\.svg|manifest\.json|robots\.txt)$">
+        Header set Cache-Control "public, max-age=86400"
+    </FilesMatch>
+
+    # Security headers
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Enable compression (gzip + brotli)
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json font/woff2 font/woff
+</IfModule>
+
+# Brotli compression (if mod_brotli is available)
+<IfModule mod_brotli.c>
+    AddOutputFilterByType BROTLI_COMPRESS text/html text/css application/javascript application/json font/woff2
+</IfModule>
+
+# Prevent access to sensitive files
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

@@ -29,6 +29,7 @@ readonly class PortfolioController
         return $this->view
             ->render('pages/portfolio/index', [
                 'title' => 'Portfolio | Nativa',
+                'metaDescription' => 'A collection of projects built with vanilla performance and BEM architecture.',
                 'eyebrow' => 'Our Work',
                 'heading' => 'Selected Projects',
                 'description' => 'A collection of projects built with vanilla performance and BEM architecture.',
@@ -52,6 +53,7 @@ readonly class PortfolioController
         return $this->view
             ->render('pages/portfolio/show', [
                 'title' => $project->title . ' | Nativa',
+                'metaDescription' => $project->description,
                 'eyebrow' => $project === null ? 'Our Work' : 'Case Study',
                 'heading' => $project->title,
                 'description' => $project->description,

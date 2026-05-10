@@ -29,17 +29,23 @@ $yieldContent = (isset($this) && method_exists($this, 'yield')) ? $this->yield('
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Vanilla Cards Architecture - Fast, lightweight BEM component-based UI for Nativa CMS." />
+    <meta name="description" content="<?= $e($metaDescription ?? 'Vanilla Cards Architecture - Fast, lightweight BEM component-based UI for Nativa CMS.') ?>" />
     <title><?= $e($title ?? 'Nativa Vanilla Cards') ?></title>
-    <?php $origin = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? ''); ?>
-    <link rel="preconnect" href="<?= $origin ?>" crossorigin>
-    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
-    <link rel="preload" as="image" href="https://res.cloudinary.com/epithemic/image/upload/v1773169416/blog/dae2d1fd9b13c89bb5b4a89280099d7a_hqfarh.webp" fetchpriority="high">
-    <?php if (View::$lcpImage): ?>
+    <!-- DNS prefetch + preconnect for cross-origin resources -->
+    <link rel="dns-prefetch" href="https://res.cloudinary.com">
+    <link rel="preconnect" href="https://res.cloudinary.com">
+    
+    <link rel="icon" type="image/svg+xml" href="/dist/favicon.svg" />
+    
+    <!-- Critical font preloads (prevent FOUT) -->
+    <link rel="preload" as="font" href="<?= View::fontUrl('Inter-Regular') ?>" crossorigin type="font/woff2">
+    <link rel="preload" as="font" href="<?= View::fontUrl('PlayfairDisplay-Bold') ?>" crossorigin type="font/woff2">
+    
+    <!-- LCP image preload for above-the-fold content -->
+    <?php if (!empty(View::$lcpImage)): ?>
         <link rel="preload" as="image" href="<?= View::$lcpImage ?>" fetchpriority="high">
     <?php endif; ?>
-    <link rel="icon" type="image/svg+xml" href="/dist/favicon.svg" />
-
+    
     <!-- Init first (theme FOUC prevention), then CSS, then app JS -->
     <?= View::viteJs('init') ?>
     <?= View::viteCss('core') ?>
