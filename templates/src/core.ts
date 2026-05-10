@@ -1,16 +1,12 @@
 // core.ts — Shared layout + components (always loaded)
 
-// HTMX - enable dynamic HTML behavior
-import 'htmx.org';
-
-// HTMX indicator styles (spinner during requests)
-const style = document.createElement('style');
-style.textContent = `
-    .htmx-indicator { opacity: 0; }
-    .htmx-request .htmx-indicator { opacity: 1; }
-    .htmx-request > .btn__text { opacity: 0.3; }
-`;
-document.head.appendChild(style);
+// Lazy load htmx only if page has htmx attributes
+// This reduces initial JS payload significantly
+if (document.querySelector('[hx-get], [hx-post], [hx-put], [hx-delete], [hx-trigger]')) {
+    import('htmx.org').then(() => {
+        (window as any).htmx?.process(document.body);
+    });
+}
 
 // Tokens + reset
 import './core/tokens/unified.css';
@@ -34,11 +30,47 @@ import './core/components/form.css';
 // Shared JS components
 import { initThemeSwitcher } from './dev/theme-switcher.ts';
 import { SectionLoader } from './core/sections/SectionLoader.ts';
-import { CookieConsent } from './core/components/CookieConsent.ts';
+
+// Deferred components (loaded after page is ready)
+// These don't block initial render
+let deferredInited = false;
+
+function initDeferred() {
+    if (deferredInited) return;
+    deferredInited = true;
+    
+    // Lazy load CookieConsent only after user scrolls
+    // This reduces initial JS payload significantly
+    const loadCookieConsent = async () => {
+        const { CookieConsent } = await import('./core/components/CookieConsent.ts');
+        CookieConsent.init();
+        
+        // Add htmx indicator styles if needed
+        if (document.querySelector('[hx-get], [hx-post], [hx-put], [hx-delete]')) {
+            const htmxStyles = document.createElement('style');
+            htmxStyles.textContent = `
+                .htmx-indicator { opacity: 0; }
+                .htmx-request .htmx-indicator { opacity: 1; }
+                .htmx-request > .btn__text { opacity: 0.3; }
+            `;
+            document.head.appendChild(htmxStyles);
+        }
+    };
+    
+    // Trigger on scroll (only once)
+    let triggered = false;
+    const onScroll = () => {
+        if (triggered) return;
+        triggered = true;
+        window.removeEventListener('scroll', onScroll, { passive: true });
+        loadCookieConsent();
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+}
 
 console.log('Core initialized');
 
-// Init when DOM is ready
+// Init theme and sections immediately
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {
@@ -47,6 +79,8 @@ if (document.readyState === 'loading') {
 
 function init() {
   SectionLoader.loadSections();
-  CookieConsent.init();
   initThemeSwitcher();
+  
+  // Load deferred components after page is interactive
+  initDeferred();
 }
