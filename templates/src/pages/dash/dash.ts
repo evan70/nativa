@@ -1,5 +1,6 @@
 // pages/dash/dash.ts — Dashboard page specific JS
 import './dash.css';
+import '../../core/components/table.css';
 
 import { initSidebar } from '../../core/components/sidebar.js';
 import { initAdminTables } from '../../core/components/admin-table.js';

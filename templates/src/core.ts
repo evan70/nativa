@@ -14,7 +14,6 @@ document.head.appendChild(style);
 
 // Tokens + reset
 import './core/tokens/unified.css';
-import './core/components/table.css';
 import './core/components/page-header.css';
 
 // Theme (brand colors + theme-specific overrides)
