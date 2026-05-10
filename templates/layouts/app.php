@@ -46,12 +46,12 @@ $yieldContent = (isset($this) && method_exists($this, 'yield')) ? $this->yield('
         <link rel="preload" as="image" href="<?= View::$lcpImage ?>" fetchpriority="high">
     <?php endif; ?>
     
-    <!-- Init first (theme FOUC prevention), then CSS, then app JS -->
+    <!-- Init first (theme FOUC prevention) -->
     <?= View::viteJs('init') ?>
+    
+    <!-- CSS in head (render-blocking for above-the-fold) -->
     <?= View::viteCss('core') ?>
     <?= View::viteCss('page-' . $page) ?>
-    <?= View::viteJs('core') ?>
-    <?= View::viteJs('page-' . $page) ?>
 
     <?= $yieldHead ?>
 </head>
@@ -157,6 +157,24 @@ $yieldContent = (isset($this) && method_exists($this, 'yield')) ? $this->yield('
         </div>
     </footer>
 
+    <!-- Deferred JS (after DOM is parsed) -->
+    <script type="module">
+        // Lazy load htmx only when needed for dynamic content
+        // This reduces initial page load for static pages
+        window.addEventListener('load', () => {
+            // Only load htmx if there's HTMX-annotated content
+            if (document.querySelector('[hx-get], [hx-post], [hx-put], [hx-delete]')) {
+                import('/dist/assets/htmx.min.js').catch(() => {
+                    // htmx not available, graceful fallback
+                });
+            }
+        });
+    </script>
+    
+    <!-- Core + page JS (deferred for faster first paint) -->
+    <?= View::viteJs('core', true) ?>
+    <?= View::viteJs('page-' . $page, true) ?>
+    
     <?= $yieldScripts ?>
 </body>
 </html>

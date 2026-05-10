@@ -131,25 +131,30 @@ final class View
         return $html;
     }
 
-    public static function viteJs(string $entry): string
+    public static function viteJs(string $entry, bool $defer = false): string
     {
         $manifest = self::ensureManifestLoaded();
         $basePath = '/dist/';
         $match = self::findByName($manifest, $entry);
         $html = '';
+        $deferAttr = $defer ? ' defer' : '';
 
         if ($match && isset($match['file'])) {
             $file = $match['file'];
             if (str_ends_with($file, '.js')) {
-                $html .= '<link rel="modulepreload" href="' . $basePath . $file . '">' . "\n";
-                $html .= '<script type="module" src="' . $basePath . $file . '"></script>' . "\n";
+                if (!$defer) {
+                    $html .= '<link rel="modulepreload" href="' . $basePath . $file . '">' . "\n";
+                }
+                $html .= '<script type="module" src="' . $basePath . $file . '"' . $deferAttr . '></script>' . "\n";
             }
         }
 
         if (!$match && str_ends_with($entry, '.js')) {
             $url = $basePath . 'assets/' . $entry;
-            $html .= '<link rel="modulepreload" href="' . $url . '">' . "\n";
-            $html .= '<script type="module" src="' . $url . '"></script>';
+            if (!$defer) {
+                $html .= '<link rel="modulepreload" href="' . $url . '">' . "\n";
+            }
+            $html .= '<script type="module" src="' . $url . '"' . $deferAttr . '></script>';
         }
 
         return $html;
