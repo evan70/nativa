@@ -5,6 +5,15 @@ $this->layout('layouts.app');
 <?php $this->section('content') ?>
     <!-- HERO SECTION -->
     <section class="hero-section hero-section--fw" data-section="hero">
+        <!-- LCP image - hero background as <img> for fetchpriority -->
+        <img class="hero-section__bg-img"
+             src="https://res.cloudinary.com/epithemic/image/upload/v1773169416/blog/dae2d1fd9b13c89bb5b4a89280099d7a_hqfarh.webp"
+             alt=""
+             fetchpriority="high"
+             loading="eager"
+             decoding="async"
+             aria-hidden="true">
+        <div class="hero-section__overlay" aria-hidden="true"></div>
         <div class="hero-section__content">
             <span class="hero-section__eyebrow"><?= $this->e($eyebrow) ?></span>
             <h1 class="hero-section__title"><?= $this->e($title) ?></h1>
