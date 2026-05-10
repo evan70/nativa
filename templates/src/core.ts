@@ -34,12 +34,9 @@ import './core/components/form.css';
 // Shared JS components
 import { initThemeSwitcher } from './dev/theme-switcher.ts';
 import { SectionLoader } from './core/sections/SectionLoader.ts';
+import { CookieConsent } from './core/components/CookieConsent.ts';
 
 console.log('Core initialized');
-
-// Expose to window for legacy support
-(window as any).initThemeSwitcher = initThemeSwitcher;
-(window as any).SectionLoader = SectionLoader;
 
 // Init when DOM is ready
 if (document.readyState === 'loading') {
@@ -50,5 +47,6 @@ if (document.readyState === 'loading') {
 
 function init() {
   SectionLoader.loadSections();
+  CookieConsent.init();
   initThemeSwitcher();
 }
