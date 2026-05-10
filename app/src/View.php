@@ -141,12 +141,15 @@ final class View
         if ($match && isset($match['file'])) {
             $file = $match['file'];
             if (str_ends_with($file, '.js')) {
+                $html .= '<link rel="modulepreload" href="' . $basePath . $file . '">' . "\n";
                 $html .= '<script type="module" src="' . $basePath . $file . '"></script>' . "\n";
             }
         }
 
         if (!$match && str_ends_with($entry, '.js')) {
-            $html .= '<script type="module" src="' . $basePath . 'assets/' . $entry . '"></script>';
+            $url = $basePath . 'assets/' . $entry;
+            $html .= '<link rel="modulepreload" href="' . $url . '">' . "\n";
+            $html .= '<script type="module" src="' . $url . '"></script>';
         }
 
         return $html;
