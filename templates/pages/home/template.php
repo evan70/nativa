@@ -2,17 +2,29 @@
 $this->layout('layouts.app');
 ?>
 
+<?php
+$lcpBase = 'https://res.cloudinary.com/epithemic/image/upload';
+$lcpId = 'v1773169416/blog/dae2d1fd9b13c89bb5b4a89280099d7a_hqfarh';
+$lcpDesktop = $lcpBase . '/f_auto,q_auto,w_1920/' . $lcpId . '.webp';
+$lcpMobile = $lcpBase . '/f_auto,q_auto,w_768/' . $lcpId . '.webp';
+$lcpFallback = $lcpBase . '/' . $lcpId . '.webp';
+?>
+
 <?php $this->section('content') ?>
     <!-- HERO SECTION -->
     <section class="hero-section hero-section--fw" data-section="hero">
-        <!-- LCP image - hero background as <img> for fetchpriority -->
-        <img class="hero-section__bg-img"
-             src="https://res.cloudinary.com/epithemic/image/upload/v1773169416/blog/dae2d1fd9b13c89bb5b4a89280099d7a_hqfarh.webp"
-             alt=""
-             fetchpriority="high"
-             loading="eager"
-             decoding="async"
-             aria-hidden="true">
+        <!-- LCP image - hero with responsive picture element -->
+        <picture>
+            <source media="(min-width: 769px)" srcset="<?= $lcpDesktop ?>" fetchpriority="high">
+            <img class="hero-section__bg-img"
+                 src="<?= $lcpMobile ?>"
+                 alt="Hero background"
+                 fetchpriority="high"
+                 loading="eager"
+                 decoding="async"
+                 width="1920"
+                 height="1080">
+        </picture>
         <div class="hero-section__overlay" aria-hidden="true"></div>
         <div class="hero-section__content">
             <span class="hero-section__eyebrow"><?= $this->e($eyebrow) ?></span>

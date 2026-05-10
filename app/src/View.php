@@ -137,21 +137,26 @@ final class View
         $basePath = '/dist/';
         $match = self::findByName($manifest, $entry);
         $html = '';
-        $deferAttr = $defer ? ' defer' : '';
+        
+        // Determine defer attribute - init.js always needs defer for FOUC prevention
+        $isInit = $entry === 'init';
+        $shouldDefer = $defer || $isInit;
+        $deferAttr = $shouldDefer ? ' defer' : '';
+        $crossorigin = $isInit ? ' crossorigin="anonymous"' : '';
 
         if ($match && isset($match['file'])) {
             $file = $match['file'];
             if (str_ends_with($file, '.js')) {
-                if (!$defer) {
+                if (!$shouldDefer) {
                     $html .= '<link rel="modulepreload" href="' . $basePath . $file . '">' . "\n";
                 }
-                $html .= '<script type="module" src="' . $basePath . $file . '"' . $deferAttr . '></script>' . "\n";
+                $html .= '<script type="module" src="' . $basePath . $file . '"' . $deferAttr . $crossorigin . '></script>' . "\n";
             }
         }
 
         if (!$match && str_ends_with($entry, '.js')) {
             $url = $basePath . 'assets/' . $entry;
-            if (!$defer) {
+            if (!$shouldDefer) {
                 $html .= '<link rel="modulepreload" href="' . $url . '">' . "\n";
             }
             $html .= '<script type="module" src="' . $url . '"' . $deferAttr . '></script>';

@@ -1,94 +1,103 @@
-# Plan: ProjectPaths Templates Integration
+# Lighthouse 100 100 100 100 Plan
 
-## Overview
+## Goal
+Achieve perfect Lighthouse scores (Performance, Accessibility, Best Practices, SEO) by following the flow from reference site that has 100/100/100/100.
 
-Unified path handling using `ProjectPaths` class instead of manual `dirname(__DIR__, N)` calculations. This ensures consistent template resolution across the application.
+## Reference Site Analysis
 
-## Branch
-`refactor/path-handling`
+The reference site uses this structure:
+```html
+<!-- 1. Theme init (deferred) - prevents FOUC -->
+<script src="/assets/init.js" defer crossorigin="anonymous"></script>
+
+<!-- 2. Shared base CSS (always loaded) -->
+<link rel="stylesheet" href="/assets/css.css">
+
+<!-- 3. Page-specific CSS (conditional) -->
+<link rel="stylesheet" href="/assets/home.css">
+
+<!-- 4. LCP preload with responsive variants -->
+<link rel="preload" ... media="(min-width: 769px)">
+<link rel="preload" ... media="(max-width: 768px)">
+```
+
+**Key differences from current Nativa:**
+1. Init script has `defer crossorigin="anonymous"`
+2. CSS split into base + page-specific
+3. LCP image preload has `media` attribute for responsive variants
+4. App JS at end of body (deferred)
+5. No htmx, no cookie consent in critical path
 
 ## Settings
-- Testing: No
-- Logging: Standard
-- Docs: No
+- **Testing:** No (performance tuning, not new feature)
+- **Logging:** Standard
+- **Docs:** No
 
 ## Tasks
 
-### Task 1: Extend ProjectPaths with templates property
-**File:** `packages/core/src/Path/ProjectPaths.php`
+### Phase 1: CSS Splitting
 
-Add `templates` property to centralize template path resolution:
+1. **Split core.css into base.css + page.css** ✅ PARTIAL
+   - Page-specific CSS already loaded separately (page-home.css)
+   - Core CSS contains shared components
 
-```php
-public string $templates;
+### Phase 2: Script Order Fix
 
-public function __construct(?string $basePath = null) {
-    $this->base = $basePath ?? getcwd();
-    $this->templates = $this->base . '/templates';
-    // ... rest of constructor
-}
-```
+2. **Fix init.js - add defer + crossorigin** ✅ DONE
+   - View::viteJs now adds `defer crossorigin="anonymous"` to init.js
 
-**Logging:** Log template path initialization in Application boot.
+3. **Move App JS to end of body** ✅ ALREADY DONE
+   - core.js and page-*.js already have defer
 
----
+### Phase 3: LCP Image Optimization
 
-### Task 2: Update Router.php to use ProjectPaths
-**File:** `packages/routing/src/Router.php`
+4. **Add responsive LCP preloads with media queries** ✅ DONE
+   - Desktop: w_1920 (media min-width: 769px)
+   - Mobile: w_768 (media max-width: 768px)
 
-Inject `ProjectPaths` and use it for 404 template resolution instead of `dirname(__DIR__, N)`:
+5. **Use <picture> element for hero image** ✅ DONE
+   - Desktop: large image
+   - Mobile: smaller image
 
-```php
-public function __construct(
-    RouteCollection $routes,
-    ContainerInterface $container,
-    array $globalMiddleware = [],
-) {
-    // ... existing code
-}
+### Phase 4: Remove Blocking Scripts
 
-private function renderNotFoundResponse(Request $request): Response
-{
-    $template = 'pages/errors/404';
-    // Use ProjectPaths instead of hardcoded dirname
-    $viewPath = $this->container->get(ProjectPaths::class)->templates . '/' . $template . '.php';
-    // ... rest
-}
-```
+6. **Lazy load htmx** ✅ ALREADY DONE
+   - htmx loads only on pages with htmx attributes
 
-**Logging:** Log 404 page render with resolved path (DEBUG level).
+7. **Cookie consent on scroll** ✅ ALREADY DONE
+   - CookieConsent loads only after user scrolls
 
----
+### Phase 5: Accessibility & SEO
 
-### Task 3: Update View package TemplateResolver to use ProjectPaths
-**Files:** 
-- `packages/view/src/ModuleTemplateResolver.php`
-- `packages/view/src/TemplateResolverInterface.php`
+8. **Add missing accessibility attributes** ⏳ PENDING
+   - Check all interactive elements have aria-labels
+   - Verify color contrast ratios
+   - Test with axe DevTools
 
-Ensure all template resolvers consistently use `ProjectPaths` for base paths.
+9. **Add missing meta tags** ⏳ PENDING
+   - robots: index, follow
+   - theme-color for mobile browsers
+   - canonical URL
 
-**Logging:** Log template resolution path (DEBUG level).
-
----
-
-### Task 4: Verify all path calculations use ProjectPaths
-**Files:** Search and update any remaining hardcoded path calculations.
-
-Use grep to find remaining `dirname(__DIR__` patterns that reference templates:
-
-```bash
-grep -rn "dirname.*templates" --include="*.php" | grep -v vendor
-```
-
----
+10. **Verify HTML semantics** ⏳ PENDING
+    - Proper heading hierarchy
+    - Landmark regions
+    - Alt text for all images
 
 ## Commit Plan
 
-Single commit at the end:
-```
-refactor: unify path handling with ProjectPaths
+### Commit 1: CSS Splitting
+- Split core.css into base.css + page.css
 
-- Add templates property to ProjectPaths
-- Replace dirname(__DIR__, N) in Router with ProjectPaths injection
-- Ensure TemplateResolver uses ProjectPaths consistently
-```
+### Commit 2: Script Optimization
+- Add defer + crossorigin to init.js
+- Fix script loading order
+
+### Commit 3: LCP Image Optimization
+- Responsive preloads with media queries
+- <picture> element for hero
+
+### Commit 4: Final Accessibility Fixes
+- Add missing aria-labels
+- Add meta tags
+- Fix any remaining issues

@@ -23,6 +23,10 @@ $yieldScripts = $scripts ?? '';
 
 // Support both $this->yield() from PhpView and $content from plain includes
 $yieldContent = (isset($this) && method_exists($this, 'yield')) ? $this->yield('content') : ($content ?? '');
+
+// Origin for canonical URL
+$origin = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$origin .= '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
 ?>
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
@@ -30,6 +34,9 @@ $yieldContent = (isset($this) && method_exists($this, 'yield')) ? $this->yield('
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="<?= $e($metaDescription ?? 'Vanilla Cards Architecture - Fast, lightweight BEM component-based UI for Nativa CMS.') ?>" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#1a1a1a" />
+    <link rel="canonical" href="<?= $origin . $_SERVER['REQUEST_URI'] ?>" />
     <title><?= $e($title ?? 'Nativa Vanilla Cards') ?></title>
     <!-- DNS prefetch + preconnect for cross-origin resources -->
     <link rel="dns-prefetch" href="https://res.cloudinary.com">
@@ -41,9 +48,16 @@ $yieldContent = (isset($this) && method_exists($this, 'yield')) ? $this->yield('
     <link rel="preload" as="font" href="<?= View::fontUrl('Inter-Regular') ?>" crossorigin type="font/woff2">
     <link rel="preload" as="font" href="<?= View::fontUrl('PlayfairDisplay-Bold') ?>" crossorigin type="font/woff2">
     
-    <!-- LCP image preload for above-the-fold content -->
+    <!-- LCP image preload with responsive variants -->
     <?php if (!empty(View::$lcpImage)): ?>
-        <link rel="preload" as="image" href="<?= View::$lcpImage ?>" fetchpriority="high">
+        <?php
+        // Generate responsive LCP URLs for Cloudinary
+        $lcpBase = View::$lcpImage;
+        $lcpDesktop = str_replace('/upload/', '/upload/f_auto,q_auto,w_1920/', $lcpBase);
+        $lcpMobile = str_replace('/upload/', '/upload/f_auto,q_auto,w_768/', $lcpBase);
+        ?>
+        <link rel="preload" as="image" href="<?= $lcpDesktop ?>" fetchpriority="high" media="(min-width: 769px)">
+        <link rel="preload" as="image" href="<?= $lcpMobile ?>" fetchpriority="high" media="(max-width: 768px)">
     <?php endif; ?>
     
     <!-- Init first (theme FOUC prevention) -->
