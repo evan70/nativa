@@ -19,7 +19,11 @@ importers:
         specifier: ^8.0.11
         version: 8.0.11
 
-  packages/theme-fire-show: {}
+  packages/theme-fire-show:
+    dependencies:
+      lenis:
+        specifier: ^1.1.14
+        version: 1.3.23
 
   packages/theme-neon: {}
 
@@ -171,6 +175,20 @@ packages:
 
   htmx.org@2.0.10:
     resolution: {integrity: sha512-kdeJe7ZVwaS6QMz/ebBIVtZdpwen6L0OQ5GOhPV9MKBb196TCZeZu4yA7ZIQsaLKv7EpXz+So7KSXNuHXhj7Cw==}
+
+  lenis@1.3.23:
+    resolution: {integrity: sha512-YxYq3TJqj9sJNv0V9SkyQHejt14xwyIwgDaaMK89Uf9SxQfIszu+gTQSSphh6BWlLTNVKvvXAGkg+Zf+oFIevg==}
+    peerDependencies:
+      '@nuxt/kit': '>=3.0.0'
+      react: '>=17.0.0'
+      vue: '>=3.0.0'
+    peerDependenciesMeta:
+      '@nuxt/kit':
+        optional: true
+      react:
+        optional: true
+      vue:
+        optional: true
 
   lightningcss-android-arm64@1.32.0:
     resolution: {integrity: sha512-YK7/ClTt4kAK0vo6w3X+Pnm0D2cf2vPHbhOXdoNti1Ga0al1P4TBZhwjATvjNwLEBCnKvjJc2jQgHXH0NEwlAg==}
@@ -420,6 +438,8 @@ snapshots:
     optional: true
 
   htmx.org@2.0.10: {}
+
+  lenis@1.3.23: {}
 
   lightningcss-android-arm64@1.32.0:
     optional: true
