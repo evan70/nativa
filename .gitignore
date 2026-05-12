@@ -28,6 +28,7 @@ Thumbs.db
 .codex/
 .codex
 .kilo/
+pi-free-proxy/
 
 # Local database
 database/*.sqlite
