@@ -458,18 +458,26 @@ h1, h2, h3, h4, h5, h6,
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  clip-path: inset(0 100% 0 0);
-  animation: fs-sfill linear both;
-  animation-timeline: view();
-  animation-range: entry 10% exit 60%;
+  /* Show gradient by default, animate on scroll if supported */
+  clip-path: inset(0 0% 0 0);
 }
 
-.fs-scroll-fill-over.fs-b {
-  animation-range: entry 20% exit 70%;
-}
-
-.fs-scroll-fill-over.fs-c {
-  animation-range: entry 30% exit 80%;
+/* Fallback for browsers that support animation-timeline */
+@supports (animation-timeline: view()) {
+  .fs-scroll-fill-over {
+    clip-path: inset(0 100% 0 0);
+    animation: fs-sfill linear both;
+    animation-timeline: view();
+    animation-range: entry 10% exit 60%;
+  }
+  
+  .fs-scroll-fill-over.fs-b {
+    animation-range: entry 20% exit 70%;
+  }
+  
+  .fs-scroll-fill-over.fs-c {
+    animation-range: entry 30% exit 80%;
+  }
 }
 
 @keyframes fs-sfill {
