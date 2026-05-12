@@ -19,6 +19,7 @@ final class PageLayout
         'dash'       => 'dash',
         'auth'       => 'auth',
         'errors'     => 'errors',
+        'fire-show-demo' => 'fire-show-demo',
 
         // Backward compatibility (old template paths)
         'blog'       => 'articles',
