@@ -16,5 +16,8 @@
     "vanilla-cards"
   ],
   "author": "Nativa",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "lenis": "^1.1.14"
+  }
 }

@@ -1,6 +1,81 @@
 /* Fire Show Theme Overrides for Vanilla Cards */
 /* Inspired by ohniva-show.sk */
 
+/* ── GRAIN OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9990;
+}
+
+/* ── CUSTOM CURSOR ── */
+.fs-cursor {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  background: var(--brand-ruby);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: transform 0.15s, width 0.3s, height 0.3s;
+}
+
+.fs-cursor-ring {
+  position: fixed;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(255, 77, 0, 0.4);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), height 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s;
+}
+
+.fs-cursor.hovering {
+  width: 4px;
+  height: 4px;
+}
+
+.fs-cursor-ring.hovering {
+  width: 56px;
+  height: 56px;
+  border-color: rgba(255, 77, 0, 0.8);
+}
+
+/* ── SCROLL PROGRESS BAR ── */
+.fs-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  z-index: 9997;
+  width: 0%;
+  background: linear-gradient(90deg, var(--brand-ruby), var(--brand-gold));
+  transition: width 0.1s linear;
+}
+
+/* ── NAV GLASSMORPHISM ── */
+.navbar {
+  transition: backdrop-filter 0.5s, background 0.5s;
+}
+
+.navbar.fs-scrolled {
+  background: rgba(5, 5, 5, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+[data-theme="light"] .navbar.fs-scrolled {
+  background: rgba(255, 248, 245, 0.7);
+}
+
 :root {
   /* Brand Colors Override - Fiery Palette */
   --brand-ruby: #ff4d00; /* Vibrant Fire Red */
@@ -121,9 +196,359 @@ h1, h2, h3, h4, h5, h6,
   box-shadow: 0 0 8px var(--brand-gold);
 }
 
-/* Hero Section */
+/* Hero Section Glow */
 .hero-section {
   background: radial-gradient(circle at center, #2a0a0a 0%, #050505 100%);
+  position: relative;
+}
+
+.hero-section .fs-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 55% 50% at 75% 65%, rgba(255, 77, 0, 0.13) 0%, transparent 65%),
+    radial-gradient(ellipse 35% 30% at 20% 80%, rgba(255, 204, 0, 0.07) 0%, transparent 55%);
+  animation: fs-gpulse 6s ease-in-out infinite alternate;
+}
+
+@keyframes fs-gpulse {
+  from { opacity: 0.4; }
+  to { opacity: 1; }
+}
+
+/* Hero Parallax */
+.hero-section .fs-parallax {
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 70% 60%, rgba(255, 77, 0, 0.16) 0%, transparent 60%),
+    radial-gradient(ellipse 30% 30% at 15% 90%, rgba(255, 204, 0, 0.08) 0%, transparent 50%);
+  will-change: transform;
+}
+
+/* ── MARQUEE ── */
+.fs-marquee-wrap {
+  overflow: hidden;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  padding: 1rem 0;
+}
+
+.fs-marquee-track {
+  display: flex;
+  gap: 3.5rem;
+  white-space: nowrap;
+  width: max-content;
+  animation: fs-mq 28s linear infinite;
+}
+
+.fs-marquee-track span {
+  font-family: var(--font-sans);
+  font-size: 0.55rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.fs-marquee-track .fs-sep {
+  color: var(--brand-ruby);
+}
+
+@keyframes fs-mq {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ── FIRE GRADIENT TEXT ── */
+.fs-text-fire {
+  background: linear-gradient(110deg, var(--brand-ruby) 0%, var(--brand-gold) 55%, var(--brand-ruby) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: fs-fmove 4s linear infinite;
+}
+
+@keyframes fs-fmove {
+  to { background-position: 200% center; }
+}
+
+.fs-text-stroke {
+  -webkit-text-stroke: 1.5px var(--color-text);
+  color: transparent;
+}
+
+/* ── SERVICE LIST HOVER FILL ── */
+.fs-service-list {
+  margin-top: 4rem;
+}
+
+.fs-service-item {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  align-items: center;
+  padding: 1.8rem 0;
+  border-bottom: 1px solid var(--color-border);
+  gap: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.fs-service-fill {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 77, 0, 0.04);
+  transform: translateX(-100%);
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fs-service-item:hover .fs-service-fill {
+  transform: translateX(0);
+}
+
+.fs-service-num {
+  font-family: var(--font-sans);
+  font-size: 0.5rem;
+  letter-spacing: 0.2em;
+  color: var(--color-text-muted);
+}
+
+.fs-service-name {
+  font-family: var(--font-sans);
+  font-size: clamp(0.9rem, 2.5vw, 1.8rem);
+  font-weight: 700;
+  color: var(--color-text);
+  transition: color 0.3s;
+  letter-spacing: -0.01em;
+}
+
+.fs-service-item:hover .fs-service-name {
+  color: var(--brand-ruby);
+}
+
+.fs-service-sub {
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+  transition: color 0.3s;
+  white-space: nowrap;
+}
+
+.fs-service-item:hover .fs-service-sub {
+  color: var(--brand-gold);
+}
+
+/* ── HORIZONTAL SCROLL CARDS ── */
+.fs-hscroll-outer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 9rem 0;
+  position: relative;
+  border-bottom: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+.fs-hscroll-track {
+  display: flex;
+  gap: 2px;
+  padding: 0 clamp(2rem, 8vw, 8rem);
+  will-change: transform;
+  overflow-x: auto;
+  scrollbar-width: none;
+  cursor: grab;
+  padding-bottom: 2rem;
+}
+
+.fs-hscroll-track:active {
+  cursor: grabbing;
+}
+
+.fs-hscroll-track::-webkit-scrollbar {
+  display: none;
+}
+
+.fs-hcard {
+  flex-shrink: 0;
+  width: 320px;
+  background: var(--color-border);
+  padding: 2.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.4s;
+}
+
+.fs-hcard:hover {
+  background: #1a0f0f;
+}
+
+.fs-hcard-num {
+  font-family: var(--font-sans);
+  font-size: 0.45rem;
+  letter-spacing: 0.2em;
+  color: var(--color-text-muted);
+  margin-bottom: 2rem;
+}
+
+.fs-hcard-title {
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-text);
+  margin-bottom: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.fs-hcard-text {
+  font-size: 1rem;
+  font-weight: 300;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  font-style: italic;
+}
+
+.fs-hcard-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--brand-ruby), var(--brand-gold));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fs-hcard:hover .fs-hcard-line {
+  transform: scaleX(1);
+}
+
+/* ── SCROLL TEXT FILL ANIMATION ── */
+.fs-scroll-fill-wrap {
+  position: relative;
+  display: inline-block;
+  line-height: 0.88;
+}
+
+.fs-scroll-fill-base {
+  font-family: var(--font-sans);
+  font-size: clamp(4rem, 13vw, 13rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  -webkit-text-stroke: 1px var(--color-text-muted);
+  color: transparent;
+  display: block;
+}
+
+.fs-scroll-fill-over {
+  font-family: var(--font-sans);
+  font-size: clamp(4rem, 13vw, 13rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  background: linear-gradient(110deg, var(--brand-ruby), var(--brand-gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  clip-path: inset(0 100% 0 0);
+  animation: fs-sfill linear both;
+  animation-timeline: view();
+  animation-range: entry 10% exit 60%;
+}
+
+.fs-scroll-fill-over.fs-b {
+  animation-range: entry 20% exit 70%;
+}
+
+.fs-scroll-fill-over.fs-c {
+  animation-range: entry 30% exit 80%;
+}
+
+@keyframes fs-sfill {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0% 0 0); }
+}
+
+/* ── REVEAL ANIMATIONS ── */
+.fs-reveal {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(30%) scale(0.9);
+  filter: blur(5px);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), filter 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fs-reveal.in {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+.fs-reveal.out {
+  opacity: 0;
+  transform: translateY(-18%) scale(1.06);
+  filter: blur(4px);
+  transition-duration: 0.5s;
+}
+
+.fs-reveal .fs-d0 { transition-delay: 0s; }
+.fs-reveal .fs-d1 { transition-delay: 0.1s; }
+.fs-reveal .fs-d2 { transition-delay: 0.2s; }
+.fs-reveal .fs-d3 { transition-delay: 0.3s; }
+.fs-reveal .fs-d4 { transition-delay: 0.4s; }
+.fs-reveal .fs-d5 { transition-delay: 0.5s; }
+
+@keyframes fs-hlkf {
+  from { opacity: 0; transform: translateY(30%) scale(0.9); filter: blur(5px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+.fs-reveal-hl {
+  display: inline-block;
+  opacity: 0;
+  animation: fs-hlkf 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.fs-reveal-hl.fs-d0 { animation-delay: 0.1s; }
+.fs-reveal-hl.fs-d1 { animation-delay: 0.25s; }
+.fs-reveal-hl.fs-d2 { animation-delay: 0.4s; }
+.fs-reveal-hl.fs-d3 { animation-delay: 0.55s; }
+.fs-reveal-hl.fs-d4 { animation-delay: 0.7s; }
+
+/* ── CONTACT EMAIL HOVER ── */
+.fs-email {
+  display: inline-block;
+  position: relative;
+  transition: color 0.4s;
+}
+
+.fs-email::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--brand-ruby);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fs-email:hover {
+  color: var(--brand-ruby);
+}
+
+.fs-email:hover::after {
+  transform: scaleX(1);
 }
 
 .hero-section__title {
