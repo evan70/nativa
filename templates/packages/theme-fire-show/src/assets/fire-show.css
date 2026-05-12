@@ -489,6 +489,95 @@ h1, h2, h3, h4, h5, h6,
   transform: scaleX(1);
 }
 
+/* ── FIRE SHOW CARDS (BEM Vanilla Cards) ── */
+.card-grid--horizontal {
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  cursor: grab;
+  padding: 0 clamp(2rem, 8vw, 8rem) 2rem;
+  will-change: transform;
+}
+
+.card-grid--horizontal:active {
+  cursor: grabbing;
+}
+
+.card-grid--horizontal::-webkit-scrollbar {
+  display: none;
+}
+
+/* Fire theme card modifier */
+.card--fire {
+  flex-shrink: 0;
+  width: 320px;
+  background: var(--color-border);
+  border: none;
+  padding: 2.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.4s;
+}
+
+.card--fire:hover {
+  background: #1a0f0f;
+  transform: translateY(-4px);
+}
+
+.card--fire:hover {
+  border-color: var(--brand-ruby);
+  box-shadow: 0 0 25px rgba(255, 77, 0, 0.3);
+}
+
+.card--fire .card__subtitle {
+  font-family: var(--font-sans);
+  font-size: 0.45rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 1rem;
+}
+
+.card--fire .card__title {
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.card--fire .card__body {
+  padding: 0;
+}
+
+.card--fire .card__body p {
+  font-size: 1rem;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Fire gradient line at bottom */
+.card--fire::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--brand-ruby), var(--brand-gold));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card--fire:hover::after {
+  transform: scaleX(1);
+}
+
 /* ── SCROLL TEXT FILL ANIMATION ── */
 .fs-scroll-fill-wrap {
   position: relative;
