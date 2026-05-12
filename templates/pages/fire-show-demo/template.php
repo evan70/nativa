@@ -109,57 +109,45 @@ $this->layout('layouts.app');
     </div>
 </section>
 
-<!-- HORIZONTAL SCROLL CARDS - Vanilla Cards BEM -->
-<div class="fs-hscroll-outer fs-reveal" id="cards">
-    <div class="fs-label">Prečo my</div>
-    <div class="card-grid card-grid--horizontal" id="fs-hscroll-track">
-        <article class="card card--interactive card--fire">
-            <div class="card__header">
-                <span class="card__subtitle">01</span>
-                <h3 class="card__title">11 rokov skúseností</h3>
-            </div>
-            <div class="card__body">
-                <p>Každé vystúpenie je výsledkom rokmi budovaného remesla.</p>
-            </div>
-        </article>
-        <article class="card card--interactive card--fire">
-            <div class="card__header">
-                <span class="card__subtitle">02</span>
-                <h3 class="card__title">Bezpečnosť na prvom mieste</h3>
-            </div>
-            <div class="card__body">
-                <p>Profesionálny prístup, certifikované rekvizity.</p>
-            </div>
-        </article>
-        <article class="card card--interactive card--fire">
-            <div class="card__header">
-                <span class="card__subtitle">03</span>
-                <h3 class="card__title">Na mieru každej akcie</h3>
-            </div>
-            <div class="card__body">
-                <p>Každé vystúpenie navrhujeme osobitne.</p>
-            </div>
-        </article>
-        <article class="card card--interactive card--fire">
-            <div class="card__header">
-                <span class="card__subtitle">04</span>
-                <h3 class="card__title">Celé Slovensko</h3>
-            </div>
-            <div class="card__body">
-                <p>Pôsobíme po celom Slovensku a okolí.</p>
-            </div>
-        </article>
-        <article class="card card--interactive card--fire">
-            <div class="card__header">
-                <span class="card__subtitle">05</span>
-                <h3 class="card__title">Komplexná show</h3>
-            </div>
-            <div class="card__body">
-                <p>Od ohňa cez svetlo po žonglovanie.</p>
-            </div>
-        </article>
+<!-- PREČO MY - Normal Grid -->
+<section id="proc" class="fs-reveal">
+    <div class="fs-glow"></div>
+    <div class="container">
+        <div class="fs-label">Prečo my</div>
+        
+        <div class="card-grid card-grid--cols-3">
+            <article class="card card--interactive">
+                <div class="card__header">
+                    <h3 class="card__title">Skúsenosti</h3>
+                    <p class="card__subtitle">11 rokov</p>
+                </div>
+                <div class="card__body">
+                    <p>Desiatky úspešných vystúpení na Slovensku aj v zahraničí.</p>
+                </div>
+            </article>
+            
+            <article class="card card--interactive">
+                <div class="card__header">
+                    <h3 class="card__title">Bezpečnosť</h3>
+                    <p class="card__subtitle">Prvoradá</p>
+                </div>
+                <div class="card__body">
+                    <p>Certifikované rekvizity a poistenie vystúpenia.</p>
+                </div>
+            </article>
+            
+            <article class="card card--interactive">
+                <div class="card__header">
+                    <h3 class="card__title">Individuálne</h3>
+                    <p class="card__subtitle">Na mieru</p>
+                </div>
+                <div class="card__body">
+                    <p>Každú akciu prispôsobime vašim potrebám.</p>
+                </div>
+            </article>
+        </div>
     </div>
-</div>
+</section>
 
 <!-- SCROLL TEXT FILL SECTION -->
 <section id="filosofia" class="fs-reveal">
