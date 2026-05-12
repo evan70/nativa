@@ -17,10 +17,9 @@ class FireShowDemoController
     public function index(Request $request): Response
     {
         return $this->view
-            ->withTitle('Fire Show Demo - All 12 Features')
-            ->withMetaDescription('Demo page showcasing all 12 interactive features of the Fire Show theme.')
             ->render('pages/fire-show-demo/template', [
-                'title' => 'Fire Show Demo',
+                'title' => 'Fire Show Demo - All 12 Features',
+                'metaDescription' => 'Demo page showcasing all 12 interactive features of the Fire Show theme.',
             ]);
     }
 }
