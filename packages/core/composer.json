@@ -3,6 +3,8 @@
     "description": "Marko Framework Core",
     "license": "MIT",
     "type": "library",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
         "php": "^8.5",
         "psr/container": "^2.0"

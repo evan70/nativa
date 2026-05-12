@@ -3,6 +3,8 @@
     "description": "Marko Framework Routing",
     "license": "MIT",
     "type": "library",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
         "php": "^8.5",
         "marko/core": "self.version"
