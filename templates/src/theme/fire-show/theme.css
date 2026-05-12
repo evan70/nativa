@@ -744,3 +744,171 @@ h1, h2, h3, h4, h5, h6,
   --shadow-lg: 0 8px 25px rgba(217, 74, 26, 0.22);
   --shadow-xl: 0 12px 35px rgba(217, 74, 26, 0.28);
 }
+
+/* ========================================
+   RESPONSIVE STYLES - MOBILE
+   ======================================== */
+
+/* Base responsive adjustments */
+@media (max-width: 768px) {
+  /* Navigation */
+  .fs-navbar {
+    padding: 1rem 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .fs-navbar__brand {
+    font-size: 0.55rem;
+  }
+  
+  .fs-navbar__links {
+    gap: 1.5rem;
+  }
+  
+  .fs-navbar__link {
+    font-size: 0.4rem;
+  }
+  
+  /* Hero Section */
+  .hero-section__content {
+    padding: 6rem 1rem 4rem;
+  }
+  
+  .hero-section__content > span {
+    display: block;
+    font-size: clamp(2.5rem, 15vw, 4rem) !important;
+    line-height: 1.1;
+  }
+  
+  .hero-section__description {
+    font-size: 1rem !important;
+    margin: 1.5rem 0;
+  }
+  
+  /* Marquee - hide on mobile or make smaller */
+  .fs-marquee-wrap {
+    padding: 0.75rem 0;
+  }
+  
+  .fs-marquee-track {
+    gap: 1.5rem;
+  }
+  
+  .fs-marquee-track span {
+    font-size: 0.4rem;
+  }
+  
+  /* Service List */
+  .fs-service-list {
+    margin-top: 2rem;
+  }
+  
+  .fs-service-item {
+    grid-template-columns: 40px 1fr;
+    padding: 1.2rem 0;
+    gap: 1rem;
+  }
+  
+  .fs-service-name {
+    font-size: 1rem;
+  }
+  
+  .fs-service-sub {
+    display: none;
+  }
+  
+  /* Cards Grid - horizontal scroll */
+  .card-grid--horizontal {
+    padding: 0 1rem 1.5rem;
+    gap: 1rem;
+  }
+  
+  .card--fire {
+    width: 280px;
+    padding: 1.5rem;
+  }
+  
+  .card--fire .card__title {
+    font-size: 1rem;
+  }
+  
+  /* Scroll Text Fill - smaller on mobile */
+  .fs-scroll-fill-wrap {
+    margin-top: 2rem;
+  }
+  
+  .fs-scroll-fill-base,
+  .fs-scroll-fill-over {
+    font-size: clamp(2.5rem, 15vw, 4rem);
+  }
+  
+  /* Section padding */
+  section,
+  .fs-hscroll-outer {
+    padding: 4rem 1rem;
+  }
+  
+  .fs-label {
+    margin-bottom: 2rem;
+    font-size: 0.4rem;
+  }
+  
+  /* Contact section */
+  [id="kontakt"] h2 {
+    font-size: clamp(1.5rem, 8vw, 2.5rem) !important;
+  }
+  
+  .fs-email {
+    font-size: clamp(1rem, 4vw, 1.5rem) !important;
+  }
+  
+  /* Footer */
+  .footer {
+    padding: 1.5rem 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .fs-navbar {
+    padding: 0.75rem;
+  }
+  
+  .fs-navbar__links {
+    gap: 1rem;
+  }
+  
+  .fs-navbar__link {
+    font-size: 0.35rem;
+  }
+  
+  .hero-section__content {
+    padding: 5rem 0.75rem 3rem;
+  }
+  
+  .btn--lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .card--fire {
+    width: 260px;
+    padding: 1.25rem;
+  }
+}
+
+/* Landscape mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .hero-section__content {
+    padding: 4rem 1rem 2rem;
+  }
+  
+  section,
+  .fs-hscroll-outer {
+    padding: 3rem 1rem;
+  }
+}
