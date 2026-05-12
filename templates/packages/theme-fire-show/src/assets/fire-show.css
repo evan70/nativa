@@ -133,17 +133,30 @@ h1, h2, h3, h4, h5, h6,
   filter: drop-shadow(0 0 10px rgba(255, 77, 0, 0.3));
 }
 
-/* High Contrast Light Mode (Optional) */
+/* Light Mode - Fire Theme */
 [data-theme="light"] {
-  --color-bg: #fffaf5;
+  /* Warm white backgrounds - lighter version of dark #060504 */
+  --color-bg: #fff8f5;
   --color-bg-alt: #ffffff;
-  --color-bg-hover: #fff0e6;
-  --color-border: #ffd6cc;
-  --color-text: #2a0a0a;
-  --color-text-muted: #6b4c4c;
-  --color-text-inverse: #ffffff;
-  --brand-ruby: #cc3d00;
+  --color-bg-hover: #ffeae0;
+  --color-border: #ffdcc8;
   
-  --shadow-sm: 0 4px 10px rgba(204, 61, 0, 0.1);
-  --shadow-lg: 0 10px 25px rgba(204, 61, 0, 0.15);
+  /* Dark warm text - lighter version of dark #ede8df */
+  --color-text: #2a1810;
+  --color-text-muted: #6b4a40;
+  --color-text-inverse: #ffffff;
+  
+  /* Fire colors - adjusted for light backgrounds */
+  --brand-ruby: #d94a1a;
+  --brand-ruby-light: #e8622a;
+  --brand-ruby-dark: #b83d10;
+  --brand-gold: #c49a3c;
+  --brand-gold-light: #d4a840;
+  
+  /* Shadows - warm fire glow but lighter */
+  --shadow-xs: 0 0 5px rgba(217, 74, 26, 0.08);
+  --shadow-sm: 0 2px 8px rgba(217, 74, 26, 0.12);
+  --shadow-md: 0 4px 15px rgba(217, 74, 26, 0.18);
+  --shadow-lg: 0 8px 25px rgba(217, 74, 26, 0.22);
+  --shadow-xl: 0 12px 35px rgba(217, 74, 26, 0.28);
 }
