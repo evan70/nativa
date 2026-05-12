@@ -13,7 +13,7 @@ import './core/tokens/unified.css';
 import './core/components/page-header.css';
 
 // Theme (brand colors + theme-specific overrides)
-import './theme/fire-show/theme.css';
+import './core/theme/default/theme.css';
 
 // Shared component styles
 import './core/global/utilities.css';
@@ -30,7 +30,6 @@ import './core/components/form.css';
 // Shared JS components
 import { initThemeSwitcher } from './dev/theme-switcher.ts';
 import { SectionLoader } from './core/sections/SectionLoader.ts';
-import initFireShowTheme from './theme/fire-show';
 
 // Deferred components (loaded after page is ready)
 // These don't block initial render
@@ -81,9 +80,6 @@ if (document.readyState === 'loading') {
 function init() {
   SectionLoader.loadSections();
   initThemeSwitcher();
-  
-  // Fire Show theme interactivity
-  initFireShowTheme();
   
   // Load deferred components after page is interactive
   initDeferred();
