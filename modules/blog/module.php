@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Blog\Admin\BlogAdminSection;
 use App\Blog\Contracts\ArticleServiceInterface;
 use App\Blog\Controller\BlogAdminController;
-use App\Blog\Database\ArticleConnection;
 use App\Blog\Repository\ArticleRepository;
 use App\Blog\Service\ArticleService;
 use Marko\Admin\Contracts\AdminSectionRegistryInterface;
@@ -16,13 +15,9 @@ use Marko\Log\Contracts\LoggerInterface;
 
 return [
     'bindings' => [
-        ArticleConnection::class => function (): ArticleConnection {
-            return new ArticleConnection();
-        },
-        
         ArticleRepository::class => function (ContainerInterface $container): ArticleRepository {
             return new ArticleRepository(
-                $container->get(ArticleConnection::class)->getConnection(),
+                $container->get(\Marko\Database\Connection\ConnectionInterface::class),
                 new EntityMetadataFactory(),
                 new EntityHydrator(),
             );
