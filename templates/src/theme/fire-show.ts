@@ -31,7 +31,7 @@ export default function initFireShowTheme() {
   }
 
   // ── NAV SCROLL CLASS ──
-  const navbar = document.querySelector('.navbar') as HTMLElement | null;
+  const navbar = document.querySelector('.fs-navbar') as HTMLElement | null;
   if (navbar) {
     lenis.on('scroll', ({ scroll }: { scroll: number }) => {
       navbar.classList.toggle('fs-scrolled', scroll > 80);
