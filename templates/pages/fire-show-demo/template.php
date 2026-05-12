@@ -9,22 +9,6 @@ $this->layout('layouts.app');
 <div class="fs-cursor-ring" id="fs-cursor-ring"></div>
 <div class="fs-progress" id="fs-progress"></div>
 
-<!-- Navigation - Fire Show Theme -->
-<nav class="fs-navbar">
-    <div class="fs-navbar__brand">Ohnivá Show</div>
-    <ul class="fs-navbar__links">
-        <li class="fs-navbar__item">
-            <a href="#sluzby" class="fs-navbar__link">Služby</a>
-        </li>
-        <li class="fs-navbar__item">
-            <a href="#filosofia" class="fs-navbar__link">Filozofia</a>
-        </li>
-        <li class="fs-navbar__item">
-            <a href="#kontakt" class="fs-navbar__link">Kontakt</a>
-        </li>
-    </ul>
-</nav>
-
 <!-- HERO SECTION -->
 <section class="hero-section" id="hero">
     <div class="fs-glow"></div>
