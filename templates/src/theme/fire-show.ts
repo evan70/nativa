@@ -95,12 +95,14 @@ export default function initFireShowTheme() {
   }
 
   // ── HORIZONTAL SCROLL DRAG ──
-  const hscrollTrack = document.querySelector('.fs-hscroll-track') as HTMLElement | null;
+  // Use id selector for horizontal scroll track
+  const hscrollTrack = document.getElementById('fs-hscroll-track') as HTMLElement | null;
   if (hscrollTrack) {
     let isDragging = false;
     let startX = 0;
     let scrollLeft = 0;
 
+    // Mouse drag
     hscrollTrack.addEventListener('mousedown', (e: MouseEvent) => {
       isDragging = true;
       startX = e.pageX - hscrollTrack.offsetLeft;
@@ -118,6 +120,23 @@ export default function initFireShowTheme() {
       const x = e.pageX - hscrollTrack.offsetLeft;
       hscrollTrack.scrollLeft = scrollLeft - (x - startX) * 1.5;
     });
+
+    // Touch drag for mobile
+    hscrollTrack.addEventListener('touchstart', (e: TouchEvent) => {
+      isDragging = true;
+      startX = e.touches[0].pageX - hscrollTrack.offsetLeft;
+      scrollLeft = hscrollTrack.scrollLeft;
+    }, { passive: true });
+
+    hscrollTrack.addEventListener('touchend', () => {
+      isDragging = false;
+    });
+
+    hscrollTrack.addEventListener('touchmove', (e: TouchEvent) => {
+      if (!isDragging || !hscrollTrack) return;
+      const x = e.touches[0].pageX - hscrollTrack.offsetLeft;
+      hscrollTrack.scrollLeft = scrollLeft - (x - startX) * 1.5;
+    }, { passive: true });
   }
 
   // ── INTERSECTION OBSERVER FOR REVEALS ──
