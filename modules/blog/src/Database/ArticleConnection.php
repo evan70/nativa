@@ -32,7 +32,7 @@ class ArticleConnection implements ConnectionInterface
         return $this->connection->execute($sql, $params);
     }
 
-    public function lastInsertId(): string
+    public function lastInsertId(): int
     {
         return $this->connection->lastInsertId();
     }
