@@ -32,6 +32,7 @@ export default defineConfig(() => {
           'page-dash': resolve(__dirname, 'src/pages/dash/dash.ts'),
           'page-auth': resolve(__dirname, 'src/pages/auth/auth.ts'),
           'page-errors': resolve(__dirname, 'src/pages/errors/errors.ts'),
+          'page-fire-show-demo': resolve(__dirname, 'src/pages/fire-show-demo.ts'),
         },
         output: {
           entryFileNames: 'assets/[name]-[hash].js',
