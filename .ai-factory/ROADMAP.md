@@ -14,7 +14,7 @@
 ### Backend (Marko PHP)
 
 - [ ] **User Registration** — Complete registration flow with validation
-- [ ] **REST API Layer** — JSON API for frontend integration
+- [x] **REST API Layer** — JSON API for frontend integration
 - [ ] **Search** — Full-text search for articles/portfolio
 - [ ] **Email Notifications** — Welcome emails, notifications
 - [ ] **File Upload** — Media upload handling
@@ -43,3 +43,4 @@
 | Login | 2026-05-13 |
 | Cardboard Editor | 2026-05-13 |
 | Themes | 2026-05-13 |
+| REST API Layer | 2026-05-13 |
