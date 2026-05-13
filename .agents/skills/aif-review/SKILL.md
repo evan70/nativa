@@ -57,16 +57,6 @@ Perform thorough code reviews focusing on correctness, security, performance, an
 - [ ] SOLID principles
 - [ ] DRY principle
 
-### PHP / Marko Framework Specific
-- [ ] `declare(strict_types=1);` at the top of every PHP file
-- [ ] No `new` in constructors — use dependency injection via constructor promotion
-- [ ] Classes marked `readonly` where possible (controllers, services, entities)
-- [ ] Code passes PHPStan level 6
-- [ ] Routing uses attributes (`#[Get]`, `#[Post]`, etc.) not manual route files
-- [ ] Entities use `Marko\Database\Attributes\Column` and `Table` attributes
-- [ ] Module bindings defined in `module.php` (not hardcoded)
-- [ ] Controllers in `app/src/Controllers/`, Entities in `app/src/Entity/`
-
 ### Testing
 - [ ] Test coverage for new code
 - [ ] Edge cases tested

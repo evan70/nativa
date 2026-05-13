@@ -38,7 +38,7 @@ $formatDate = static function (?\DateTimeInterface $value): ?string {
                     <?php if (!empty($article->categoryId)): ?>
                         <p class="card__subtitle">Category: #<?= $this->e((string) $article->categoryId) ?></p>
                     <?php endif; ?>
-                    <div><?= nl2br($this->e($article->content)) ?></div>
+                    <div><?= $article->content ?></div>
                 </div>
 
                 <footer class="card__footer">

@@ -52,11 +52,11 @@ readonly class PortfolioController
 
         return $this->view
             ->render('pages/portfolio/show', [
-                'title' => $project->title . ' | Nativa',
-                'metaDescription' => $project->description,
+                'title' => ($project->title ?? 'Not Found') . ' | Nativa',
+                'metaDescription' => $project !== null ? $project->description : 'Project not found',
                 'eyebrow' => $project === null ? 'Our Work' : 'Case Study',
-                'heading' => $project->title,
-                'description' => $project->description,
+                'heading' => $project !== null ? $project->title : 'Not Found',
+                'description' => $project !== null ? $project->description : 'Project not found',
                 'project' => $project,
                 'projects' => $this->loadProjects(),
             ])
@@ -191,6 +191,7 @@ readonly class PortfolioController
         return getenv('LOG_LEVEL') === 'debug';
     }
 
+    /** @param array<string, mixed> $context */
     private function logDebug(string $message, array $context = []): void
     {
         if (function_exists('log_add_debug')) {

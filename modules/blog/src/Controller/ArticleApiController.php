@@ -26,19 +26,27 @@ class ArticleApiController
     {
         $input = $_POST ?? [];
         
-        if (empty($input['title']) || empty($input['content']) || empty($input['slug'])) {
+        $title = $input['title'] ?? '';
+        $content = $input['content'] ?? '';
+        $slug = $input['slug'] ?? '';
+        $excerpt = $input['excerpt'] ?? '';
+        $image = $input['image'] ?? '';
+        $publishedInput = $input['published'] ?? 'false';
+        $categoryIdInput = $input['category_id'] ?? null;
+
+        if (!is_string($title) || $title === '' || !is_string($content) || $content === '' || !is_string($slug) || $slug === '') {
             throw new ArticleValidationException('Title, content, and slug are required');
         }
 
         try {
             $request = new CreateArticleRequest(
-                title: $input['title'],
-                content: $input['content'],
-                slug: $input['slug'],
-                excerpt: $input['excerpt'] ?? '',
-                image: $input['image'] ?? '',
-                published: ($input['published'] ?? 'false') === 'true',
-                categoryId: isset($input['category_id']) ? (int) $input['category_id'] : null,
+                title: $title,
+                content: $content,
+                slug: $slug,
+                excerpt: is_string($excerpt) ? $excerpt : '',
+                image: is_string($image) ? $image : '',
+                published: $publishedInput === 'true',
+                categoryId: $categoryIdInput !== null && is_numeric($categoryIdInput) ? (int) $categoryIdInput : null,
             );
 
             $article = $this->service->createArticle($request);
@@ -57,8 +65,11 @@ class ArticleApiController
     {
         $input = $_POST ?? [];
 
+        /** @var array<string, mixed> $validatedInput */
+        $validatedInput = (array) $input;
+
         try {
-            $request = UpdateArticleRequest::fromArray($input);
+            $request = UpdateArticleRequest::fromArray($validatedInput);
             $article = $this->service->updateArticle($id, $request);
 
             return Response::json([
@@ -88,9 +99,13 @@ class ArticleApiController
     #[Get('/api/articles')]
     public function list(): Response
     {
-        $limit = (int) ($_GET['limit'] ?? 10);
-        $offset = (int) ($_GET['offset'] ?? 0);
-        $categoryId = isset($_GET['category_id']) ? (int) $_GET['category_id'] : null;
+        $limitInput = $_GET['limit'] ?? '10';
+        $offsetInput = $_GET['offset'] ?? '0';
+        $categoryIdInput = $_GET['category_id'] ?? null;
+
+        $limit = is_numeric($limitInput) ? (int) $limitInput : 10;
+        $offset = is_numeric($offsetInput) ? (int) $offsetInput : 0;
+        $categoryId = $categoryIdInput !== null && is_numeric($categoryIdInput) ? (int) $categoryIdInput : null;
 
         $articles = $categoryId 
             ? $this->service->findByCategory($categoryId, $limit, $offset)

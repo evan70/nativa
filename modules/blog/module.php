@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Blog\Admin\BlogAdminSection;
 use App\Blog\Contracts\ArticleServiceInterface;
 use App\Blog\Controller\BlogAdminController;
+use App\Blog\Database\BlogConnection;
 use App\Blog\Repository\ArticleRepository;
 use App\Blog\Service\ArticleService;
 use Marko\Admin\Contracts\AdminSectionRegistryInterface;
@@ -15,9 +16,15 @@ use Marko\Log\Contracts\LoggerInterface;
 
 return [
     'bindings' => [
+        BlogConnection::class => function (ContainerInterface $container): BlogConnection {
+            return new BlogConnection(
+                $container->get(\App\DatabaseModular\Contracts\ModuleDatabaseResolverInterface::class)
+            );
+        },
+        
         ArticleRepository::class => function (ContainerInterface $container): ArticleRepository {
             return new ArticleRepository(
-                $container->get(\Marko\Database\Connection\ConnectionInterface::class),
+                $container->get(BlogConnection::class)->getConnection(),
                 new EntityMetadataFactory(),
                 new EntityHydrator(),
             );

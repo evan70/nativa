@@ -32,11 +32,13 @@ interface ArticleServiceInterface
 
     /**
      * Find all published articles
+     * @return array<int, ArticleDTO>
      */
     public function findPublished(int $limit = 10, int $offset = 0): array;
 
     /**
      * Find articles by category
+     * @return array<int, ArticleDTO>
      */
     public function findByCategory(int $categoryId, int $limit = 10, int $offset = 0): array;
 

@@ -27,7 +27,9 @@ class ArticleController
     public function index(Request $request): Response
     {
         $htmx = HtmxContext::fromRequest($request);
-        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $pageInput = $_GET['page'] ?? '1';
+        $page = is_numeric($pageInput) ? (int) $pageInput : 1;
+        $page = max(1, $page);
 
         // If HTMX swap request targeting article-list, return partial
         if ($htmx !== null && $htmx->target() === 'article-list') {
@@ -71,7 +73,9 @@ class ArticleController
     #[Get('/articles/load')]
     public function loadMore(): Response
     {
-        $page = max(1, (int) ($_GET['page'] ?? 2));
+        $pageInput = $_GET['page'] ?? '2';
+        $page = is_numeric($pageInput) ? (int) $pageInput : 2;
+        $page = max(1, $page);
 
         return $this->renderPartial($page);
     }
@@ -124,11 +128,13 @@ class ArticleController
         return Response::html($html);
     }
 
+    /**
+     * @param array<int, \App\Blog\DTO\ArticleDTO> $articles
+     */
     private function renderArticlesHtml(array $articles, int $page): string
     {
         $items = '';
-        foreach ($articles as $article) {
-            $dto = ArticleDTO::fromEntity($article);
+        foreach ($articles as $dto) {
             $imageHtml = $dto->image
                 ? '<div class="card__image"><img src="' . htmlspecialchars($dto->image) . '" alt="' . htmlspecialchars($dto->title) . '"></div>'
                 : '';

@@ -245,86 +245,6 @@ or using optional chaining: `user?.profile?.name`"
 
 ---
 
-## PHP / Marko Framework Conventions
-
-### Class Design
-```php
-// ✅ Good: readonly class with constructor injection, strict types
-<?php
-
-declare(strict_types=1);
-
-namespace App\Controllers;
-
-use Marko\Routing\Attributes\Get;
-use Marko\Routing\Http\Request;
-use Marko\Routing\Http\Response;
-use Marko\View\ViewInterface;
-
-readonly class HomeController
-{
-    public function __construct(
-        private ViewInterface $view,
-    ) {}
-
-    #[Get('/')]
-    public function index(Request $request): Response
-    {
-        return $this->view->render('app.home');
-    }
-}
-```
-
-### Entity Design
-```php
-// ✅ Good: Entity with Table and Column attributes
-<?php
-
-declare(strict_types=1);
-
-namespace App\Entity;
-
-use Marko\Database\Attributes\Column;
-use Marko\Database\Attributes\Table;
-use Marko\Database\Entity\Entity;
-
-#[Table('portfolio_items')]
-class PortfolioItem extends Entity
-{
-    #[Column(primaryKey: true, autoIncrement: true)]
-    public ?int $id = null;
-
-    #[Column]
-    public string $title = '';
-}
-```
-
-### Module Definition
-```php
-// ✅ Good: module.php with bindings
-<?php
-
-declare(strict_types=1);
-
-return [
-    'bindings' => [
-        PostRepositoryInterface::class => PostRepository::class,
-    ],
-    'singletons' => [
-        PostRepository::class,
-    ],
-];
-```
-
-**Rules:**
-- Use `declare(strict_types=1);` in every PHP file
-- Prefer `readonly` classes for controllers, services, and value objects
-- Never use `new` for service classes — always inject via constructor
-- Use routing attributes (`#[Get]`, `#[Post]`, etc.) instead of manual route definitions
-- Use `\Marko\Exceptions\HttpException` for HTTP errors, not generic exceptions
-- Define module bindings in `module.php`, not inline
-- Follow PSR-4: namespace matches directory structure under `app/src/`
-
 ## Quick Rules Summary
 
 | Area | Rule |
@@ -334,4 +254,3 @@ return [
 | Errors | Specific types, never swallow, log context |
 | Tests | AAA pattern, test behavior, descriptive names |
 | Reviews | Be specific, suggest solutions, be kind |
-| PHP/Marko | strict_types, readonly, attributes, DI, module.php |

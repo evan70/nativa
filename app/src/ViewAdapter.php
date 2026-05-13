@@ -10,6 +10,7 @@ use Marko\View\ViewInterface;
 
 class ViewAdapter implements ViewInterface, AssetAwareViewInterface
 {
+    /** @var array<string, array{js: array<int, string>, css: array<int, string>}> */
     private array $customAssets = [];
     private ?string $lcpImage = null;
 

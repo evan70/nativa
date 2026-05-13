@@ -13,34 +13,57 @@ final class View
 
     public static ?string $lcpImage = null;
 
+    /** @var array<string, array{name: string, file: string, css?: array<int, string>, assets?: array<int, string>}>|null */
     private static ?array $manifest = null;
 
     public static ?string $currentTemplate = null;
     public static ?string $currentPage = null;
 
+    /**
+     * @return array<string, array{name: string, file: string, css?: array<int, string>, assets?: array<int, string>}>|null
+     */
+    /**
+     * @return array<string, array{name: string, file: string, css?: array<int, string>, assets?: array<int, string>}>|null
+     */
     private static function ensureManifestLoaded(): ?array
     {
         if (self::$manifest === null) {
             $path = dirname(__DIR__, 2) . '/public/dist/manifest.json';
-            if (is_file($path)) {
-                self::$manifest = json_decode(file_get_contents($path), true);
+            $content = is_file($path) ? file_get_contents($path) : null;
+            if (is_string($content)) {
+                /** @var mixed $decoded */
+                $decoded = json_decode($content, true);
+                /** @var array<string, array{name: string, file: string, css?: array<int, string>, assets?: array<int, string>}>|false $parsed */
+                $parsed = is_array($decoded) ? $decoded : false;
+                if ($parsed !== false) {
+                    self::$manifest = $parsed;
+                }
             }
         }
         return self::$manifest;
     }
 
+    /**
+     * @param array<string, array{name: string, file: string, css?: array<int, string>, assets?: array<int, string>}>|null $manifest
+     * @return array{name: string, file: string, css?: array<int, string>, assets?: array<int, string>}|null
+     */
     private static function findByName(?array $manifest, string $name): ?array
     {
         if (!$manifest) return null;
 
         foreach ($manifest as $entry) {
             if (isset($entry['name']) && $entry['name'] === $name) {
+                /** @var array{name: string, file: string, css?: array<int, string>, assets?: array<int, string>} $entry */
                 return $entry;
             }
         }
         return null;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @param string[] $pageAssets
+     */
     public static function render(
         string $template,
         array $data = [],
@@ -82,6 +105,9 @@ final class View
         return self::renderFile($layoutFile, [...$data, 'content' => $content, 'currentPage' => $page]);
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
     public static function partial(
         string $template,
         array $data = [],
@@ -165,6 +191,9 @@ final class View
         return $html;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
     private static function renderFile(
         string $template,
         array $data = [],

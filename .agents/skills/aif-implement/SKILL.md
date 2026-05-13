@@ -479,26 +479,6 @@ Shows progress without executing.
 
 For progress display format, blocker handling, session continuity examples, and full flow examples → see `references/IMPLEMENTATION-GUIDE.md`
 
-## PHP / Marko Framework Implementation Notes
-
-When implementing in this project:
-
-- **File placement**:
-  - Controllers → `app/src/Controllers/`
-  - Entities → `app/src/Entity/`
-  - Services → `app/src/Services/`
-  - Middleware → `app/src/Middleware/`
-  - Commands → `app/src/Command/`
-  - Migrations → `database/migrations/`
-  - Seeders → `app/Seed/`
-- **Every PHP file starts with**: `<?php\n\ndeclare(strict_types=1);`
-- **Controllers**: Use `readonly` classes with constructor injection, route attributes (`#[Get('/path')]`)
-- **Entities**: Extend `Marko\Database\Entity\Entity`, use `#[Table]` and `#[Column]` attributes
-- **Module system**: Follow the module pattern — `module.php` returns bindings/singletons/preferences/plugins
-- **DI**: Constructor injection only — never use `new` for services, always inject via constructor
-- **View rendering**: Use `$this->view->withAssets()->render()` pattern for templates with frontend assets
-- **Logging**: Use `log_add_debug($message, $context)` or inject `LoggerInterface`
-
 ## Critical Rules
 
 1. **NEVER write tests** unless task list explicitly includes test tasks

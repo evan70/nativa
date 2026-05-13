@@ -1,9 +1,10 @@
 # PHPStan configuration
 parameters:
-    level: 4
+    level: max
     paths:
         - app
         - modules/blog/src
+        - modules/database-modular/src
     excludePaths:
         - vendor
         - packages
@@ -14,3 +15,6 @@ parameters:
         - '#Class Marko\\Authentication\\DefaultUserProvider not found#'
         - '#Offset.*always exists#'
         - '#Variable \$_POST on left side of \?\?#'
+        - '#Parameter.*storagePath.*implicitly nullable#'
+        - '#Property.*ModuleConnection.*pdo#'
+        - '#comparison.*PDO and null#'

@@ -1,0 +1,20 @@
+{
+    "name": "modules/database-modular",
+    "description": "Database modular module for Marko Framework - manages module-specific databases",
+    "type": "library",
+    "require": {
+        "php": "^8.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\DatabaseModular\\": "src/"
+        }
+    },
+    "extra": {
+        "marko": {
+            "module": true,
+            "group": "database",
+            "routes": []
+        }
+    }
+}

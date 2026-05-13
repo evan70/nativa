@@ -199,7 +199,7 @@ class ArticleServiceTest extends TestCase
         // Arrange
         $this->repository->expects($this->once())
             ->method('findOneBy')
-            ->with(['non-existent-slug'])
+            ->with(['slug' => 'non-existent-slug'])
             ->willReturn(null);
 
         // Act
@@ -223,13 +223,7 @@ class ArticleServiceTest extends TestCase
         $article2->published = true;
 
         $this->repository->expects($this->once())
-            ->method('findBy')
-            ->with(
-                ['published' => true],
-                ['createdAt' => 'DESC'],
-                10,
-                0,
-            )
+            ->method('findAll')
             ->willReturn([$article1, $article2]);
 
         // Act
@@ -246,15 +240,10 @@ class ArticleServiceTest extends TestCase
         $article->id = 1;
         $article->title = 'Category Article';
         $article->categoryId = 5;
+        $article->published = true;
 
         $this->repository->expects($this->once())
-            ->method('findBy')
-            ->with(
-                ['categoryId' => 5, 'published' => true],
-                ['createdAt' => 'DESC'],
-                10,
-                0,
-            )
+            ->method('findAll')
             ->willReturn([$article]);
 
         // Act

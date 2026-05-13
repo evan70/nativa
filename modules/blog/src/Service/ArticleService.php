@@ -22,6 +22,9 @@ class ArticleService implements ArticleServiceInterface
         $this->logger = $logger;
     }
 
+    /**
+     * @param array<string, mixed> $context
+     */
     private function log(string $level, string $message, array $context = []): void
     {
         if ($this->logger !== null && method_exists($this->logger, $level)) {
@@ -150,6 +153,9 @@ class ArticleService implements ArticleServiceInterface
         return ArticleDTO::fromEntity($article);
     }
 
+    /**
+     * @return array<int, ArticleDTO>
+     */
     public function findPublished(int $limit = 10, int $offset = 0): array
     {
         $articles = $this->repository->findAll();
@@ -163,10 +169,14 @@ class ArticleService implements ArticleServiceInterface
             }
             return $b->id <=> $a->id;
         });
-        // Apply limit/offset
-        return array_slice($filtered, $offset, $limit);
+        // Apply limit/offset and map to DTOs
+        $sliced = array_slice($filtered, $offset, $limit);
+        return array_map(fn($article) => ArticleDTO::fromEntity($article), $sliced);
     }
 
+    /**
+     * @return array<int, ArticleDTO>
+     */
     public function findByCategory(int $categoryId, int $limit = 10, int $offset = 0): array
     {
         $articles = $this->repository->findAll();
@@ -174,8 +184,9 @@ class ArticleService implements ArticleServiceInterface
         $filtered = array_values(array_filter($articles, fn($a) => $a->categoryId === $categoryId && $a->published));
         // Sort by createdAt DESC  
         usort($filtered, fn($a, $b) => ($b->createdAt ?? '') <=> ($a->createdAt ?? ''));
-        // Apply limit/offset
-        return array_slice($filtered, $offset, $limit);
+        // Apply limit/offset and map to DTOs
+        $sliced = array_slice($filtered, $offset, $limit);
+        return array_map(fn($article) => ArticleDTO::fromEntity($article), $sliced);
     }
 
     public function countPublished(): int

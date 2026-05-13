@@ -29,7 +29,7 @@ class Article extends Entity
     #[Column(type: 'TEXT')]
     public string $excerpt = '';
 
-    #[Column]
+    #[Column(type: 'string')]
     public string $image = '';
 
     #[Column]

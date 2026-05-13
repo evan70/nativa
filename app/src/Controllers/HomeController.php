@@ -38,6 +38,7 @@ class HomeController
         return getenv('LOG_LEVEL') === 'debug';
     }
 
+    /** @param array<string, mixed> $context */
     private function logDebug(string $message, array $context = []): void
     {
         if (function_exists('log_add_debug')) {

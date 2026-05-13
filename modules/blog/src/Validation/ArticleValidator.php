@@ -15,7 +15,7 @@ class ArticleValidator
 
     /**
      * Validate article creation/update data
-     * 
+     * @param array<string, mixed> $data
      * @return array{valid: bool, errors: array<string>}
      */
     public function validate(array $data, ?int $excludeId = null): array
@@ -23,9 +23,10 @@ class ArticleValidator
         $errors = [];
 
         // Title required
-        if (empty($data['title'])) {
+        $title = $data['title'] ?? '';
+        if (empty($title) || !is_string($title)) {
             $errors['title'] = 'Title is required';
-        } elseif (strlen($data['title']) > 255) {
+        } elseif (strlen($title) > 255) {
             $errors['title'] = 'Title must be less than 255 characters';
         }
 
@@ -35,15 +36,16 @@ class ArticleValidator
         }
 
         // Slug required
-        if (empty($data['slug'])) {
+        $slug = $data['slug'] ?? '';
+        if (empty($slug) || !is_string($slug)) {
             $errors['slug'] = 'Slug is required';
-        } elseif (!preg_match('/^[a-z0-9-]+$/', $data['slug'])) {
+        } elseif (!preg_match('/^[a-z0-9-]+$/', $slug)) {
             $errors['slug'] = 'Slug must contain only lowercase letters, numbers, and hyphens';
-        } elseif (strlen($data['slug']) > 255) {
+        } elseif (strlen($slug) > 255) {
             $errors['slug'] = 'Slug must be less than 255 characters';
         } else {
             // Check uniqueness
-            $existing = $this->repository->findOneBy(['slug' => $data['slug']]);
+            $existing = $this->repository->findOneBy(['slug' => $slug]);
             if ($existing !== null && ($excludeId === null || $existing->id !== $excludeId)) {
                 $errors['slug'] = 'Slug already exists';
             }
@@ -57,6 +59,8 @@ class ArticleValidator
 
     /**
      * Validate create request
+     * @param array<string, mixed> $data
+     * @return array{valid: bool, errors: array<string>}
      */
     public function validateCreate(array $data): array
     {
@@ -65,6 +69,8 @@ class ArticleValidator
 
     /**
      * Validate update request
+     * @param array<string, mixed> $data
+     * @return array{valid: bool, errors: array<string>}
      */
     public function validateUpdate(int $id, array $data): array
     {

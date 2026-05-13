@@ -5,6 +5,13 @@ declare(strict_types=1);
 use App\Blog\Entity\Article;
 
 $articles = $data['articles'] ?? [];
+
+// Escape helper function
+if (!function_exists('h')) {
+    function h(mixed $value): string {
+        return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
+    }
+}
 ?>
 
 <div class="admin-container">
@@ -24,7 +31,9 @@ $articles = $data['articles'] ?? [];
                     <th>Title</th>
                     <th>Slug</th>
                     <th>Status</th>
+                    <th>Published</th>
                     <th>Created</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -37,8 +46,16 @@ $articles = $data['articles'] ?? [];
                             </a>
                         </td>
                         <td><?= h($article->slug ?? '-') ?></td>
-                        <td><?= h($article->status ?? 'draft') ?></td>
+                        <td><span class="badge badge--<?= $article->status ?? 'draft' ?>"><?= h($article->status ?? 'draft') ?></span></td>
+                        <td><?= $article->published ? 'Yes' : 'No' ?></td>
                         <td><?= $article->createdAt?->format('Y-m-d') ?? '-' ?></td>
+                        <td class="actions">
+                            <a href="/mark/articles/<?= $article->id ?>/edit" class="btn btn--small btn--secondary">Edit</a>
+                            <form method="POST" action="/mark/articles/<?= $article->id ?>" style="display:inline" onsubmit="return confirm('Delete this article?')">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button type="submit" class="btn btn--small btn--danger">Delete</button>
+                            </form>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@nativa/cardboard':
+        specifier: workspace:*
+        version: link:packages/cardboard
+      '@nativa/theme-fire-show':
+        specifier: workspace:*
+        version: link:packages/theme-fire-show
       chart.js:
         specifier: ^4.5.1
         version: 4.5.1
@@ -18,6 +24,12 @@ importers:
       vite:
         specifier: ^8.0.11
         version: 8.0.11
+
+  packages/cardboard:
+    dependencies:
+      htmx.org:
+        specifier: ^2.0.10
+        version: 2.0.10
 
   packages/theme-fire-show:
     dependencies:
