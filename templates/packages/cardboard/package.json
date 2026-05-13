@@ -1,0 +1,24 @@
+{
+  "name": "@nativa/cardboard",
+  "version": "0.0.1",
+  "description": "Cardboard UI components for Vanilla Cards",
+  "type": "module",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./article-editor": "./src/article-editor/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "keywords": [
+    "components",
+    "article-editor",
+    "vanilla-cards"
+  ],
+  "author": "Nativa",
+  "license": "MIT",
+  "dependencies": {
+    "htmx.org": "^2.0.10"
+  }
+}
