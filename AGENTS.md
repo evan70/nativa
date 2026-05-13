@@ -78,6 +78,7 @@ Application skeleton for the Marko Framework, a PHP framework for building web a
 | CLI Reference | docs/cli.md | All available commands |
 | Deployment | docs/deployment.md | Production deployment |
 | Security | docs/security.md | Security policy |
+| Cardboard | docs/marko/src/content/docs/packages/cardboard.md | TypeScript UI components |
 | Architecture | .ai-factory/ARCHITECTURE.md | Architecture decisions |
 
 ## AI Context Files

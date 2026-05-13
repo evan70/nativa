@@ -183,3 +183,10 @@ if (result.ok) {
 }
 ```
 
+## Next Steps
+
+- [View and template rendering](/docs/packages/view/)
+- [Admin panel documentation](/docs/packages/admin/)
+- [Getting started guide](/docs/getting-started/introduction/)
+
+

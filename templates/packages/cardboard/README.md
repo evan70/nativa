@@ -74,11 +74,12 @@ Cardboard components follow a consistent pattern by extending the `BaseComponent
 
 ## Documentation
 
-Detailed documentation for each component and utility can be found in the [official documentation](https://nativa.dev/docs/packages/cardboard).
+Detailed documentation for each component and utility can be found in the [official documentation](https://marko.build/docs/packages/cardboard/).
 
-- [Article Editor](https://nativa.dev/docs/packages/cardboard#article-editor)
-- [Notifications](https://nativa.dev/docs/packages/cardboard#notifications)
-- [Utilities](https://nativa.dev/docs/packages/cardboard#utilities)
+- [Article Editor](https://marko.build/docs/packages/cardboard/#article-editor)
+- [Notifications](https://marko.build/docs/packages/cardboard/#notifications)
+- [Utilities](https://marko.build/docs/packages/cardboard/#utilities)
+
 
 ## License
 

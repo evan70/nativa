@@ -42,6 +42,7 @@ Visit http://localhost:8000
 | [CLI Reference](docs/cli.md) | All available commands |
 | [Deployment](docs/deployment.md) | Production deployment |
 | [Security](docs/security.md) | Security policy |
+| [Cardboard](docs/marko/src/content/docs/packages/cardboard.md) | TypeScript UI components |
 
 ## License
 

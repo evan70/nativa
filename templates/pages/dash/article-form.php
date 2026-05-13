@@ -29,13 +29,13 @@ $checked = function(string $field) use ($article, $isEdit) {
 
 <?php $this->section('content') ?>
 <header class="page-header">
-    <h1><?= $this->e($title) ?></h1>
+    <h1 class="page-header__title"><?= $this->e($title) ?></h1>
     <p class="page-header__subtitle">Dashboard / Articles / <?= $isEdit ? 'Edit' : 'Create' ?></p>
 </header>
 
-<div class="card" style="max-width: 800px;">
+<div class="card article-form-card">
     <div class="card__body">
-        <form method="POST" action="<?= $formAction ?>" style="display: flex; flex-direction: column; gap: var(--space-6);">
+        <form method="POST" action="<?= $formAction ?>" class="article-form">
             <?php if ($isEdit): ?>
                 <input type="hidden" name="_method" value="PUT">
             <?php endif; ?>
@@ -44,7 +44,7 @@ $checked = function(string $field) use ($article, $isEdit) {
                 <label for="title" class="form-label">Title *</label>
                 <input type="text" id="title" name="title" value="<?= $this->e($fv('title')) ?>" class="form-input" required>
                 <?php if (isset($errors['title'])): ?>
-                    <p style="color: var(--color-error); font-size: var(--text-xs); margin: var(--space-1) 0 0;"><?= $this->e($errors['title']) ?></p>
+                    <p class="form-error"><?= $this->e($errors['title']) ?></p>
                 <?php endif; ?>
             </div>
 
@@ -62,9 +62,9 @@ $checked = function(string $field) use ($article, $isEdit) {
 
             <div class="form-group">
                 <label for="content" class="form-label">Content *</label>
-                <textarea id="content" name="content" rows="15" class="form-input" required style="font-family: var(--font-mono);"><?= $this->e($fv('content')) ?></textarea>
+                <textarea id="content" name="content" rows="15" class="form-input article-form-editor" required><?= $this->e($fv('content')) ?></textarea>
                 <?php if (isset($errors['content'])): ?>
-                    <p style="color: var(--color-error); font-size: var(--text-xs); margin: var(--space-1) 0 0;"><?= $this->e($errors['content']) ?></p>
+                    <p class="form-error"><?= $this->e($errors['content']) ?></p>
                 <?php endif; ?>
             </div>
 
@@ -73,7 +73,7 @@ $checked = function(string $field) use ($article, $isEdit) {
                 <input type="text" id="image" name="image" value="<?= $this->e($fv('image')) ?>" class="form-input" placeholder="/dist/assets/images/...">
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+            <div class="article-form-row">
                 <div class="form-group">
                     <label for="status" class="form-label">Status</label>
                     <select id="status" name="status" class="form-input">
@@ -103,7 +103,7 @@ $checked = function(string $field) use ($article, $isEdit) {
                 </label>
             </div>
 
-            <div style="display: flex; gap: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--color-border);">
+            <div class="article-form-actions">
                 <button type="submit" class="btn">
                     <?= $isEdit ? 'Update Article' : 'Create Article' ?>
                 </button>

@@ -6,7 +6,7 @@
 
 ### Frontend (Cardboard/TypeScript)
 
-- [ ] **Cardboard README & Docs** — Complete documentation for the Cardboard package
+- [x] **Cardboard README & Docs** — Complete documentation for the Cardboard package
 - [ ] **Cardboard Test Suite** — Add unit tests for all components
 - [ ] **More UI Components** — Build additional components (modals, toasts, forms)
 - [ ] **Theme System** — Document and extend theme customization
@@ -44,3 +44,4 @@
 | Cardboard Editor | 2026-05-13 |
 | Themes | 2026-05-13 |
 | REST API Layer | 2026-05-13 |
+| Cardboard README & Docs | 2026-05-13 |

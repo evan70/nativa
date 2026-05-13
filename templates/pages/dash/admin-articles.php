@@ -7,12 +7,12 @@ $articles = $data['articles'] ?? [];
 
 <?php $this->section('content') ?>
 <header class="page-header">
-    <h1><?= $this->e($title ?? 'Articles Administration') ?></h1>
+    <h1 class="page-header__title"><?= $this->e($title ?? 'Articles Administration') ?></h1>
     <p class="page-header__subtitle">Dashboard / Articles</p>
 </header>
 
-<div class="card" style="margin-bottom: var(--space-4);">
-    <div class="card__body" style="display: flex; justify-content: flex-end;">
+<div class="card article-toolbar-wrap">
+    <div class="card__body article-toolbar">
         <a href="/mark/articles/new" class="btn">Create New Article</a>
     </div>
 </div>
@@ -25,7 +25,7 @@ $articles = $data['articles'] ?? [];
     </div>
 <?php else: ?>
     <div class="card">
-        <div class="card__body" style="padding: 0;">
+        <div class="card__body article-table-wrap">
             <table class="table">
                 <thead>
                     <tr>
@@ -42,23 +42,23 @@ $articles = $data['articles'] ?? [];
                         <tr>
                             <td><?= $article->id ?></td>
                             <td>
-                                <a href="/articles/<?= $this->e($article->slug ?? $article->id) ?>" class="link" style="font-weight: var(--font-bold);">
+                                <a href="/articles/<?= $this->e($article->slug ?? $article->id) ?>" class="link article-link">
                                     <?= $this->e($article->title ?? 'Untitled') ?>
                                 </a>
                             </td>
                             <td>
-                                <span style="font-size: var(--text-xs); font-weight: var(--font-bold); text-transform: uppercase; color: <?= $article->status === 'published' ? 'var(--color-success)' : 'var(--color-text-muted)' ?>;">
+                                <span class="article-status article-status--<?= $this->e($article->status ?? 'draft') ?>">
                                     <?= $this->e($article->status ?? 'draft') ?>
                                 </span>
                             </td>
                             <td><?= $article->published ? 'Yes' : 'No' ?></td>
                             <td><?= $article->createdAt?->format('Y-m-d') ?? '-' ?></td>
                             <td>
-                                <div style="display: flex; gap: var(--space-2);">
+                                <div class="article-actions">
                                     <a href="/mark/articles/<?= $article->id ?>/edit" class="btn btn--sm btn--secondary">Edit</a>
-                                    <form method="POST" action="/mark/articles/<?= $article->id ?>" style="display:inline" onsubmit="return confirm('Delete this article?')">
+                                    <form method="POST" action="/mark/articles/<?= $article->id ?>" class="article-delete-form" onsubmit="return confirm('Delete this article?')">
                                         <input type="hidden" name="_method" value="DELETE">
-                                        <button type="submit" class="btn btn--sm" style="background-color: var(--color-error);">Delete</button>
+                                        <button type="submit" class="article-delete-btn">Delete</button>
                                     </form>
                                 </div>
                             </td>
