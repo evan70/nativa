@@ -1,64 +1,72 @@
 <?php
-
-declare(strict_types=1);
-
-use App\Blog\Entity\Article;
+$currentPage = 'articles';
+$this->layout('layouts.admin');
 
 $articles = $data['articles'] ?? [];
-
-// Escape helper function
-if (!function_exists('h')) {
-    function h(mixed $value): string {
-        return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
-    }
-}
 ?>
 
-<div class="admin-container">
-    <h1><?= h($title ?? 'Articles Administration') ?></h1>
+<?php $this->section('content') ?>
+<header class="page-header">
+    <h1><?= $this->e($title ?? 'Articles Administration') ?></h1>
+    <p class="page-header__subtitle">Dashboard / Articles</p>
+</header>
 
-    <div class="admin-header">
-        <a href="/mark/articles/new" class="btn btn--primary">Create New Article</a>
+<div class="card" style="margin-bottom: var(--space-4);">
+    <div class="card__body" style="display: flex; justify-content: flex-end;">
+        <a href="/mark/articles/new" class="btn">Create New Article</a>
     </div>
-
-    <?php if (empty($articles)): ?>
-        <p class="empty-state">No articles yet.</p>
-    <?php else: ?>
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Slug</th>
-                    <th>Status</th>
-                    <th>Published</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($articles as $article): ?>
-                    <tr>
-                        <td><?= $article->id ?></td>
-                        <td>
-                            <a href="/articles/<?= h($article->slug ?? $article->id) ?>">
-                                <?= h($article->title ?? 'Untitled') ?>
-                            </a>
-                        </td>
-                        <td><?= h($article->slug ?? '-') ?></td>
-                        <td><span class="badge badge--<?= $article->status ?? 'draft' ?>"><?= h($article->status ?? 'draft') ?></span></td>
-                        <td><?= $article->published ? 'Yes' : 'No' ?></td>
-                        <td><?= $article->createdAt?->format('Y-m-d') ?? '-' ?></td>
-                        <td class="actions">
-                            <a href="/mark/articles/<?= $article->id ?>/edit" class="btn btn--small btn--secondary">Edit</a>
-                            <form method="POST" action="/mark/articles/<?= $article->id ?>" style="display:inline" onsubmit="return confirm('Delete this article?')">
-                                <input type="hidden" name="_method" value="DELETE">
-                                <button type="submit" class="btn btn--small btn--danger">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    <?php endif; ?>
 </div>
+
+<?php if (empty($articles)): ?>
+    <div class="card">
+        <div class="card__body">
+            <p class="form-hint">No articles yet.</p>
+        </div>
+    </div>
+<?php else: ?>
+    <div class="card">
+        <div class="card__body" style="padding: 0;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Published</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($articles as $article): ?>
+                        <tr>
+                            <td><?= $article->id ?></td>
+                            <td>
+                                <a href="/articles/<?= $this->e($article->slug ?? $article->id) ?>" class="link" style="font-weight: var(--font-bold);">
+                                    <?= $this->e($article->title ?? 'Untitled') ?>
+                                </a>
+                            </td>
+                            <td>
+                                <span style="font-size: var(--text-xs); font-weight: var(--font-bold); text-transform: uppercase; color: <?= $article->status === 'published' ? 'var(--color-success)' : 'var(--color-text-muted)' ?>;">
+                                    <?= $this->e($article->status ?? 'draft') ?>
+                                </span>
+                            </td>
+                            <td><?= $article->published ? 'Yes' : 'No' ?></td>
+                            <td><?= $article->createdAt?->format('Y-m-d') ?? '-' ?></td>
+                            <td>
+                                <div style="display: flex; gap: var(--space-2);">
+                                    <a href="/mark/articles/<?= $article->id ?>/edit" class="btn btn--sm btn--secondary">Edit</a>
+                                    <form method="POST" action="/mark/articles/<?= $article->id ?>" style="display:inline" onsubmit="return confirm('Delete this article?')">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <button type="submit" class="btn btn--sm" style="background-color: var(--color-error);">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+<?php endif; ?>
+<?php $this->endSection() ?>

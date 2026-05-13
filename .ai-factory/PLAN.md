@@ -9,27 +9,27 @@ Fix and complete the blog article admin management in Marko. The BlogAdminSectio
 
 ## Implementation Status
 
-### ✅ Completed Tasks
+### Completed Tasks
 
 | Task | Status | Notes |
 |------|--------|-------|
-| **Task 1** | ✅ Done | Added Edit/Delete links to admin-articles.php |
-| **Task 2** | ✅ Done | Created article-form.php template |
-| **Task 3** | ✅ Done | Fixed create() method to render correct template |
-| **Task 4** | ✅ Done | Added edit() method |
-| **Task 5** | ✅ Done | Added update() method |
-| **Task 6** | ✅ Done | Added delete() method |
-| **Task 7** | ✅ Done | Validation in controller (inline, not separate class) |
-| **Task 8** | ✅ Done | Auto-generate slug implemented |
-| **Task 9** | ⏳ Pending | Flash messages not implemented yet |
+| **Task 1** | [x] Done | Added Edit/Delete links to admin-articles.php |
+| **Task 2** | [x] Done | Created article-form.php template |
+| **Task 3** | [x] Done | Fixed create() method to render correct template |
+| **Task 4** | [x] Done | Added edit() method |
+| **Task 5** | [x] Done | Added update() method |
+| **Task 6** | [x] Done | Added delete() method |
+| **Task 7** | [x] Done | Validation in controller (inline, not separate class) |
+| **Task 8** | [x] Done | Auto-generate slug implemented |
+| **Task 9** | [x] Done | Flash messages implemented using SessionInterface |
 
 ### PHPStan Fixes (Level Max)
 
 | File | Status | Notes |
 |------|--------|-------|
-| **BlogAdminController.php** | ✅ Fixed | Added helper methods with proper type handling for PHPStan max |
-| **ModuleDatabaseResolver.php** | ✅ Fixed | Changed `$storagePath = null` to `?string $storagePath = null` |
-| **ModuleConnection.php** | ✅ Fixed | Changed `PDO $pdo` to `?PDO $pdo = null` |
+| **BlogAdminController.php** | [x] Fixed | Added helper methods with proper type handling for PHPStan max |
+| **ModuleDatabaseResolver.php** | [x] Fixed | Changed `$storagePath = null` to `?string $storagePath = null` |
+| **ModuleConnection.php** | [x] Fixed | Changed `PDO $pdo` to `?PDO $pdo = null` |
 
 ### Remaining PHPStan Errors (149 total)
 
@@ -52,42 +52,42 @@ The remaining errors are in pre-existing codebase files:
 
 **Task 1: Fix article index template**
 - File: `templates/pages/dash/admin-articles.php`
-- ✅ DONE - Added action column with Edit/Delete links
+- [x] DONE - Added action column with Edit/Delete links
 
 **Task 2: Create article form template**
 - File: `templates/pages/dash/article-form.php`
-- ✅ DONE - Created with all fields (title, slug, excerpt, content, image, status, category, published)
+- [x] DONE - Created with all fields (title, slug, excerpt, content, image, status, category, published)
 
 **Task 3: Fix BlogAdminController create() method**
 - File: `modules/blog/src/Controller/BlogAdminController.php`
-- ✅ DONE - Changed to render 'pages/dash/article-form'
+- [x] DONE - Changed to render 'pages/dash/article-form'
 
 ### Phase 2: Complete CRUD Operations
 
 **Task 4: Add edit() method**
 - File: `modules/blog/src/Controller/BlogAdminController.php`
-- ✅ DONE - Route: GET /mark/articles/{id}/edit
+- [x] DONE - Route: GET /mark/articles/{id}/edit
 
 **Task 5: Add update() method**
 - File: `modules/blog/src/Controller/BlogAdminController.php`
-- ✅ DONE - Route: PUT /mark/articles/{id}
+- [x] DONE - Route: PUT /mark/articles/{id}
 
 **Task 6: Add delete() method**
 - File: `modules/blog/src/Controller/BlogAdminController.php`
-- ✅ DONE - Route: DELETE /mark/articles/{id}
+- [x] DONE - Route: DELETE /mark/articles/{id}
 
 ### Phase 3: Validation & Polish
 
 **Task 7: Add article validation**
 - Files: `modules/blog/src/Controller/BlogAdminController.php`
-- ✅ DONE - Validation in store() and update() methods
+- [x] DONE - Validation in store() and update() methods
 
 **Task 8: Auto-generate slug from title**
 - File: `modules/blog/src/Controller/BlogAdminController.php`
-- ✅ DONE - generateSlug() method implemented
+- [x] DONE - generateSlug() method implemented
 
 **Task 9: Add flash messages**
-- ⏳ NOT DONE - Would require session handling
+- [x] DONE - Implemented using SessionInterface in BlogAdminController and updated templates to pass flashMessages
 
 ## Settings
 

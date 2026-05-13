@@ -7,6 +7,7 @@ namespace App\Blog\Controller;
 use App\Blog\Entity\Article;
 use App\Blog\Repository\ArticleRepository;
 use App\Middleware\AdminAuthMiddleware;
+use Marko\Session\Contracts\SessionInterface;
 use Marko\Routing\Attributes\Get;
 use Marko\Routing\Attributes\Middleware;
 use Marko\Routing\Attributes\Post;
@@ -25,6 +26,7 @@ class BlogAdminController
     public function __construct(
         private readonly ArticleRepository $articleRepository,
         private readonly ViewInterface $view,
+        private readonly SessionInterface $session,
     ) {}
 
     /**
@@ -40,6 +42,7 @@ class BlogAdminController
         return $this->view->render('pages/dash/admin-articles', [
             'title' => 'Articles Administration',
             'articles' => $articles,
+            'flashMessages' => $this->session->flash()->all(),
         ]);
     }
 
@@ -56,6 +59,7 @@ class BlogAdminController
             'article' => null,
             'categories' => [],
             'errors' => $this->errors,
+            'flashMessages' => $this->session->flash()->all(),
         ]);
     }
 
@@ -81,6 +85,7 @@ class BlogAdminController
             'article' => $article,
             'categories' => [],
             'errors' => $this->errors,
+            'flashMessages' => $this->session->flash()->all(),
         ]);
     }
 
@@ -138,6 +143,8 @@ class BlogAdminController
         $article->createdAt = date('Y-m-d H:i:s');
 
         $this->articleRepository->save($article);
+
+        $this->session->flash()->add('success', 'Article created successfully.');
 
         error_log('[BlogAdmin] Article created: ' . $article->id . ' - ' . $article->title);
 
@@ -204,6 +211,8 @@ class BlogAdminController
 
         $this->articleRepository->save($article);
 
+        $this->session->flash()->add('success', 'Article updated successfully.');
+
         error_log('[BlogAdmin] Article updated: ' . $id . ' - ' . $article->title);
 
         return new Response('', 302, ['Location' => '/mark/articles']);
@@ -224,6 +233,8 @@ class BlogAdminController
 
         $title = $article->title;
         $this->articleRepository->delete($article);
+
+        $this->session->flash()->add('success', 'Article deleted successfully.');
 
         error_log('[BlogAdmin] Article deleted: ' . $id . ' - ' . $title);
 
