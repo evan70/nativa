@@ -1,4 +1,4 @@
-import { NotificationService } from '@kernel/ui/notification';
+import { NotificationAdapter } from '../utils/NotificationAdapter.ts';
 import { clearDraft, loadDraft, saveDraft, shouldOfferRestore, showRestorePrompt } from './autosave';
 import { addMediaToGallery, appendMediaIdsInput, collectMediaIds, uploadMedia } from './media';
 import { configureMarked, togglePreview, updatePreview } from './preview';
@@ -499,7 +499,7 @@ export class ArticleEditor {
       return;
     }
 
-    NotificationService.error(message);
+    NotificationAdapter.error(message);
   }
 }
 

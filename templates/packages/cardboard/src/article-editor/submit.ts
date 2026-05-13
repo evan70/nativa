@@ -1,4 +1,4 @@
-import { NotificationService } from '@kernel/ui/notification';
+import { NotificationAdapter } from '../utils/NotificationAdapter.ts';
 
 export interface SubmitSuccessPayload {
   redirectUrl: string;
@@ -49,6 +49,6 @@ export function queueSuccessAndRedirect(
   message: string,
   redirectUrl: string,
 ): void {
-  NotificationService.queueForNextPage(message, 'success');
+  NotificationAdapter.queueForNextPage(message, 'success');
   window.location.href = redirectUrl;
 }

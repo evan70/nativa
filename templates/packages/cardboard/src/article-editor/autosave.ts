@@ -5,7 +5,7 @@
  * All functions are async and return Promises.
  */
 
-import { NotificationService } from '@kernel/ui/notification';
+import { NotificationAdapter } from '../utils/NotificationAdapter.ts';
 
 export interface AutosavePayload {
   title: string;
@@ -151,11 +151,10 @@ export function showRestorePrompt(
   savedTime: string,
   onConfirm: () => void,
 ): void {
-  NotificationService.showConfirm({
+  NotificationAdapter.showConfirm({
     message: `Auto-saved content from ${savedTime}`,
-    confirmText: 'Restore',
-    dismissText: 'Dismiss',
+    confirmLabel: 'Restore',
+    cancelLabel: 'Dismiss',
     onConfirm,
-    duration: 10000,
   });
 }
