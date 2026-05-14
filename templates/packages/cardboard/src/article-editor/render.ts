@@ -1,6 +1,17 @@
 import type { EditorArticleModel, EditorCategoryOption, EditorMediaItem, EditorTagOption } from './types';
-import { escapeHtml } from '../../../lib/escape-html.js';
-export { escapeHtml } from '../../../lib/escape-html.js';
+
+// Simple inline escapeHtml function
+function escapeHtml(str: string): string {
+  if (!str) return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+export { escapeHtml };
 
 export function renderCategoryOptions(selectedId: string, categories: EditorCategoryOption[]): string {
   if (0 === categories.length) {

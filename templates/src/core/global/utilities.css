@@ -50,3 +50,8 @@
     padding: 0 var(--space-8);
   }
 }
+
+/* Margin bottom utilities */
+.mb-8 {
+  margin-bottom: var(--space-8);
+}

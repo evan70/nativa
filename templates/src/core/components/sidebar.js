@@ -2,12 +2,16 @@
 export function initSidebar() {
   const navbar = document.querySelector('.navbar');
   const toggleBtn = navbar?.querySelector('.sidebar-toggle');
-  const sidebar = document.querySelector('aside.sidebar');
+  const sidebar = document.querySelector('.layout-admin__sidebar');
+  const body = document.body;
   
   if (!toggleBtn || !sidebar) return;
     
   toggleBtn.addEventListener('click', (e) => {
     e.preventDefault();
+    // Toggle collapsed state on body
+    body.classList.toggle('is-collapsed');
+    // Also toggle open state for mobile overlay
     sidebar.classList.toggle('sidebar--open');
   });
     

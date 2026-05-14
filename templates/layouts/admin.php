@@ -24,7 +24,7 @@ $bodyClass = PageLayout::bodyClass($page);
 
     <?= $this->yield('head') ?>
 </head>
-<body class="<?= $bodyClass ?>">
+<body class="layout-admin <?= $bodyClass ?> is-collapsed">
 
     <aside class="layout-admin__sidebar sidebar">
         <?= $this->include('partials/sidebar', ['menuItems' => $menuItems ?? []]) ?>

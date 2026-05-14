@@ -1,4 +1,4 @@
-<aside class="sidebar">
+<div class="sidebar">
     <div class="sidebar__header">
         <span class="sidebar__brand">Marko Admin</span>
     </div>
@@ -33,4 +33,4 @@
             <p class="sidebar__version">Version 0.0.1-alpha</p>
         </div>
     </nav>
-</aside>
+</div>

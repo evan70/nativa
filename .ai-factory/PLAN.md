@@ -1,105 +1,53 @@
-# Plan: Marko Admin Blog/Article Management
+# Plan: Create Admin Section for Cardboard Module
 
-**Created:** 2026-05-13  
-**Mode:** Fast
+## Goal
+Create an admin section for the cardboard module that follows the Marko admin section pattern and uses BEM methodology for any frontend components (if applicable).
 
-## Overview
+## Steps
 
-Fix and complete the blog article admin management in Marko. The BlogAdminSection and basic controller exist but are incomplete. Need to implement full CRUD functionality with proper templates.
+### 1. Create Admin Section Class
+- Create `/home/evan/dev/05/nativa/modules/cardboard/src/Admin/CardboardAdminSection.php`
+- Implement `AdminSectionInterface`
+- Use `#[AdminSection]` attribute with appropriate id, label, icon, and sortOrder
+- Implement `getMenuItems()` to return menu items for cardboard admin functionality
 
-## Implementation Status
+### 2. Define Menu Items
+- Menu items should include:
+  - Cardboard overview/dashboard
+  - Card management (if applicable)
+  - Settings/configuration
 
-### Completed Tasks
+### 3. Follow BEM for Frontend (if applicable)
+- If the admin section requires custom frontend components (TS/CSS), follow BEM methodology:
+  - Block: `cardboard-admin` (or similar)
+  - Elements: `cardboard-admin__[element]`
+  - Modifiers: `cardboard-admin--[modifier]`
+- Place TS in `/home/evan/dev/05/nativa/modules/cardboard/src/Admin/[SectionName]AdminSection.ts`
+- Place CSS in `/home/evan/dev/05/nativa/modules/cardboard/src/Admin/[section-name]-admin.css`
+- Ensure CSS follows BEM naming conventions
 
-| Task | Status | Notes |
-|------|--------|-------|
-| **Task 1** | [x] Done | Added Edit/Delete links to admin-articles.php |
-| **Task 2** | [x] Done | Created article-form.php template |
-| **Task 3** | [x] Done | Fixed create() method to render correct template |
-| **Task 4** | [x] Done | Added edit() method |
-| **Task 5** | [x] Done | Added update() method |
-| **Task 6** | [x] Done | Added delete() method |
-| **Task 7** | [x] Done | Validation in controller (inline, not separate class) |
-| **Task 8** | [x] Done | Auto-generate slug implemented |
-| **Task 9** | [x] Done | Flash messages implemented using SessionInterface |
+### 4. Update Module Configuration
+- Ensure the module's `module.php` properly registers any admin-related files if needed
+- Check if admin discovery is automatic (should be via attributes)
 
-### PHPStan Fixes (Level Max)
+### 5. Add Dashboard Widgets (Optional)
+- Consider creating dashboard widgets for cardboard statistics
+- Implement `DashboardWidgetInterface` if needed
 
-| File | Status | Notes |
-|------|--------|-------|
-| **BlogAdminController.php** | [x] Fixed | Added helper methods with proper type handling for PHPStan max |
-| **ModuleDatabaseResolver.php** | [x] Fixed | Changed `$storagePath = null` to `?string $storagePath = null` |
-| **ModuleConnection.php** | [x] Fixed | Changed `PDO $pdo` to `?PDO $pdo = null` |
+### 6. Permissions
+- Consider defining permissions for cardboard admin actions using `#[AdminPermission]` attributes
 
-### Remaining PHPStan Errors (149 total)
+## Files to Create
+1. `/home/evan/dev/05/nativa/modules/cardboard/src/Admin/CardboardAdminSection.php`
+2. (Optional) `/home/evan/dev/05/nativa/modules/cardboard/src/Admin/CardboardAdminSection.ts`
+3. (Optional) `/home/evan/dev/05/nativa/modules/cardboard/src/Admin/cardboard-admin.css`
 
-The remaining errors are in pre-existing codebase files:
-- app/View.php (many errors - array type handling)
-- app/module.php (mixed type handling)
-- app/src/Controllers/HomeController.php
-- app/src/Controllers/PortfolioController.php
-- modules/blog/src/DTO/ArticleDTO.php
-- modules/blog/src/Controller/ArticleController.php
-- modules/blog/src/Controller/ArticleApiController.php
-- modules/blog/src/Validation/ArticleValidator.php
-- modules/blog/src/Service/ArticleService.php
-- modules/blog/src/Contracts/ArticleServiceInterface.php
-- modules/database-modular/src/ModuleDatabaseResolver.php (partially fixed)
+## Reference
+- Existing admin section: `/home/evan/dev/05/nativa/modules/blog/src/Admin/BlogAdminSection.php`
+- Admin section interface: `/home/evan/dev/05/nativa/packages/admin/src/Contracts/AdminSectionInterface.php`
+- BEM guidelines: `/home/evan/dev/05/nativa/templates/RULES.md`
 
-## Tasks
-
-### Phase 1: Fix Article List & Basic CRUD
-
-**Task 1: Fix article index template**
-- File: `templates/pages/dash/admin-articles.php`
-- [x] DONE - Added action column with Edit/Delete links
-
-**Task 2: Create article form template**
-- File: `templates/pages/dash/article-form.php`
-- [x] DONE - Created with all fields (title, slug, excerpt, content, image, status, category, published)
-
-**Task 3: Fix BlogAdminController create() method**
-- File: `modules/blog/src/Controller/BlogAdminController.php`
-- [x] DONE - Changed to render 'pages/dash/article-form'
-
-### Phase 2: Complete CRUD Operations
-
-**Task 4: Add edit() method**
-- File: `modules/blog/src/Controller/BlogAdminController.php`
-- [x] DONE - Route: GET /mark/articles/{id}/edit
-
-**Task 5: Add update() method**
-- File: `modules/blog/src/Controller/BlogAdminController.php`
-- [x] DONE - Route: PUT /mark/articles/{id}
-
-**Task 6: Add delete() method**
-- File: `modules/blog/src/Controller/BlogAdminController.php`
-- [x] DONE - Route: DELETE /mark/articles/{id}
-
-### Phase 3: Validation & Polish
-
-**Task 7: Add article validation**
-- Files: `modules/blog/src/Controller/BlogAdminController.php`
-- [x] DONE - Validation in store() and update() methods
-
-**Task 8: Auto-generate slug from title**
-- File: `modules/blog/src/Controller/BlogAdminController.php`
-- [x] DONE - generateSlug() method implemented
-
-**Task 9: Add flash messages**
-- [x] DONE - Implemented using SessionInterface in BlogAdminController and updated templates to pass flashMessages
-
-## Settings
-
-- **Testing:** No tests in plan
-- **Logging:** Verbose (INFO for key events, DEBUG for details)
-- **Documentation:** No updates in plan
-
-## Notes
-
-- Follow existing patterns in BlogAdminController
-- Use Article entity and ArticleRepository
-- Admin templates should use consistent styling with dash/index.php
-- Consider HTMX for delete (smooth UX)
-- Routes should follow /mark/articles prefix for admin
-- PHPStan max level requires proper type handling for all mixed types
+## Testing
+- Verify admin section appears in admin menu
+- Check that menu items link to correct routes
+- Validate BEM naming if frontend components are created

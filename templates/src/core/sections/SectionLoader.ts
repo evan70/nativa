@@ -4,6 +4,8 @@ import { FeaturesSection } from './features/FeaturesSection.ts';
 import { CTASection } from './cta/CTASection.ts';
 import { StatsSection } from './stats/StatsSection.ts';
 import { NavbarSection } from './navbar/NavbarSection.ts';
+import { CardboardGraphSection } from '../../../packages/cardboard/src/sections/CardboardGraphSection.ts';
+import { CardboardQuickSection } from '../../../packages/cardboard/src/sections/CardboardQuickSection.ts';
 
 const sectionMap: Record<string, new (el: HTMLElement) => BaseSection> = {
   hero: HeroSection,
@@ -11,6 +13,8 @@ const sectionMap: Record<string, new (el: HTMLElement) => BaseSection> = {
   cta: CTASection,
   stats: StatsSection,
   navbar: NavbarSection,
+  'cardboard-graph': CardboardGraphSection,
+  'cardboard-quick': CardboardQuickSection,
 };
 
 export class SectionLoader {

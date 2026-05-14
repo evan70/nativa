@@ -3,7 +3,7 @@
  * Imports all 12 fire-show theme features
  */
 
-import initFireShowTheme from '../theme/fire-show';
+import { initFireShowTheme } from '@nativa/theme-fire-show';
 
 // Initialize fire-show theme features when DOM is ready
 if (document.readyState === 'loading') {

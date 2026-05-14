@@ -5,7 +5,7 @@
  * Provides common functionality for all components.
  */
 
-import { BaseSection } from '../../../core/sections/BaseSection.ts';
+import { BaseSection } from '../../../../src/core/sections/BaseSection.ts';
 
 export interface ComponentOptions {
   name: string;

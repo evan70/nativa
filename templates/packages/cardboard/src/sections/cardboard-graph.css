@@ -1,0 +1,112 @@
+.cardboard-graph {
+  padding: var(--space-12) 0;
+  background-color: var(--color-bg);
+}
+
+.cardboard-graph__title {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-semibold);
+  color: var(--color-text);
+  margin: 0 0 var(--space-6);
+  text-align: center;
+}
+
+.cardboard-graph__description {
+  font-size: var(--text-base);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-8);
+  text-align: center;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cardboard-graph__chart-container {
+  position: relative;
+  height: 300px;
+  margin: 0 auto var(--space-8);
+  max-width: 800px;
+}
+
+.cardboard-graph__chart {
+  width: 100%;
+  height: 100%;
+}
+
+.cardboard-graph__controls {
+  display: flex;
+  gap: var(--space-4);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.cardboard-graph__button {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-text);
+  background-color: var(--color-bg-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.cardboard-graph__button:hover {
+  background-color: var(--color-bg);
+  color: var(--brand-gold);
+  border-color: var(--brand-gold);
+}
+
+.cardboard-graph__button:active {
+  transform: translateY(1px);
+}
+
+.cardboard-graph__button--active {
+  background-color: var(--brand-gold);
+  color: var(--color-bg);
+  border-color: var(--brand-gold);
+}
+
+@supports not ((gap: 1px) and (inset: 0)) {
+  .cardboard-graph__controls {
+    gap: 0;
+    margin: calc(var(--space-2) * -1);
+  }
+  .cardboard-graph__controls > * {
+    margin: var(--space-2);
+  }
+}
+
+/* Animation classes */
+.cardboard-graph__animate {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.cardboard-graph__animate.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Responsive design */
+@media (max-width: 767px) {
+  .cardboard-graph__chart-container {
+    height: 250px;
+  }
+  
+  .cardboard-graph__title {
+    font-size: var(--text-xl);
+  }
+  
+  .cardboard-graph__controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .cardboard-graph__button {
+    width: 100%;
+    text-align: center;
+  }
+}

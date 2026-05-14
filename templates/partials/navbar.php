@@ -1,4 +1,4 @@
-<nav class="navbar" data-section="navbar">
+<div class="navbar" data-section="navbar">
     <div class="navbar__container">
         <div class="navbar__left">
             <button class="icon-btn navbar__toggle sidebar-toggle" aria-label="Toggle Sidebar">
@@ -45,12 +45,21 @@
             </button>
             
             <?php if ($currentUser): ?>
-                <div class="navbar__user">
-                    <svg class="navbar__user-avatar" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                <button class="icon-btn navbar__user" aria-label="User Menu">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
                     </svg>
-                </div>
+                </button>
+            <?php else: ?>
+                <a href="/mark/login" class="icon-btn navbar__login" aria-label="Login">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                        <polyline points="10 17 15 12 10 7"></polyline>
+                        <line x1="15" y1="12" x2="3" y2="12"></line>
+                    </svg>
+                </a>
             <?php endif ?>
         </div>
     </div>
-</nav>
+</div>
