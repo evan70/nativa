@@ -34,6 +34,15 @@ Generate commit messages following the [Conventional Commits](https://www.conven
    - From argument if provided
    - Optional - omit if changes span multiple areas
 
+**PHP/Framework-specific scopes:**
+- `migration` — database migrations
+- `module` — module configuration changes
+- `controller` — HTTP controllers/routes
+- `command` — CLI commands
+- `service` — business logic services
+- `model` — data models/entities
+- `seeder` — database seeders
+
 4. **Generate Message**
    - Keep subject line under 72 characters
    - Use imperative mood ("add" not "added")

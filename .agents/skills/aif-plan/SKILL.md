@@ -315,6 +315,11 @@ Use `TaskUpdate` to set `blockedBy` relationships:
 - Task 2 blocked by Task 1 if it depends on Task 1's output
 - Keep dependency chains logical
 
+**For PHP Projects:**
+- Add verification task: "Run PHPStan to verify type safety"
+- If creating new module: include `module.php` with bindings/singletons
+- If adding DI dependency: document the binding needed in module.php
+
 ### Step 5: Save Plan to File
 
 **Determine plan file path:**

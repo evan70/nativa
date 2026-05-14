@@ -185,6 +185,7 @@ Task(subagent_type: Explore, model: sonnet, prompt:
 
 **Apply the fix with logging:**
 
+**For TypeScript/JavaScript projects:**
 ```typescript
 // ✅ REQUIRED: Add logging around the fix
 console.log('[FIX] Processing user input', { userId, input });
@@ -205,6 +206,35 @@ try {
 }
 ```
 
+**For PHP projects:**
+```php
+// ✅ REQUIRED: Add logging around the fix
+$logLevel = $_ENV['LOG_LEVEL'] ?? 'INFO';
+
+if (in_array($logLevel, ['debug', 'DEBUG'], true)) {
+    error_log("[FIX] Processing user input: " . json_encode(['userId' => $userId]));
+}
+
+try {
+    // The actual fix
+    $result = fixedLogic($input);
+    
+    if (in_array($logLevel, ['debug', 'DEBUG'], true)) {
+        error_log("[FIX] Success: " . json_encode(['userId' => $userId, 'result' => $result]));
+    }
+    
+    return $result;
+} catch (\Throwable $e) {
+    error_log("[FIX] Error in fixedLogic: " . json_encode([
+        'userId' => $userId,
+        'input' => $input,
+        'error' => $e->getMessage(),
+        'stack' => $e->getTraceAsString()
+    ]));
+    throw $e;
+}
+```
+
 **Logging is MANDATORY because:**
 - User needs to verify the fix works
 - If it doesn't work, logs help debug further
@@ -215,6 +245,15 @@ try {
 - Check the code compiles/runs
 - Verify the logic is correct
 - Ensure no regressions introduced
+
+**For PHP projects: Run PHPStan to verify type safety**
+```bash
+php vendor/bin/phpstan analyze --memory-limit=256M
+```
+If PHPStan is not available, at least verify:
+- `declare(strict_types=1);` is present
+- Return types are declared on all methods
+- No type errors in the modified code
 
 ### Step 5: Suggest Test Coverage
 

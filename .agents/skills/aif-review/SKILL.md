@@ -23,6 +23,17 @@ Perform thorough code reviews focusing on correctness, security, performance, an
 2. Use `gh pr diff <number>` to get the diff
 3. Review all changes in the PR
 
+### PHPStan Verification
+
+For PHP projects, also verify static analysis:
+```bash
+php vendor/bin/phpstan analyze --memory-limit=256M
+```
+If the project uses a custom config:
+```bash
+php vendor/bin/phpstan analyze -c phpstan.neon --memory-limit=256M
+```
+
 ## Review Checklist
 
 ### Correctness
@@ -31,6 +42,13 @@ Perform thorough code reviews focusing on correctness, security, performance, an
 - [ ] Null/undefined checks
 - [ ] Error handling completeness
 - [ ] Type safety (if applicable)
+
+### PHP-Specific Correctness
+- [ ] `declare(strict_types=1);` present in new files
+- [ ] Return types declared on all methods
+- [ ] Constructor property promotion (`readonly` + `private Type $param`)
+- [ ] No implicit nullable types (use `?Type` explicitly)
+- [ ] PHPDoc comments only for complex types, not instead of real types
 
 ### Security
 - [ ] SQL injection vulnerabilities
@@ -56,6 +74,17 @@ Perform thorough code reviews focusing on correctness, security, performance, an
 - [ ] Proper naming conventions
 - [ ] SOLID principles
 - [ ] DRY principle
+
+### PHP Framework Best Practices (Marko/Laravel/etc.)
+- [ ] Dependency injection via constructor (no service locator)
+- [ ] Routing attributes used correctly
+- [ ] `readonly` classes for immutable services
+- [ ] Custom exceptions for domain errors
+
+### Static Analysis (PHP)
+- [ ] PHPStan passes at configured level (project uses level max)
+- [ ] No `@var` annotations conflicting with actual types
+- [ ] Properties properly initialized (never access before init)
 
 ### Testing
 - [ ] Test coverage for new code

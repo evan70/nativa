@@ -12,6 +12,8 @@ Universal code quality guidelines applicable to any language or framework.
 
 **Context:** If `.ai-factory/ARCHITECTURE.md` exists, follow its folder structure, dependency rules, and module boundaries alongside these guidelines.
 
+**PHP Projects:** For framework-specific patterns, see `/marko-framework` skill.
+
 ## Quick Reference
 
 - `/aif-best-practices` — Full overview
@@ -124,6 +126,15 @@ feature/
 ---
 
 ## Error Handling
+
+### Static Analysis (PHP)
+
+**Use PHPStan for type checking:**
+```bash
+php vendor/bin/phpstan analyze --memory-limit=256M
+```
+
+Run PHPStan at the highest level (max) for best results. Configure in `phpstan.neon`.
 
 ### Do's and Don'ts
 ```typescript

@@ -125,6 +125,7 @@ return new class extends Migration
     {
         error_log('[Migration] Dropping system tables');
         
+        $connection->execute('DROP TABLE IF EXISTS "rate_limits"');
         $connection->execute('DROP TABLE IF EXISTS "portfolio_items"');
         $connection->execute('DROP TABLE IF EXISTS "notifications"');
         $connection->execute('DROP TABLE IF EXISTS "migrations"');

@@ -313,6 +313,31 @@ readonly class SendWelcomeEmail
 
 ---
 
+## Integration with AI Factory Skills
+
+When working with Marko in this project, combine with these skills:
+
+| Task | Use Skill |
+|------|-----------|
+| Code review | `/aif-review` — checks for DI patterns, routing attributes |
+| Implementation | `/aif-implement` — includes PHPStan verification |
+| Planning | `/aif-plan` — includes module setup tasks |
+| Bug fixes | `/aif-fix` — includes PHP logging patterns |
+| Best practices | `/aif-best-practices` — now references this skill |
+| Code review | `/aif-review` — includes PHP/PHPStan checks |
+
+**Run PHPStan before committing:**
+```bash
+php vendor/bin/phpstan analyze --memory-limit=256M
+```
+
+**Verify with Marko CLI:**
+```bash
+php marko list
+```
+
+---
+
 ## Project Structure
 
 ```

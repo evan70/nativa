@@ -186,6 +186,12 @@ TaskUpdate(taskId, status: "in_progress")
 - Verify functionality works
 - Fix any immediate issues
 
+**For PHP projects: Run PHPStan to verify type safety**
+```bash
+php vendor/bin/phpstan analyze --memory-limit=256M
+```
+If PHPStan fails, fix type errors before marking task complete.
+
 **3.5: Mark as completed**
 ```
 TaskUpdate(taskId, status: "completed")
