@@ -28,7 +28,7 @@
         "aif-verify"
       ],
       "mcp": {
-        "github": false,
+        "github": true,
         "filesystem": false,
         "postgres": false,
         "chromeDevtools": false,
