@@ -27,9 +27,7 @@
     },
     "extra": {
         "marko": {
-            "module": true,
-            "group": "cli",
-            "routes": []
+            "module": true
         }
     }
 }

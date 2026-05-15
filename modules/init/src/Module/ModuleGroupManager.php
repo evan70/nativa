@@ -40,30 +40,64 @@ class ModuleGroupManager implements ModuleGroupManagerInterface
 
     public function registerGroup(ModuleManifest $manifest): void
     {
-        if ($manifest->group === null) {
+        // Read extra.marko.* metadata directly from module's composer.json
+        // (upstream ModuleManifest no longer carries these custom properties)
+        $meta = $this->readModuleMetadata($manifest->path);
+
+        if ($meta['group'] === null) {
             return;
         }
 
         // Load removed groups from state
         $removedGroups = $this->loadRemovedGroups();
-        if (in_array($manifest->group, $removedGroups)) {
+        if (in_array($meta['group'], $removedGroups)) {
             return;
         }
 
         $group = new ModuleGroup(
-            name: $manifest->group,
+            name: $meta['group'],
             moduleName: $manifest->name,
-            routes: $manifest->routes,
-            idleTimeout: $manifest->idleTimeout,
-            isCore: $manifest->isCore,
+            routes: $meta['routes'],
+            idleTimeout: $meta['idleTimeout'],
+            isCore: $meta['isCore'],
         );
 
-        $this->groups[$manifest->group] = $group;
-        $this->manifests[$manifest->group] = $manifest;
-        
-        if ($manifest->isCore) {
-            $this->activeGroups[$manifest->group] = true;
+        $this->groups[$meta['group']] = $group;
+        $this->manifests[$meta['group']] = $manifest;
+
+        if ($meta['isCore']) {
+            $this->activeGroups[$meta['group']] = true;
         }
+    }
+
+    /**
+     * Read extra.marko metadata from a module's composer.json.
+     *
+     * @return array{group: string|null, routes: array, idleTimeout: int|null, isCore: bool}
+     */
+    private function readModuleMetadata(string $modulePath): array
+    {
+        $composerPath = $modulePath . '/composer.json';
+        $data = [];
+
+        if (is_file($composerPath)) {
+            $contents = file_get_contents($composerPath);
+            if ($contents !== false) {
+                $decoded = json_decode($contents, true);
+                if (is_array($decoded)) {
+                    $data = $decoded;
+                }
+            }
+        }
+
+        $marko = $data['extra']['marko'] ?? [];
+
+        return [
+            'group' => $marko['group'] ?? null,
+            'routes' => $marko['routes'] ?? [],
+            'idleTimeout' => $marko['idleTimeout'] ?? null,
+            'isCore' => $marko['isCore'] ?? false,
+        ];
     }
 
     private function loadRemovedGroups(): array

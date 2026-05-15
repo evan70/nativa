@@ -24,10 +24,17 @@ readonly class SeederDiscovery implements SeederDiscoveryInterface
     public function discoverInVendor(
         string $vendorPath,
     ): array {
-        return $this->discoverInDirectoryPatterns($vendorPath, [
-            '/*/*/Seed',
-            '/*/Seed',
-        ]);
+        if (!is_dir($vendorPath)) {
+            return [];
+        }
+
+        $seeders = [];
+
+        foreach (glob($vendorPath . '/*/*/Seed', GLOB_ONLYDIR) as $seedDir) {
+            $seeders = array_merge($seeders, $this->discoverInPath($seedDir));
+        }
+
+        return $seeders;
     }
 
     /**
@@ -38,9 +45,17 @@ readonly class SeederDiscovery implements SeederDiscoveryInterface
     public function discoverInModules(
         string $modulesPath,
     ): array {
-        return $this->discoverInDirectoryPatterns($modulesPath, [
-            '/*/*/Seed',
-        ]);
+        if (!is_dir($modulesPath)) {
+            return [];
+        }
+
+        $seeders = [];
+
+        foreach (glob($modulesPath . '/*/*/Seed', GLOB_ONLYDIR) as $seedDir) {
+            $seeders = array_merge($seeders, $this->discoverInPath($seedDir));
+        }
+
+        return $seeders;
     }
 
     /**
@@ -51,10 +66,17 @@ readonly class SeederDiscovery implements SeederDiscoveryInterface
     public function discoverInApp(
         string $appPath,
     ): array {
-        return $this->discoverInDirectoryPatterns($appPath, [
-            '/Seed',
-            '/*/Seed',
-        ]);
+        if (!is_dir($appPath)) {
+            return [];
+        }
+
+        $seeders = [];
+
+        foreach (glob($appPath . '/*/Seed', GLOB_ONLYDIR) as $seedDir) {
+            $seeders = array_merge($seeders, $this->discoverInPath($seedDir));
+        }
+
+        return $seeders;
     }
 
     /**
@@ -96,46 +118,6 @@ readonly class SeederDiscovery implements SeederDiscoveryInterface
                 name: $attribute->name,
                 order: $attribute->order,
             );
-        }
-
-        return $seeders;
-    }
-
-    /**
-     * @param array<string> $patterns
-     * @return array<SeederDefinition>
-     */
-    private function discoverInDirectoryPatterns(
-        string $rootPath,
-        array $patterns,
-    ): array {
-        if (!is_dir($rootPath)) {
-            return [];
-        }
-
-        $seeders = [];
-        $seen = [];
-
-        foreach ($patterns as $pattern) {
-            $matches = glob($rootPath . $pattern, GLOB_ONLYDIR);
-
-            if ($matches === false) {
-                continue;
-            }
-
-            foreach ($matches as $seedDir) {
-                if (str_contains($seedDir, '/tests/')) {
-                    continue;
-                }
-                foreach ($this->discoverInPath($seedDir) as $definition) {
-                    if (isset($seen[$definition->seederClass])) {
-                        continue;
-                    }
-
-                    $seen[$definition->seederClass] = true;
-                    $seeders[] = $definition;
-                }
-            }
         }
 
         return $seeders;

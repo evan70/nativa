@@ -24,14 +24,7 @@ try {
     $projectFinder = new ProjectFinder();
 
     if (($projectRoot = $projectFinder->find()) !== null) {
-        $bootstrapAutoload = "{$projectRoot}/bootstrap/autoload.php";
-        $composerAutoload = "{$projectRoot}/vendor/autoload.php";
-
-        if (is_file($bootstrapAutoload)) {
-            require_once $bootstrapAutoload;
-        } elseif (is_file($composerAutoload)) {
-            require_once $composerAutoload;
-        }
+        require_once "{$projectRoot}/vendor/autoload.php";
     }
 
     exit((new CliKernel(

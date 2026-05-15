@@ -8,8 +8,8 @@ class NoDriverException extends AdminException
 {
     private const array DRIVER_PACKAGES = [
         'marko/admin-api',
-        'marko/mark',
-        'marko/cardboard',
+        'marko/admin-auth',
+        'marko/admin-panel',
     ];
 
     public static function noDriverInstalled(): self

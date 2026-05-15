@@ -11,6 +11,18 @@ use Marko\Database\Entity\Entity;
 use Marko\Database\Entity\EntityMetadata;
 use Marko\Database\Entity\EntityMetadataFactory;
 use Marko\Database\Exceptions\EntityException;
+use Marko\Database\Exceptions\MissingPrimaryKeyException;
+use Marko\Database\Tests\Entity\Fixtures\ExtenderFactory\BasicExtenderEntity;
+use Marko\Database\Tests\Entity\Fixtures\ExtenderFactory\ChainedExtenderEntity;
+use Marko\Database\Tests\Entity\Fixtures\ExtenderFactory\ExtenderParentEntity;
+use Marko\Database\Tests\Entity\Fixtures\ExtenderFactory\ExtenderWithAutoIncrementEntity;
+use Marko\Database\Tests\Entity\Fixtures\ExtenderFactory\ExtenderWithIndexEntity;
+use Marko\Database\Tests\Entity\Fixtures\ExtenderFactory\ExtenderWithMissingParentEntity;
+use Marko\Database\Tests\Entity\Fixtures\ExtenderFactory\ExtenderWithNonEntityParentEntity;
+use Marko\Database\Tests\Entity\Fixtures\ExtenderFactory\ExtenderWithOwnNameEntity;
+use Marko\Database\Tests\Entity\Fixtures\ExtenderFactory\ExtenderWithPrimaryKeyEntity;
+use Marko\Database\Tests\Entity\Fixtures\ExtenderFactory\ExtenderWithRelationshipEntity;
+use Marko\Database\Tests\Entity\Fixtures\ExtenderFactory\TableWithNeitherNameNorExtendsEntity;
 
 beforeEach(function (): void {
     $this->factory = new EntityMetadataFactory();
@@ -95,6 +107,9 @@ it('extracts #[Index] attributes from class', function (): void {
 it('infers column type from PHP property type (int to integer, string to varchar, etc)', function (): void {
     $entity = new #[Table('test')] class () extends Entity
     {
+        #[Column(primaryKey: true)]
+        public int $id;
+
         /** @noinspection PhpUnused - Accessed via reflection metadata */
         #[Column]
         public int $intColumn;
@@ -114,17 +129,17 @@ it('infers column type from PHP property type (int to integer, string to varchar
 
     $metadata = $this->factory->parse($entity::class);
 
-    expect($metadata->columns[0]->type)
+    expect($metadata->columns[1]->type)
         ->toBe('integer')
-        ->and($metadata->columns[1]->type)->toBe('varchar')
-        ->and($metadata->columns[2]->type)->toBe('decimal')
-        ->and($metadata->columns[3]->type)->toBe('boolean');
+        ->and($metadata->columns[2]->type)->toBe('varchar')
+        ->and($metadata->columns[3]->type)->toBe('decimal')
+        ->and($metadata->columns[4]->type)->toBe('boolean');
 });
 
 it('infers nullable from nullable PHP type (?string)', function (): void {
     $entity = new #[Table('test')] class () extends Entity
     {
-        #[Column]
+        #[Column(primaryKey: true)]
         public int $required;
 
         #[Column]
@@ -146,7 +161,7 @@ it('infers nullable from nullable PHP type (?string)', function (): void {
 it('infers default from property initializer', function (): void {
     $entity = new #[Table('test')] class () extends Entity
     {
-        #[Column]
+        #[Column(primaryKey: true)]
         public int $count = 0;
 
         #[Column]
@@ -172,7 +187,7 @@ it('infers default from property initializer', function (): void {
 it('uses Column attribute name when specified', function (): void {
     $entity = new #[Table('test')] class () extends Entity
     {
-        #[Column(name: 'user_id')]
+        #[Column(primaryKey: true, name: 'author')]
         public int $userId;
 
         #[Column]
@@ -182,14 +197,14 @@ it('uses Column attribute name when specified', function (): void {
     $metadata = $this->factory->parse($entity::class);
 
     expect($metadata->columns[0]->name)
-        ->toBe('user_id')
+        ->toBe('author')
         ->and($metadata->columns[1]->name)->toBe('title');
 });
 
 it('uses Column attribute type when specified over inferred type', function (): void {
     $entity = new #[Table('test')] class () extends Entity
     {
-        #[Column(type: 'BIGINT')]
+        #[Column(primaryKey: true, type: 'BIGINT')]
         public int $id;
 
         #[Column(type: 'TEXT')]
@@ -295,6 +310,226 @@ it('throws EntityException for property without type declaration', function (): 
 
     $this->factory->parse($className);
 })->throws(EntityException::class, 'must have a type declaration');
+
+it('handles leading uppercase sequences correctly (HTMLParser becomes html_parser)', function (): void {
+    $entity = new #[Table('records')] class () extends Entity
+    {
+        #[Column(primaryKey: true)]
+        public int $id;
+
+        /** @noinspection PhpUnused - Accessed via reflection metadata */
+        #[Column]
+        public string $HTMLParser;
+    };
+
+    $metadata = $this->factory->parse($entity::class);
+
+    expect($metadata->columns[1]->name)->toBe('html_parser');
+});
+
+it('handles consecutive uppercase letters correctly (userID becomes user_id)', function (): void {
+    $entity = new #[Table('records')] class () extends Entity
+    {
+        #[Column(primaryKey: true)]
+        public int $id;
+
+        /** @noinspection PhpUnused - Accessed via reflection metadata */
+        #[Column]
+        public int $userID;
+    };
+
+    $metadata = $this->factory->parse($entity::class);
+
+    expect($metadata->columns[1]->name)->toBe('user_id');
+});
+
+it('handles single-word property names without change', function (): void {
+    $entity = new #[Table('users')] class () extends Entity
+    {
+        #[Column(primaryKey: true)]
+        public int $id;
+
+        #[Column]
+        public string $name;
+
+        #[Column]
+        public string $email;
+    };
+
+    $metadata = $this->factory->parse($entity::class);
+
+    expect($metadata->columns[0]->name)
+        ->toBe('id')
+        ->and($metadata->columns[1]->name)->toBe('name')
+        ->and($metadata->columns[2]->name)->toBe('email');
+});
+
+it('preserves explicit Column name override when specified', function (): void {
+    $entity = new #[Table('posts')] class () extends Entity
+    {
+        #[Column(primaryKey: true)]
+        public int $id;
+
+        #[Column(name: 'author')]
+        public int $userId;
+    };
+
+    $metadata = $this->factory->parse($entity::class);
+
+    expect($metadata->columns[1]->name)->toBe('author');
+});
+
+it('converts camelCase property names to snake_case column names automatically', function (): void {
+    $entity = new #[Table('posts')] class () extends Entity
+    {
+        #[Column(primaryKey: true, autoIncrement: true)]
+        public int $id;
+
+        #[Column]
+        public int $postId;
+
+        #[Column]
+        public string $createdAt;
+
+        #[Column]
+        public bool $isActive;
+    };
+
+    $metadata = $this->factory->parse($entity::class);
+
+    expect($metadata->columns[1]->name)
+        ->toBe('post_id')
+        ->and($metadata->columns[2]->name)->toBe('created_at')
+        ->and($metadata->columns[3]->name)->toBe('is_active');
+});
+
+it('throws MissingPrimaryKeyException at metadata parse time when entity has no primary key attribute', function (): void {
+    $entity = new #[Table('no_pk')] class () extends Entity
+    {
+        #[Column]
+        public int $userId;
+
+        #[Column]
+        public string $name;
+    };
+
+    $this->factory->parse($entity::class);
+})->throws(MissingPrimaryKeyException::class);
+
+it('includes the entity class name in the exception message', function (): void {
+    $entity = new #[Table('no_pk')] class () extends Entity
+    {
+        #[Column]
+        public int $userId;
+    };
+
+    $entityClass = $entity::class;
+
+    expect(fn () => $this->factory->parse($entityClass))
+        ->toThrow(MissingPrimaryKeyException::class, $entityClass);
+});
+
+it('includes a suggestion to add #[Column(primaryKey: true)] in the exception message', function (): void {
+    $entity = new #[Table('no_pk')] class () extends Entity
+    {
+        #[Column]
+        public int $userId;
+    };
+
+    $exception = null;
+
+    try {
+        $this->factory->parse($entity::class);
+    } catch (MissingPrimaryKeyException $e) {
+        $exception = $e;
+    }
+
+    expect($exception)->not->toBeNull()
+        ->and($exception->getSuggestion())->toContain('#[Column(primaryKey: true)]');
+});
+
+it('parses an extender entity and resolves table name from the parent', function (): void {
+    $metadata = $this->factory->parse(BasicExtenderEntity::class);
+
+    expect($metadata->tableName)->toBe('users');
+});
+
+it('populates extends field on extender metadata with the parent class-string', function (): void {
+    $metadata = $this->factory->parse(BasicExtenderEntity::class);
+
+    expect($metadata->extends)->toBe(ExtenderParentEntity::class);
+});
+
+it('throws EntityException when extender declares its own name on Table attribute', function (): void {
+    $this->factory->parse(ExtenderWithOwnNameEntity::class);
+})->throws(EntityException::class, 'declares its own name');
+
+it('throws EntityException when entity declares neither name nor extends on Table attribute', function (): void {
+    $this->factory->parse(TableWithNeitherNameNorExtendsEntity::class);
+})->throws(EntityException::class, 'requires either name: or extends:');
+
+it('throws EntityException when extender declares a primaryKey column', function (): void {
+    $this->factory->parse(ExtenderWithPrimaryKeyEntity::class);
+})->throws(EntityException::class, 'declares a primaryKey column');
+
+it('throws EntityException when extender declares an autoIncrement column', function (): void {
+    $this->factory->parse(ExtenderWithAutoIncrementEntity::class);
+})->throws(EntityException::class, 'declares an autoIncrement column');
+
+it("throws EntityException when extender's parent class does not exist", function (): void {
+    $this->factory->parse(ExtenderWithMissingParentEntity::class);
+})->throws(EntityException::class, 'does not exist');
+
+it("throws EntityException when extender's parent class does not extend Entity", function (): void {
+    $this->factory->parse(ExtenderWithNonEntityParentEntity::class);
+})->throws(EntityException::class, 'does not extend Entity');
+
+it("throws EntityException when extender's parent is itself an extender (no chained extension)", function (): void {
+    $this->factory->parse(ChainedExtenderEntity::class);
+})->throws(EntityException::class, 'Chained extension is not supported');
+
+it('allows extender to declare its own indexes', function (): void {
+    $metadata = $this->factory->parse(ExtenderWithIndexEntity::class);
+
+    expect($metadata->indexes)->toHaveCount(1)
+        ->and($metadata->indexes[0]->name)->toBe('idx_extra');
+});
+
+it('allows extender to declare relationships', function (): void {
+    $metadata = $this->factory->parse(ExtenderWithRelationshipEntity::class);
+
+    expect($metadata->relationships)->toHaveKey('related');
+});
+
+it('caches extender metadata like normal entities', function (): void {
+    $metadata1 = $this->factory->parse(BasicExtenderEntity::class);
+    $metadata2 = $this->factory->parse(BasicExtenderEntity::class);
+
+    expect($metadata1)->toBe($metadata2);
+});
+
+it('linkExtenders replaces the cached parent metadata with one that has extenders populated', function (): void {
+    $this->factory->parse(ExtenderParentEntity::class);
+    $this->factory->linkExtenders(ExtenderParentEntity::class, [BasicExtenderEntity::class]);
+    $updated = $this->factory->parse(ExtenderParentEntity::class);
+
+    expect($updated->extenders)->toBe([BasicExtenderEntity::class]);
+});
+
+it('linkExtenders returns metadata where isExtended is true', function (): void {
+    $this->factory->parse(ExtenderParentEntity::class);
+    $result = $this->factory->linkExtenders(ExtenderParentEntity::class, [BasicExtenderEntity::class]);
+
+    expect($result->isExtended())->toBeTrue();
+});
+
+it('produces a chained-extension error message that names both the extender and its extender-parent and tells the user to extend the root', function (): void {
+    $extender = ChainedExtenderEntity::class;
+    $parent = BasicExtenderEntity::class;
+
+    expect(fn () => $this->factory->parse($extender))
+        ->toThrow(EntityException::class, "Chained extension is not supported. $extender's parent $parent is itself an extender. Extend the root entity directly.");
+});
 
 it('clears cached metadata', function (): void {
     $entity = new #[Table('test')] class () extends Entity

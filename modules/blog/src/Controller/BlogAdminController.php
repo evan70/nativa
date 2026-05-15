@@ -73,9 +73,9 @@ class BlogAdminController
         
         if ($article === null) {
             error_log('[BlogAdmin] Edit - article not found: ' . $id);
-            return $this->view->render('pages/errors/404', [
+            return Response::html($this->view->renderToString('pages/errors/404', [
                 'title' => 'Article Not Found',
-            ])->withStatus(404);
+            ]), 404);
         }
         
         error_log('[BlogAdmin] Edit form for article: ' . $id);

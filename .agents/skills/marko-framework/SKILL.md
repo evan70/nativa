@@ -54,6 +54,16 @@ Marko scans three locations (priority order):
 | 1 | `app/` | Your application (wins all conflicts) |
 | 2 | `modules/` | Third-party (overrides vendor) |
 | 3 | `vendor/` | Composer packages (base defaults) |
+**Flat vendor pattern (Nativa project):** When packages live in `packages/` and are linked via
+`vendor/marko -> ../packages` symlink, Marko's `discoverInVendor('vendor/')` finds them as a
+two-level structure (`marko/package-name/`), matching upstream expectations. This avoids
+modifying ModuleDiscovery.
+
+```bash
+# Create the symlink (required for ModuleDiscovery to work):
+ln -s ../packages vendor/marko
+```
+
 
 ### The module.php File
 
@@ -86,7 +96,33 @@ return [
 |-----|---------|
 | `bindings` | Map interfaces to concrete implementations |
 | `singletons` | Classes that should only be instantiated once |
+| `preferences` | Entirely replace one implementation with another (global override) |
+| `boot` | Callback invoked after all modules are loaded (for registration, listeners) |
+| `plugins` | Intercept method inputs/outputs on objects |
+|
+**Extended module metadata (via composer.json `extra.marko`):**
 
+```json
+{
+    "extra": {
+        "marko": {
+            "module": true,
+            "group": "admin",
+            "routes": ["/admin/*"],
+            "idleTimeout": "5m",
+            "isCore": false
+        }
+    }
+}
+```
+
+| Field | Purpose |
+|-------|---------|
+| `group` | Logical group name for ModuleGroupManager (idle eviction, route activation) |
+| `routes` | Route patterns that trigger group activation (fnmatch-style, e.g. `/admin/*`) |
+| `idleTimeout` | Inactivity timeout before group is evicted (e.g. `5m`, `1h`) |
+| `isCore` | Core groups are never evicted and are active by default |
+| `middleware` | (optional) Route middleware class names, applied to all group routes |
 ---
 
 ## Application Bootstrap
@@ -288,6 +324,57 @@ readonly class SendWelcomeEmail
     }
 }
 ```
+
+### Module Groups & Idle Eviction (Nativa project)
+
+The `modules/init` module provides a `ModuleGroupManager` for organizing modules into
+groups with idle timeout eviction — useful for admin panels, API backends, and
+other non-core features that don't need to stay loaded.
+
+**How groups work:**
+- Each module declares its group via `extra.marko.group` in `composer.json`
+- Core groups (`isCore: true`) are active by default and never evicted
+- Non-core groups start inactive and activate when a matching route is hit
+- Idle groups are evicted after their timeout (their bindings are removed from the container)
+
+```php
+use App\Init\Module\ModuleGroupManager;
+use App\Init\Module\ModuleGroupManagerInterface;
+use Marko\Core\Container\ContainerInterface;
+
+// Register a module group
+$manager = $container->get(ModuleGroupManagerInterface::class);
+$manager->registerGroup($module->manifest); // from Manifest metadata
+
+// Evict idle groups
+$manager->evictIfIdle('admin', '5m');
+
+// Check if group is active
+if ($manager->isGroupActive('admin')) {
+    // ...
+}
+```
+
+**Config (`config/module.php`):**
+
+```php
+return [
+    'eviction' => [
+        'enabled' => true,
+        'default' => '5m',       // default idle timeout
+        'check_interval' => '1m', // how often to check
+    ],
+    'route_guard' => false, // blocks routes if group is not active
+    'auto_activate_routes' => [
+        '/mark/*',
+        '/blog/*',
+    ],
+];
+```
+
+**Container unbind:** The `modules/init` Container extension adds `unbind()`, `unbindGroup()`,
+and `unbindAll()` methods used by eviction. These remove bindings and shared instances from
+the container, effectively deactivating a module group.
 
 ---
 

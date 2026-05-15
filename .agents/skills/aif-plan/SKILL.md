@@ -251,13 +251,12 @@ AskUserQuestion: Before we start:
 ## Shared Steps (both modes)
 
 ### Step 2: Analyze Requirements
-
 From the description, identify:
 - Core functionality to implement
 - Components/files that need changes
 - Dependencies between tasks
+- **Marko modules**: If creating a new module, plan includes: `composer.json` with `extra.marko.module`, `module.php`, PSR-4 autoload, and `config/database.php['modules']` mapping if it uses its own database
 - Edge cases to handle
-
 If requirements are ambiguous, ask clarifying questions:
 ```
 I need a few clarifications before creating the plan:

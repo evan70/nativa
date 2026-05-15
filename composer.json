@@ -37,7 +37,9 @@
             "Marko\\Cardboard\\": "modules/cardboard/src/",
             "App\\Blog\\": "modules/blog/src/",
             "Marko\\Mark\\": "modules/mark/src/",
-            "App\\Htmx\\": "modules/htmx/src/"
+            "App\\Htmx\\": "modules/htmx/src/",
+            "App\\Portfolio\\": "modules/portfolio/src/",
+            "App\\ViewSimple\\": "modules/view-simple/src/"
         }
     },
     "require-dev": {
@@ -50,5 +52,19 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true
         }
+    },
+    "scripts": {
+        "test": "vendor/bin/pest --parallel --stop-on-failure",
+        "analyse": "phpstan analyse --memory-limit=1G --error-format=table",
+        "check": [
+            "@validate",
+            "@analyse",
+            "@test"
+        ],
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "php -S localhost:9000 -t public"
+        ],
+        "build": "php build.php"
     }
 }

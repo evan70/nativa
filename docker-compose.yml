@@ -1,0 +1,29 @@
+services:
+  php:
+    image: php:8.4-cli
+    container_name: nativa-dev
+    working_dir: /app
+    ports:
+      - "9000:9000"
+    volumes:
+      - .:/app
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+    command: >
+      sh -c "
+        docker-php-ext-install pdo_sqlite >/dev/null &&
+        php -S 0.0.0.0:9000 -t public
+      "
+    depends_on:
+      composer:
+        condition: service_completed_successfully
+
+  composer:
+    image: composer:2
+    container_name: nativa-composer
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: install --no-interaction --prefer-dist
+    restart: no

@@ -7,7 +7,6 @@ use Marko\Layout\DiscoveringComponentCollector;
 use Marko\Layout\HandleResolver;
 use Marko\Layout\LayoutProcessor;
 use Marko\Layout\LayoutProcessorInterface;
-use Marko\Layout\Middleware\LayoutMiddleware;
 use Marko\Layout\LayoutResolver;
 
 return [
@@ -18,8 +17,5 @@ return [
     'singletons' => [
         HandleResolver::class => HandleResolver::class,
         LayoutResolver::class => LayoutResolver::class,
-    ],
-    'middleware' => [
-        LayoutMiddleware::class,
     ],
 ];

@@ -61,7 +61,7 @@ function cleanupDir(
 
 describe('SeederDiscovery', function (): void {
     it('discovers seeders via #[Seeder] attribute', function (): void {
-        $tempDir = sys_get_temp_dir() . '/marko_test_' . uniqid();
+        $tempDir = sys_get_temp_dir() . '/marko_test_' . bin2hex(random_bytes(8));
         mkdir($tempDir . '/Seed', 0755, true);
 
         $seederCode = <<<'PHP'
@@ -102,7 +102,7 @@ PHP;
     });
 
     it('ignores classes without #[Seeder] attribute', function (): void {
-        $tempDir = sys_get_temp_dir() . '/marko_test_' . uniqid();
+        $tempDir = sys_get_temp_dir() . '/marko_test_' . bin2hex(random_bytes(8));
         mkdir($tempDir . '/Seed', 0755, true);
 
         $classCode = <<<'PHP'
@@ -132,7 +132,7 @@ PHP;
     });
 
     it('extracts order from attribute', function (): void {
-        $tempDir = sys_get_temp_dir() . '/marko_test_' . uniqid();
+        $tempDir = sys_get_temp_dir() . '/marko_test_' . bin2hex(random_bytes(8));
         mkdir($tempDir . '/Seed', 0755, true);
 
         $seederCode = <<<'PHP'
@@ -171,13 +171,13 @@ PHP;
     });
 
     it('discovers seeders in vendor/*/*/Seed/', function (): void {
-        $tempDir = sys_get_temp_dir() . '/marko_test_' . uniqid();
+        $tempDir = sys_get_temp_dir() . '/marko_test_' . bin2hex(random_bytes(8));
         $vendorPath = $tempDir . '/vendor/acme/blog/Seed';
         mkdir($vendorPath, 0755, true);
 
         createSeederFile(
             $vendorPath . '/VendorSeeder.php',
-            'VendorAcmeBlog' . uniqid(),
+            'VendorAcmeBlog' . bin2hex(random_bytes(8)),
             'VendorSeeder',
             'vendor-seeder',
         );
@@ -193,37 +193,14 @@ PHP;
         }
     });
 
-    it('discovers seeders in flat packages/*/Seed/', function (): void {
-        $tempDir = sys_get_temp_dir() . '/marko_test_' . uniqid();
-        $packagesPath = $tempDir . '/packages/blog/Seed';
-        mkdir($packagesPath, 0755, true);
-
-        createSeederFile(
-            $packagesPath . '/PackageSeeder.php',
-            'PackagesBlog' . uniqid(),
-            'PackageSeeder',
-            'package-seeder',
-        );
-
-        try {
-            $discovery = new SeederDiscovery(new ClassFileParser());
-            $seeders = $discovery->discoverInVendor($tempDir . '/packages');
-
-            expect($seeders)->toHaveCount(1)
-                ->and($seeders[0]->name)->toBe('package-seeder');
-        } finally {
-            cleanupDir($tempDir);
-        }
-    });
-
     it('discovers seeders in modules/*/*/Seed/', function (): void {
-        $tempDir = sys_get_temp_dir() . '/marko_test_' . uniqid();
+        $tempDir = sys_get_temp_dir() . '/marko_test_' . bin2hex(random_bytes(8));
         $modulesPath = $tempDir . '/modules/acme/blog/Seed';
         mkdir($modulesPath, 0755, true);
 
         createSeederFile(
             $modulesPath . '/ModuleSeeder.php',
-            'ModulesAcmeBlog' . uniqid(),
+            'ModulesAcmeBlog' . bin2hex(random_bytes(8)),
             'ModuleSeeder',
             'module-seeder',
         );
@@ -240,13 +217,13 @@ PHP;
     });
 
     it('discovers seeders in app/*/Seed/', function (): void {
-        $tempDir = sys_get_temp_dir() . '/marko_test_' . uniqid();
+        $tempDir = sys_get_temp_dir() . '/marko_test_' . bin2hex(random_bytes(8));
         $appPath = $tempDir . '/app/blog/Seed';
         mkdir($appPath, 0755, true);
 
         createSeederFile(
             $appPath . '/AppSeeder.php',
-            'AppBlog' . uniqid(),
+            'AppBlog' . bin2hex(random_bytes(8)),
             'AppSeeder',
             'app-seeder',
         );

@@ -10,24 +10,55 @@ use Marko\Notification\Database\Entity\DatabaseNotification;
 interface NotificationRepositoryInterface
 {
     /**
+     * Get all notifications for a notifiable.
+     *
      * @return array<DatabaseNotification>
      */
-    public function forNotifiable(NotifiableInterface $notifiable): array;
+    public function forNotifiable(
+        NotifiableInterface $notifiable,
+    ): array;
 
     /**
+     * Get all unread notifications for a notifiable.
+     *
      * @return array<DatabaseNotification>
      */
-    public function unread(NotifiableInterface $notifiable): array;
+    public function unread(
+        NotifiableInterface $notifiable,
+    ): array;
 
-    public function markAsRead(string $notificationId): void;
+    /**
+     * Mark a single notification as read.
+     */
+    public function markAsRead(
+        string $notificationId,
+    ): void;
 
-    public function markAllAsRead(NotifiableInterface $notifiable): void;
+    /**
+     * Mark all notifications as read for a notifiable.
+     */
+    public function markAllAsRead(
+        NotifiableInterface $notifiable,
+    ): void;
 
-    public function deleteById(string $notificationId): void;
+    /**
+     * Delete a single notification by ID.
+     */
+    public function delete(
+        string $notificationId,
+    ): void;
 
-    public function deleteAll(NotifiableInterface $notifiable): void;
+    /**
+     * Delete all notifications for a notifiable.
+     */
+    public function deleteAll(
+        NotifiableInterface $notifiable,
+    ): void;
 
-    public function unreadCount(NotifiableInterface $notifiable): int;
-
-    public function deleteOld(\DateTimeImmutable $before): void;
+    /**
+     * Count unread notifications for a notifiable.
+     */
+    public function unreadCount(
+        NotifiableInterface $notifiable,
+    ): int;
 }

@@ -12,6 +12,7 @@ return [
     'modules' => [
         'blog' => 'articles',
         'cardboard' => 'cardboard',
+        'portfolio' => 'portfolio',
         'nativa' => 'nativa',
         'database-modular' => 'database-modular',
     ],

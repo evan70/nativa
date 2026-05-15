@@ -231,8 +231,7 @@ class Session implements SessionInterface
 
     private function configure(): void
     {
-        ini_set('session.save_handler', 'files');
-        ini_set('session.save_path', $this->config->path());
+        // Note: session.save_handler is automatically set to 'user' by session_set_save_handler()
         ini_set('session.gc_maxlifetime', (string) ($this->config->lifetime() * 60));
         ini_set('session.gc_probability', (string) $this->config->gcProbability());
         ini_set('session.gc_divisor', (string) $this->config->gcDivisor());
@@ -250,6 +249,8 @@ class Session implements SessionInterface
             'httponly' => $this->config->cookieHttpOnly(),
             'samesite' => ucfirst($this->config->cookieSameSite()),
         ]);
+
+        session_set_save_handler($this->handler, true);
     }
 
     /**

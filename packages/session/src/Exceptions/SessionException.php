@@ -4,8 +4,32 @@ declare(strict_types=1);
 
 namespace Marko\Session\Exceptions;
 
-use Marko\Core\Exceptions\MarkoException;
+use Exception;
+use Throwable;
 
-class SessionException extends MarkoException
+class SessionException extends Exception
 {
+    public function __construct(
+        string $message,
+        private readonly string $context = '',
+        private readonly string $suggestion = '',
+        int $code = 0,
+        ?Throwable $previous = null,
+    ) {
+        parent::__construct(
+            $message,
+            $code,
+            $previous,
+        );
+    }
+
+    public function getContext(): string
+    {
+        return $this->context;
+    }
+
+    public function getSuggestion(): string
+    {
+        return $this->suggestion;
+    }
 }

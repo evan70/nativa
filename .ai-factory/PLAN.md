@@ -1,53 +1,110 @@
-# Plan: Create Admin Section for Cardboard Module
+# Plan: Dev & Prod Circuits for Nativa
+
+> Creation date: 2026-05-15
+> Branch: (fast mode — no branch)
 
 ## Goal
-Create an admin section for the cardboard module that follows the Marko admin section pattern and uses BEM methodology for any frontend components (if applicable).
 
-## Steps
+Formalize two distinct operation modes (circuits) for the Nativa project:
+- **Dev circuit** — full development environment with vendor, dev tools, tests, frontend HMR
+- **Prod circuit** — stripped-down production artifact (no vendor, no composer.json, no tests, min thin)
 
-### 1. Create Admin Section Class
-- Create `/home/evan/dev/05/nativa/modules/cardboard/src/Admin/CardboardAdminSection.php`
-- Implement `AdminSectionInterface`
-- Use `#[AdminSection]` attribute with appropriate id, label, icon, and sortOrder
-- Implement `getMenuItems()` to return menu items for cardboard admin functionality
+## Settings
 
-### 2. Define Menu Items
-- Menu items should include:
-  - Cardboard overview/dashboard
-  - Card management (if applicable)
-  - Settings/configuration
+- Testing: N/A (plan is about infrastructure, not code)
+- Logging: N/A
+- Docs: minimal inline docs in Makefile + circuit documentation
 
-### 3. Follow BEM for Frontend (if applicable)
-- If the admin section requires custom frontend components (TS/CSS), follow BEM methodology:
-  - Block: `cardboard-admin` (or similar)
-  - Elements: `cardboard-admin__[element]`
-  - Modifiers: `cardboard-admin--[modifier]`
-- Place TS in `/home/evan/dev/05/nativa/modules/cardboard/src/Admin/[SectionName]AdminSection.ts`
-- Place CSS in `/home/evan/dev/05/nativa/modules/cardboard/src/Admin/[section-name]-admin.css`
-- Ensure CSS follows BEM naming conventions
+## Current State
 
-### 4. Update Module Configuration
-- Ensure the module's `module.php` properly registers any admin-related files if needed
-- Check if admin discovery is automatic (should be via attributes)
+The project already has:
+- `build.php` — generates `dist/` without vendor/composer.json
+- `composer.json` with `require-dev` (pest, phpstan)
+- CI pipeline that runs quality checks then builds prod dist
+- `composer install --no-dev` used in CI build job
 
-### 5. Add Dashboard Widgets (Optional)
-- Consider creating dashboard widgets for cardboard statistics
-- Implement `DashboardWidgetInterface` if needed
+**What's missing:**
+- `build.php` copies everything including test dirs → prod dist has test files
+- No Makefile for common dev tasks
+- No Docker Compose for dev
+- No documentation of the two circuits
+- No automated way to verify prod dist is clean
 
-### 6. Permissions
-- Consider defining permissions for cardboard admin actions using `#[AdminPermission]` attributes
+## Tasks
 
-## Files to Create
-1. `/home/evan/dev/05/nativa/modules/cardboard/src/Admin/CardboardAdminSection.php`
-2. (Optional) `/home/evan/dev/05/nativa/modules/cardboard/src/Admin/CardboardAdminSection.ts`
-3. (Optional) `/home/evan/dev/05/nativa/modules/cardboard/src/Admin/cardboard-admin.css`
+### Phase 1: Formalize Circuits
 
-## Reference
-- Existing admin section: `/home/evan/dev/05/nativa/modules/blog/src/Admin/BlogAdminSection.php`
-- Admin section interface: `/home/evan/dev/05/nativa/packages/admin/src/Contracts/AdminSectionInterface.php`
-- BEM guidelines: `/home/evan/dev/05/nativa/templates/RULES.md`
+1. **Add `CIRCUITS.md` documenting dev and prod circuits**
+   - Dev: `composer install`, vendor/, tests, phpstan, phpunit, frontend dev server
+   - Prod: `php build.php` → `dist/`, no vendor, no composer.json, no tests, deployable
+   - Explicitly describe what each circuit contains and how to switch between them
+   - Cover: dependencies, tooling, testing, database, frontend assets
 
-## Testing
-- Verify admin section appears in admin menu
-- Check that menu items link to correct routes
-- Validate BEM naming if frontend components are created
+### Phase 2: Dev Circuit Tooling
+
+2. **Create `Makefile` for common dev operations**
+   - `make install` — install PHP + frontend deps
+   - `make dev` — start PHP dev server + frontend HMR
+   - `make test` — run pest tests
+   - `make analyse` — run phpstan
+   - `make lint` — run composer validate + phpstan
+   - `make build` — php build.php (prod artifact)
+   - `make clean` — clean vendor, dist, etc.
+
+3. **Create `docker-compose.yml` for dev circuit**
+   - PHP 8.5 CLI image with composer
+   - Mount source code as volume
+   - Expose dev server port
+   - Run `make install` on startup
+   - No prod Docker (user wants `build.php` for prod)
+
+### Phase 3: Prod Circuit — Max Thin Build
+
+4. **Update `build.php` to strip test directories**
+   - Exclude `**/tests/`, `**/Tests/`, `**/*.test.ts`, `**/*.spec.ts` from all copied dirs
+   - Exclude `.phpunit.cache/`, `phpunit.xml`, `phpstan.neon`, `.phpstan` from dist
+   - Exclude dev-only configs (`phpunit.xml`, `run_test.sh`, `test_server.sh`)
+   - Verify prod dist has zero test files
+
+5. **Add `dist/ verification` step to build.php**
+   - After build, assert no `vendor/` dir exists in dist
+   - Assert no `composer.json` exists in dist
+   - Assert no `**/tests/` dirs exist in dist
+   - Assert no dev config files exist in dist
+   - Exit with error if any dev artifact leaked into prod
+
+### Phase 4: CI Alignment
+
+6. **Update CI workflow to use the same dev/prod patterns**
+   - Quality job → dev circuit (composer install, tests, phpstan)
+   - Build job → build.php with `MARKO_SKIP_FRONTEND_BUILD=1`
+   - Smoke test uses dist/ (already done)
+   - Ensure CI build job runs the new verification step
+
+### Phase 5: Documentation
+
+7. **Update `README.md` with circuit badges/summary**
+   - Add quick "Dev Circuit" and "Prod Circuit" section
+   - Link to CIRCUITS.md
+   - Update `AGENTS.md` with new files
+
+## Edge Cases
+
+- **Dev Docker**: permissions for storage/ directory must be writable by www-data inside container
+- **Build stripping**: `packages/` contains first-party tests that MUST NOT be in prod — use explicit exclusion list, not just a blanket `tests/` pattern, to avoid false matches
+- **Composer.lock**: must exist for reproducible builds in CI; dev circuit uses `--frozen-lockfile`
+- **Frontend assets**: prod dist includes built assets from templates/ — build.php should exclude `node_modules/` (already done) and source maps in prod
+
+## Verification
+
+After implementation:
+1. `make install && make test && make analyse` → all pass
+2. `make build` → `dist/` has:
+   - No `vendor/` dir
+   - No `composer.json` or `composer.lock`
+   - No `tests/` directories anywhere
+   - No `phpunit.xml`, `phpstan.neon`, `run_test.sh`, `test_server.sh`
+   - No `.phpunit.cache/`
+   - Frontend assets built (no `node_modules/`, no raw `.ts` sources)
+3. `make dev` (or Docker) → PHP dev server + frontend HMR work
+4. CI pipeline passes same checks

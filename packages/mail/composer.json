@@ -29,10 +29,7 @@
     },
     "extra": {
         "marko": {
-            "module": true,
-            "group": "mail",
-            "routes": ["/api/mail/*", "/mail/*"],
-            "idleTimeout": "1h"
+            "module": true
         }
     }
 }

@@ -4,21 +4,20 @@ declare(strict_types=1);
 
 namespace Marko\Amphp;
 
-use Marko\Config\ConfigInterface;
+use Marko\Config\ConfigRepositoryInterface;
+use Marko\Config\Exceptions\ConfigNotFoundException;
 
-class AmphpConfig
+readonly class AmphpConfig
 {
     public function __construct(
-        private readonly ConfigInterface $config
+        private ConfigRepositoryInterface $config,
     ) {}
 
-    public function isEnabled(): bool
+    /**
+     * @throws ConfigNotFoundException
+     */
+    public function shutdownTimeout(): int
     {
-        return (bool) $this->config->get('amphp.enabled', false);
-    }
-
-    public function getConcurrency(): int
-    {
-        return (int) $this->config->get('amphp.concurrency', 10);
+        return $this->config->getInt('amphp.shutdown_timeout');
     }
 }

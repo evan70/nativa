@@ -8,21 +8,26 @@ use BackedEnum;
 use DateTimeImmutable;
 use Marko\Core\Event\EventDispatcherInterface;
 use Marko\Database\Connection\ConnectionInterface;
+use Marko\Database\Connection\TransactionInterface;
 use Marko\Database\Entity\Entity;
+use Marko\Database\Entity\EntityCollection;
 use Marko\Database\Entity\EntityHydrator;
 use Marko\Database\Entity\EntityMetadata;
 use Marko\Database\Entity\EntityMetadataFactory;
-use Marko\Database\Entity\PropertyMetadata;
+use Marko\Database\Entity\RelationshipLoader;
 use Marko\Database\Events\EntityCreated;
 use Marko\Database\Events\EntityCreating;
 use Marko\Database\Events\EntityDeleted;
 use Marko\Database\Events\EntityDeleting;
 use Marko\Database\Events\EntityUpdated;
 use Marko\Database\Events\EntityUpdating;
+use Marko\Database\Exceptions\BatchInsertException;
 use Marko\Database\Exceptions\RepositoryException;
 use Marko\Database\Query\QueryBuilderFactoryInterface;
 use Marko\Database\Query\QueryBuilderInterface;
+use Marko\Database\Query\QuerySpecification;
 use ReflectionClass;
+use Throwable;
 
 /**
  * Abstract base class for entity repositories.
@@ -44,11 +49,19 @@ abstract class Repository implements RepositoryInterface
     protected readonly EntityMetadata $metadata;
 
     /**
+     * Relationships to eager-load on the next query.
+     *
+     * @var array<string>
+     */
+    private array $pendingRelationships = [];
+
+    /**
      * @param ConnectionInterface $connection Database connection
      * @param EntityMetadataFactory $metadataFactory Factory for entity metadata
      * @param EntityHydrator $hydrator Entity hydrator
      * @param QueryBuilderFactoryInterface|null $queryBuilderFactory Optional factory that creates QueryBuilderInterface instances
      * @param EventDispatcherInterface|null $eventDispatcher Optional event dispatcher for lifecycle events
+     * @param RelationshipLoader|null $relationshipLoader Optional loader for eager-loading relationships
      *
      * @throws RepositoryException
      */
@@ -58,9 +71,41 @@ abstract class Repository implements RepositoryInterface
         protected readonly EntityHydrator $hydrator,
         protected readonly ?QueryBuilderFactoryInterface $queryBuilderFactory = null,
         protected readonly ?EventDispatcherInterface $eventDispatcher = null,
+        protected readonly ?RelationshipLoader $relationshipLoader = null,
     ) {
         $this->validateEntityClass();
         $this->metadata = $this->metadataFactory->parse(static::ENTITY_CLASS);
+
+        if ($this->metadata->isExtender()) {
+            throw RepositoryException::extenderCannotHaveRepository(static::ENTITY_CLASS);
+        }
+    }
+
+    /**
+     * Specify relationships to eager-load on the next query.
+     *
+     * Returns a cloned repository with the pending relationships set.
+     *
+     * @throws RepositoryException When RelationshipLoader is not configured or relationship name is unknown
+     */
+    public function with(string ...$relationships): static
+    {
+        if ($this->relationshipLoader === null) {
+            throw RepositoryException::relationshipLoaderNotConfigured(static::class);
+        }
+
+        foreach ($relationships as $name) {
+            $topLevel = explode('.', $name, 2)[0];
+
+            if ($this->metadata->getRelationship($topLevel) === null) {
+                throw RepositoryException::unknownRelationship(static::class, static::ENTITY_CLASS, $name);
+            }
+        }
+
+        $clone = clone $this;
+        $clone->pendingRelationships = array_values($relationships);
+
+        return $clone;
     }
 
     /**
@@ -71,8 +116,7 @@ abstract class Repository implements RepositoryInterface
     public function find(
         int|string $id,
     ): ?Entity {
-        $primaryKey = $this->metadata->getPrimaryKeyProperty();
-        $columnName = $primaryKey?->columnName ?? 'id';
+        $columnName = $this->metadata->getPrimaryKeyProperty()->columnName;
 
         $sql = sprintf(
             'SELECT * FROM %s WHERE %s = ?',
@@ -86,11 +130,15 @@ abstract class Repository implements RepositoryInterface
             return null;
         }
 
-        return $this->hydrator->hydrate(
+        $entity = $this->hydrator->hydrate(
             static::ENTITY_CLASS,
             $rows[0],
             $this->metadata,
         );
+
+        $this->eagerLoadRelationships([$entity]);
+
+        return $entity;
     }
 
     /**
@@ -114,14 +162,14 @@ abstract class Repository implements RepositoryInterface
     /**
      * Find all entities in the repository.
      *
-     * @return array<TEntity>
+     * @return EntityCollection<TEntity>
      */
-    public function findAll(): array
+    public function findAll(): EntityCollection
     {
         $sql = sprintf('SELECT * FROM %s', $this->metadata->tableName);
         $rows = $this->connection->query($sql);
 
-        return array_map(
+        $entities = array_map(
             fn (array $row): Entity => $this->hydrator->hydrate(
                 static::ENTITY_CLASS,
                 $row,
@@ -129,17 +177,21 @@ abstract class Repository implements RepositoryInterface
             ),
             $rows,
         );
+
+        $this->eagerLoadRelationships($entities);
+
+        return new EntityCollection($entities);
     }
 
     /**
      * Find entities matching the given criteria.
      *
      * @param array<string, mixed> $criteria Column-value pairs to match
-     * @return array<TEntity>
+     * @return EntityCollection<TEntity>
      */
     public function findBy(
         array $criteria,
-    ): array {
+    ): EntityCollection {
         $propertyToColumn = $this->metadata->getPropertyToColumnMap();
         $conditions = [];
         $bindings = [];
@@ -158,7 +210,7 @@ abstract class Repository implements RepositoryInterface
 
         $rows = $this->connection->query($sql, $bindings);
 
-        return array_map(
+        $entities = array_map(
             fn (array $row): Entity => $this->hydrator->hydrate(
                 static::ENTITY_CLASS,
                 $row,
@@ -166,6 +218,10 @@ abstract class Repository implements RepositoryInterface
             ),
             $rows,
         );
+
+        $this->eagerLoadRelationships($entities);
+
+        return new EntityCollection($entities);
     }
 
     /**
@@ -176,9 +232,7 @@ abstract class Repository implements RepositoryInterface
     public function findOneBy(
         array $criteria,
     ): ?Entity {
-        $results = $this->findBy($criteria);
-
-        return $results[0] ?? null;
+        return $this->findBy($criteria)->first();
     }
 
     /**
@@ -203,6 +257,144 @@ abstract class Repository implements RepositoryInterface
     }
 
     /**
+     * Insert multiple entities in a single multi-row INSERT statement.
+     *
+     * @param array<Entity> $entities
+     * @throws BatchInsertException|RepositoryException
+     */
+    public function insertBatch(array $entities): void
+    {
+        if (count($entities) === 0) {
+            throw BatchInsertException::emptyBatch();
+        }
+
+        foreach ($entities as $entity) {
+            if ($entity->companions() !== []) {
+                throw BatchInsertException::companionsNotSupported($entity::class);
+            }
+        }
+
+        $firstClass = $entities[0]::class;
+
+        foreach ($entities as $index => $entity) {
+            if ($entity::class !== $firstClass) {
+                throw BatchInsertException::heterogeneousBatch($firstClass, $entity::class, $index);
+            }
+        }
+
+        $this->validateEntityType($entities[0]);
+
+        // Fire Creating events for each entity before insert
+        foreach ($entities as $entity) {
+            $this->eventDispatcher?->dispatch(new EntityCreating($entity, static::ENTITY_CLASS));
+        }
+
+        // Build column set from first entity
+        $firstData = $this->extractBatchRow($entities[0]);
+        $columns = array_keys($firstData);
+        $expectedColumns = $columns;
+
+        // Verify column consistency across the batch
+        foreach ($entities as $index => $entity) {
+            if ($index === 0) {
+                continue;
+            }
+
+            $rowData = $this->extractBatchRow($entity);
+            $rowColumns = array_keys($rowData);
+
+            if ($rowColumns !== $expectedColumns) {
+                throw BatchInsertException::columnSetMismatch($firstClass, $index);
+            }
+        }
+
+        // Compile all row data
+        $allRows = array_map(fn (Entity $e) => $this->extractBatchRow($e), $entities);
+
+        // Build multi-row INSERT SQL
+        $placeholderRow = '(' . implode(', ', array_fill(0, count($columns), '?')) . ')';
+        $placeholders = implode(', ', array_fill(0, count($allRows), $placeholderRow));
+
+        $sql = sprintf(
+            'INSERT INTO %s (%s) VALUES %s',
+            $this->metadata->tableName,
+            implode(', ', $columns),
+            $placeholders,
+        );
+
+        // Flatten all row values into a single bindings array
+        $bindings = [];
+        foreach ($allRows as $row) {
+            foreach ($row as $value) {
+                $bindings[] = $value;
+            }
+        }
+
+        // Wrap in transaction if none is active
+        $ownsTransaction = false;
+        if ($this->connection instanceof TransactionInterface && !$this->connection->inTransaction()) {
+            $this->connection->beginTransaction();
+            $ownsTransaction = true;
+        }
+
+        try {
+            $this->connection->execute($sql, $bindings);
+
+            // Populate auto-increment IDs (MySQL strategy: LAST_INSERT_ID + row offset)
+            $pkProperty = $this->metadata->getPrimaryKeyProperty();
+            if ($pkProperty?->isAutoIncrement === true) {
+                $firstId = $this->connection->lastInsertId();
+                $reflection = new ReflectionClass($entities[0]);
+
+                foreach ($entities as $offset => $entity) {
+                    $property = $reflection->getProperty($this->metadata->primaryKey);
+                    $property->setValue($entity, $firstId + $offset);
+                }
+            }
+
+            // Register original values for dirty tracking
+            foreach ($entities as $entity) {
+                $this->hydrator->registerOriginalValues($entity, $this->metadata);
+            }
+
+            if ($ownsTransaction) {
+                $this->connection->commit();
+            }
+        } catch (Throwable $e) {
+            if ($ownsTransaction) {
+                $this->connection->rollback();
+            }
+
+            throw $e;
+        }
+
+        // Fire Created events for each entity after insert
+        foreach ($entities as $entity) {
+            $this->eventDispatcher?->dispatch(new EntityCreated($entity, static::ENTITY_CLASS));
+        }
+    }
+
+    /**
+     * Extract row data for a single entity, excluding auto-increment PK if null.
+     *
+     * @return array<string, mixed>
+     */
+    private function extractBatchRow(Entity $entity): array
+    {
+        $data = $this->hydrator->extract($entity, $this->metadata);
+
+        $pkProperty = $this->metadata->getPrimaryKeyProperty();
+        if ($pkProperty?->isAutoIncrement === true) {
+            $pkColumn = $pkProperty->columnName;
+            if ($data[$pkColumn] === null) {
+                unset($data[$pkColumn]);
+            }
+        }
+
+        return $data;
+    }
+
+    /**
      * Delete an entity.
      *
      * @throws RepositoryException
@@ -212,8 +404,7 @@ abstract class Repository implements RepositoryInterface
     ): void {
         $this->validateEntityType($entity);
 
-        $primaryKey = $this->metadata->getPrimaryKeyProperty();
-        $columnName = $primaryKey?->columnName ?? 'id';
+        $columnName = $this->metadata->getPrimaryKeyProperty()->columnName;
 
         $reflection = new ReflectionClass($entity);
         $property = $reflection->getProperty($this->metadata->primaryKey);
@@ -258,10 +449,58 @@ abstract class Repository implements RepositoryInterface
     }
 
     /**
+     * Return an EntityCollection of entities matching all given specifications.
+     *
+     * Specifications are applied in order to the RepositoryQueryBuilder wrapper
+     * so that specs can call $builder->with() to declare eager loading.
+     * Call-site relationships from with()->matching() are pre-seeded and merged
+     * with any spec-declared relationships without duplicates.
+     *
+     * @throws RepositoryException If no query builder factory was provided
+     */
+    public function matching(QuerySpecification ...$specifications): EntityCollection
+    {
+        if ($this->queryBuilderFactory === null) {
+            throw RepositoryException::queryBuilderNotConfigured(static::class);
+        }
+
+        $queryBuilder = $this->queryBuilderFactory->create();
+        $queryBuilder->table($this->metadata->tableName);
+
+        $repositoryQueryBuilder = new RepositoryQueryBuilder(
+            $queryBuilder,
+            $this->hydrator,
+            $this->metadata,
+            static::ENTITY_CLASS,
+            $this->relationshipLoader,
+        );
+
+        // Pre-seed call-site relationships (from $repo->with(...)->matching(...))
+        if ($this->pendingRelationships !== []) {
+            $repositoryQueryBuilder->with(...$this->pendingRelationships);
+        }
+
+        foreach ($specifications as $specification) {
+            $specification->apply($repositoryQueryBuilder);
+        }
+
+        return $repositoryQueryBuilder->getEntities();
+    }
+
+    /**
      * Count all entities in the repository.
+     *
+     * Delegates to the query builder when a factory is configured, otherwise
+     * falls back to a raw SQL query. The raw-SQL path exists because Repository
+     * can be constructed without a QueryBuilderFactory (e.g. in lightweight
+     * contexts that only need find/save), and we must not break that contract.
      */
     public function count(): int
     {
+        if ($this->queryBuilderFactory !== null) {
+            return $this->query()->count();
+        }
+
         $sql = sprintf(
             'SELECT COUNT(*) as aggregate FROM %s',
             $this->metadata->tableName,
@@ -308,7 +547,8 @@ abstract class Repository implements RepositoryInterface
         $bindings = [$value];
 
         if ($excludeId !== null) {
-            $sql .= ' AND id != ?';
+            $pkColumn = $this->metadata->getPrimaryKeyProperty()->columnName;
+            $sql .= " AND $pkColumn != ?";
             $bindings[] = $excludeId;
         }
 
@@ -323,13 +563,13 @@ abstract class Repository implements RepositoryInterface
     protected function insert(
         Entity $entity,
     ): void {
-        $data = $this->hydrator->extract($entity, $this->metadata);
+        $data = $this->hydrator->extractAll($entity, $this->metadata);
 
         // Remove primary key if it's auto-increment and null
         $pkProperty = $this->metadata->getPrimaryKeyProperty();
         if ($pkProperty?->isAutoIncrement === true) {
             $pkColumn = $pkProperty->columnName;
-            if ($data[$pkColumn] === null) {
+            if (array_key_exists($pkColumn, $data) && $data[$pkColumn] === null) {
                 unset($data[$pkColumn]);
             }
         }
@@ -352,29 +592,33 @@ abstract class Repository implements RepositoryInterface
             $property = $reflection->getProperty($this->metadata->primaryKey);
             $property->setValue($entity, $this->connection->lastInsertId());
         }
+
+        $this->hydrator->registerOriginalValues($entity, $this->metadata);
+
+        // Register original values for each freshly-attached companion so that
+        // subsequent update() calls can dirty-track them correctly.
+        foreach ($entity->companions() as $companion) {
+            $companionMetadata = $this->metadataFactory->parse($companion::class);
+            $this->hydrator->registerOriginalValues($companion, $companionMetadata);
+        }
     }
 
     /**
      * Update an existing entity.
      *
      * Only dirty (changed) fields are updated to minimize database operations.
+     * Dirty fields from attached companions are merged into the same UPDATE statement.
      */
     protected function update(
         Entity $entity,
     ): void {
-        $primaryKey = $this->metadata->getPrimaryKeyProperty();
-        $pkColumn = $primaryKey?->columnName ?? 'id';
+        $pkColumn = $this->metadata->getPrimaryKeyProperty()->columnName;
         $propertyToColumn = $this->metadata->getPropertyToColumnMap();
 
-        // Get the dirty properties
+        // Get the dirty properties for the parent
         $dirtyProperties = $this->hydrator->getDirtyProperties($entity, $this->metadata);
 
-        // If no fields are dirty, skip the update
-        if (count($dirtyProperties) === 0) {
-            return;
-        }
-
-        // Extract only the dirty field values
+        // Extract only the dirty field values for the parent
         $reflection = new ReflectionClass($entity);
         $data = [];
 
@@ -382,10 +626,47 @@ abstract class Repository implements RepositoryInterface
             $property = $reflection->getProperty($propertyName);
             $value = $property->getValue($entity);
             $columnName = $propertyToColumn[$propertyName];
-            $propMeta = $this->metadata->getProperty($propertyName);
 
-            // Convert value to DB format
-            $data[$columnName] = $this->convertToDbValue($value, $propMeta);
+            $data[$columnName] = $this->convertToDbValue($value);
+        }
+
+        // Collect dirty companion data. Companions with no originalValues
+        // (never hydrated, rolling deploy) are skipped entirely.
+        $participatingCompanions = [];
+
+        foreach ($entity->companions() as $companion) {
+            $companionMetadata = $this->metadataFactory->parse($companion::class);
+            $companionOriginalValues = $this->hydrator->getOriginalValues($companion);
+
+            // Never hydrated and no original values — skip (rolling deploy)
+            if ($companionOriginalValues === []) {
+                continue;
+            }
+
+            $companionDirtyProperties = $this->hydrator->getDirtyProperties($companion, $companionMetadata);
+
+            if ($companionDirtyProperties === []) {
+                $participatingCompanions[] = [$companion, $companionMetadata];
+                continue;
+            }
+
+            $companionPropertyToColumn = $companionMetadata->getPropertyToColumnMap();
+            $companionReflection = new ReflectionClass($companion);
+
+            foreach ($companionDirtyProperties as $propertyName) {
+                $property = $companionReflection->getProperty($propertyName);
+                $value = $property->getValue($companion);
+                $columnName = $companionPropertyToColumn[$propertyName];
+
+                $data[$columnName] = $this->convertToDbValue($value);
+            }
+
+            $participatingCompanions[] = [$companion, $companionMetadata];
+        }
+
+        // If no fields are dirty (parent + companions), skip the update
+        if ($data === []) {
+            return;
         }
 
         // Get the primary key value for the WHERE clause
@@ -409,6 +690,13 @@ abstract class Repository implements RepositoryInterface
         $bindings[] = $id;
 
         $this->connection->execute($sql, $bindings);
+
+        $this->hydrator->registerOriginalValues($entity, $this->metadata);
+
+        // Refresh original values snapshots for participating companions
+        foreach ($participatingCompanions as [$companion, $companionMetadata]) {
+            $this->hydrator->registerOriginalValues($companion, $companionMetadata);
+        }
     }
 
     /**
@@ -416,7 +704,6 @@ abstract class Repository implements RepositoryInterface
      */
     private function convertToDbValue(
         mixed $value,
-        ?PropertyMetadata $propMeta,
     ): mixed {
         if ($value === null) {
             return null;
@@ -431,6 +718,23 @@ abstract class Repository implements RepositoryInterface
         }
 
         return $value;
+    }
+
+    /**
+     * Eager-load any pending relationships on the given entities.
+     *
+     * Supports dot-notation for nested eager loading (e.g. 'comments.author').
+     *
+     * @param Entity[] $entities
+     */
+    private function eagerLoadRelationships(array $entities): void
+    {
+        if ($this->pendingRelationships === [] || $this->relationshipLoader === null || $entities === []) {
+            return;
+        }
+
+        $tree = RelationshipLoader::parseRelationshipTree($this->pendingRelationships);
+        $this->relationshipLoader->loadNested($entities, $tree, $this->metadata);
     }
 
     /**

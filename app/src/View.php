@@ -173,18 +173,14 @@ final class View
         if ($match && isset($match['file'])) {
             $file = $match['file'];
             if (str_ends_with($file, '.js')) {
-                if (!$shouldDefer) {
-                    $html .= '<link rel="modulepreload" href="' . $basePath . $file . '">' . "\n";
-                }
+                // Do not preload scripts that are already included in the head to avoid double download warnings in some browsers
+                // especially when they are deferred.
                 $html .= '<script type="module" src="' . $basePath . $file . '"' . $deferAttr . $crossorigin . '></script>' . "\n";
             }
         }
 
         if (!$match && str_ends_with($entry, '.js')) {
             $url = $basePath . 'assets/' . $entry;
-            if (!$shouldDefer) {
-                $html .= '<link rel="modulepreload" href="' . $url . '">' . "\n";
-            }
             $html .= '<script type="module" src="' . $url . '"' . $deferAttr . '></script>';
         }
 

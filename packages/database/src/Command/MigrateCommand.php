@@ -267,7 +267,6 @@ readonly class MigrateCommand implements CommandInterface
      */
     private const array EXCLUDED_TABLES = [
         'migrations',
-        'sessions',
     ];
 
     /**

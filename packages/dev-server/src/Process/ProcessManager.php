@@ -4,164 +4,300 @@ declare(strict_types=1);
 
 namespace Marko\DevServer\Process;
 
+use Marko\Core\Command\Output;
 use Marko\DevServer\Exceptions\DevServerException;
-use Symfony\Component\Process\Process;
+use ValueError;
 
 class ProcessManager
 {
-    /** @var array<string, Process> */
+    /** @var array<string, array{resource: resource, pipes: array<int, resource>}> */
     private array $processes = [];
 
+    /** @var array<string, int> */
+    private array $pids = [];
+
     public function __construct(
-        private readonly PidFile $pidFile,
-        private readonly int $port = 8000,
+        private readonly Output $output,
     ) {}
 
-    /** @throws DevServerException */
-    public function start(string $name, string $command, bool $detached = true): int
-    {
-        if (!$detached) {
-            $process = Process::fromShellCommandline($command);
-            $process->setTimeout(null);
-            $process->start(function ($type, $buffer) use ($name) {
-                echo "[{$name}] {$buffer}";
-            });
+    /**
+     * Start a named process.
+     *
+     * @throws DevServerException If the process fails to start
+     */
+    public function start(
+        string $name,
+        string $command,
+    ): int {
+        $descriptors = [
+            0 => ['pipe', 'r'],  // stdin
+            1 => ['pipe', 'w'],  // stdout
+            2 => ['pipe', 'w'],  // stderr
+        ];
 
-            if (!$process->isRunning()) {
-                throw DevServerException::processFailedToStart($name, $command);
-            }
+        $wrappedCommand = $this->wrapWithNewProcessGroup($command);
+        $process = proc_open($wrappedCommand, $descriptors, $pipes);
 
-            $pid = $process->getPid();
-            if ($pid === null) {
-                throw DevServerException::processFailedToStart($name, $command);
-            }
-            $this->processes[$name] = $process;
-        } else {
-            if (PHP_OS_FAMILY === 'Windows') {
-                // On Windows, we use 'start /B' to run in background
-                $fullCommand = "start /B {$command}";
-                $handle = popen($fullCommand, 'r');
-                $pid = 0; // Difficult to get PID on Windows without more complexity
-            } else {
-                // On Unix, we use nohup and &
-                $fullCommand = "nohup {$command} > /dev/null 2>&1 & echo $!";
-                $output = [];
-                exec($fullCommand, $output);
-                $pid = (int) ($output[0] ?? 0);
-            }
-        }
-
-        if ($pid === 0 && PHP_OS_FAMILY !== 'Windows') {
+        if (!is_resource($process)) {
             throw DevServerException::processFailedToStart($name, $command);
         }
 
-        $entries = $this->pidFile->read();
-        $entries[] = new ProcessEntry(
-            $name,
-            $pid,
-            $command,
-            $this->port,
-            date('Y-m-d H:i:s')
-        );
-        $this->pidFile->write($entries);
+        // Make stdout/stderr non-blocking
+        stream_set_blocking($pipes[1], false);
+        stream_set_blocking($pipes[2], false);
+
+        $status = proc_get_status($process);
+        $pid = $status['pid'];
+
+        $this->processes[$name] = ['resource' => $process, 'pipes' => $pipes];
+        $this->pids[$name] = $pid;
+
+        // Wait briefly and check if the process exited immediately with an error
+        usleep(150000); // 150ms — allows setsid wrapper to start and fail
+        $status = proc_get_status($process);
+        if (!$status['running'] && in_array($status['exitcode'], [126, 127], true)) {
+            $this->stop($name);
+            throw DevServerException::processFailedToStart($name, $command);
+        }
 
         return $pid;
     }
 
+    /**
+     * Start a named process in the background, fully detached from PHP.
+     *
+     * Uses shell exec with output redirection instead of proc_open,
+     * so the process survives PHP exit. Returns the PID.
+     */
+    public function startDetached(
+        string $name,
+        string $command,
+    ): int {
+        $wrappedCommand = $this->wrapWithNewProcessGroup($command);
+
+        // Start fully detached: pipe stdin from tail to keep it open (some tools
+        // like tailwind --watch exit when stdin closes), redirect output to
+        // /dev/null, and background the process.
+        $pid = (int) trim((string) shell_exec(
+            "tail -f /dev/null | $wrappedCommand > /dev/null 2>&1 & echo $!",
+        ));
+
+        if ($pid <= 0) {
+            throw DevServerException::processFailedToStart($name, $command);
+        }
+
+        // Brief check to see if process died immediately
+        // (e.g. command not found, port in use)
+        usleep(150000); // 150ms
+        if (!$this->isDetachedRunning($pid)) {
+            throw DevServerException::processFailedToStart($name, $command);
+        }
+
+        $this->pids[$name] = $pid;
+
+        return $pid;
+    }
+
+    /**
+     * Check if a detached process (or its process group) is still running.
+     */
+    private function isDetachedRunning(int $pid): bool
+    {
+        if (!function_exists('posix_kill')) {
+            return false;
+        }
+
+        try {
+            return @posix_kill(-$pid, 0) || posix_kill($pid, 0);
+        } catch (ValueError) {
+            return false;
+        }
+    }
+
+    /**
+     * Stop a named process.
+     */
     public function stop(string $name): void
     {
-        $entries = $this->pidFile->read();
-        $newEntries = [];
-        foreach ($entries as $entry) {
-            if ($entry->name === $name) {
-                if ($entry->pid > 0 && $this->pidFile->isRunning($entry->pid)) {
-                    $this->killProcess($entry->pid);
-                }
-            } else {
-                $newEntries[] = $entry;
+        if (!isset($this->processes[$name])) {
+            return;
+        }
+
+        $process = $this->processes[$name]['resource'];
+        $pipes = $this->processes[$name]['pipes'];
+
+        // Close pipes
+        foreach ($pipes as $pipe) {
+            if (is_resource($pipe)) {
+                fclose($pipe);
             }
         }
-        $this->pidFile->write($newEntries);
 
-        if (isset($this->processes[$name])) {
-            $this->processes[$name]->stop();
-            unset($this->processes[$name]);
-        }
+        proc_terminate($process);
+        proc_close($process);
+
+        unset($this->processes[$name], $this->pids[$name]);
     }
 
+    /**
+     * Stop all managed processes.
+     */
     public function stopAll(): void
     {
-        $entries = $this->pidFile->read();
-        foreach ($entries as $entry) {
-            if ($entry->pid > 0 && $this->pidFile->isRunning($entry->pid)) {
-                $this->killProcess($entry->pid);
-            }
-        }
-        $this->pidFile->clear();
-
-        foreach ($this->processes as $process) {
-            $process->stop();
-        }
-        $this->processes = [];
-    }
-
-    private function killProcess(int $pid): void
-    {
-        if (PHP_OS_FAMILY === 'Windows') {
-            exec("taskkill /F /T /PID {$pid}");
-        } else {
-            posix_kill($pid, SIGTERM);
-            // Give it a moment and then SIGKILL if still running
-            usleep(100000);
-            if (posix_kill($pid, 0)) {
-                posix_kill($pid, SIGKILL);
-            }
+        foreach (array_keys($this->processes) as $name) {
+            $this->stop($name);
         }
     }
 
+    /**
+     * Get the PID of a named process.
+     */
     public function getPid(string $name): ?int
     {
-        $entries = $this->pidFile->read();
-        foreach ($entries as $entry) {
-            if ($entry->name === $name) {
-                return $entry->pid;
-            }
-        }
-        return null;
+        return $this->pids[$name] ?? null;
     }
 
+    /**
+     * Get all PIDs indexed by name.
+     *
+     * @return array<string, int>
+     */
     public function getPids(): array
     {
-        $entries = $this->pidFile->read();
-        $pids = [];
-        foreach ($entries as $entry) {
-            $pids[$entry->name] = $entry->pid;
-        }
-        return $pids;
+        return $this->pids;
     }
 
+    /**
+     * Check if a process is still running.
+     */
     public function isRunning(string $name): bool
     {
-        $pid = $this->getPid($name);
-        return $pid !== null && $pid > 0 && $this->pidFile->isRunning($pid);
+        if (!isset($this->processes[$name])) {
+            return false;
+        }
+
+        $status = proc_get_status($this->processes[$name]['resource']);
+
+        return $status['running'];
     }
 
+    /**
+     * Run in foreground mode: stream process output with prefixes until all processes exit or a signal is received.
+     *
+     * Registers SIGINT/SIGTERM handlers for graceful shutdown when pcntl is available.
+     */
     public function runForeground(): void
     {
-        while (true) {
-            $anyRunning = false;
-            foreach ($this->processes as $process) {
-                if ($process->isRunning()) {
-                    $anyRunning = true;
-                    break;
+        $signaled = false;
+
+        if (function_exists('pcntl_signal')) {
+            $handler = function () use (&$signaled): void {
+                $signaled = true;
+            };
+            pcntl_signal(SIGINT, $handler);
+            pcntl_signal(SIGTERM, $handler);
+            pcntl_async_signals(true);
+        }
+
+        while (!$signaled && $this->processes !== []) {
+            $this->drainOutput();
+
+            // Remove exited processes and report their exit status
+            foreach (array_keys($this->processes) as $name) {
+                if (!$this->isRunning($name)) {
+                    $this->drainOutput($name);
+                    $exitCode = $this->getExitCode($name);
+                    if ($exitCode !== 0) {
+                        $this->writePrefix($name, "exited with code $exitCode");
+                    } else {
+                        $this->writePrefix($name, 'exited');
+                    }
+                    $this->stop($name);
                 }
             }
 
-            if (!$anyRunning) {
-                break;
+            if ($this->processes !== []) {
+                usleep(50000); // 50ms
+            }
+        }
+
+        if ($signaled) {
+            $this->stopAll();
+        }
+    }
+
+    /**
+     * Get the exit code of a process, or -1 if unknown.
+     */
+    private function getExitCode(string $name): int
+    {
+        if (!isset($this->processes[$name])) {
+            return -1;
+        }
+
+        $status = proc_get_status($this->processes[$name]['resource']);
+
+        return $status['exitcode'];
+    }
+
+    /**
+     * Read available output from process pipes and write with prefix.
+     */
+    private function drainOutput(?string $onlyName = null): void
+    {
+        $names = $onlyName !== null ? [$onlyName] : array_keys($this->processes);
+
+        foreach ($names as $name) {
+            if (!isset($this->processes[$name])) {
+                continue;
             }
 
-            usleep(100000);
+            $pipes = $this->processes[$name]['pipes'];
+
+            // Read stdout (pipe 1) and stderr (pipe 2)
+            foreach ([1, 2] as $fd) {
+                if (!is_resource($pipes[$fd])) {
+                    continue;
+                }
+
+                while (($line = fgets($pipes[$fd])) !== false) {
+                    $this->writePrefix($name, rtrim($line, "\r\n"));
+                }
+            }
         }
+    }
+
+    /**
+     * Write a prefixed line to output.
+     */
+    public function writePrefix(
+        string $name,
+        string $line,
+    ): void {
+        $this->output->writeLine("[$name] $line");
+    }
+
+    /**
+     * Wrap a command to run in its own process group.
+     *
+     * Uses PHP's posix_setsid() before exec'ing the command, so the process
+     * becomes a session leader. This ensures all child processes (e.g. PHP
+     * server workers, npx children) share the same group and can be killed
+     * or status-checked together.
+     */
+    private function wrapWithNewProcessGroup(string $command): string
+    {
+        if (!function_exists('posix_setsid') || !function_exists('pcntl_exec')) {
+            return "exec $command";
+        }
+
+        $encoded = base64_encode($command);
+        $php = PHP_BINARY;
+
+        // Use double quotes inside the PHP code to avoid escapeshellarg single-quote conflicts
+        return "$php -r " . escapeshellarg(
+            'posix_setsid();'
+            . 'pcntl_exec("/bin/sh", ["-c", base64_decode("' . $encoded . '")]);',
+        );
     }
 }

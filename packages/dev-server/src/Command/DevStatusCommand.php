@@ -8,41 +8,43 @@ use Marko\Core\Attributes\Command;
 use Marko\Core\Command\CommandInterface;
 use Marko\Core\Command\Input;
 use Marko\Core\Command\Output;
-use Marko\Core\Path\ProjectPaths;
 use Marko\DevServer\Process\PidFile;
 
+/** @noinspection PhpUnused */
 #[Command(name: 'dev:status', description: 'Show development environment status', aliases: ['status'])]
-class DevStatusCommand implements CommandInterface
+readonly class DevStatusCommand implements CommandInterface
 {
     public function __construct(
-        private readonly ProjectPaths $projectPaths,
+        private PidFile $pidFile,
     ) {}
 
-    public function execute(Input $input, Output $output): int
-    {
-        $projectRoot = $this->projectPaths->base;
-        $pidFile = new PidFile($projectRoot);
-        $entries = $pidFile->read();
+    public function execute(
+        Input $input,
+        Output $output,
+    ): int {
+        $entries = $this->pidFile->read();
 
-        if (empty($entries)) {
-            $output->writeLine("No services are running.");
+        if ($entries === []) {
+            $output->writeLine('No development services running.');
+
             return 0;
         }
 
-        $output->writeLine(sprintf("%-15s %-10s %-10s %-10s %-20s", "Name", "PID", "Status", "Port", "Started At"));
-        $output->writeLine(str_repeat("-", 70));
+        $output->writeLine(
+            str_pad('NAME', 12) . str_pad('PID', 8) . str_pad('STATUS', 10) . str_pad('PORT', 8) . 'STARTED',
+        );
+        $output->writeLine(str_repeat('-', 60));
 
         foreach ($entries as $entry) {
-            $isRunning = $pidFile->isRunning($entry->pid);
-            $status = $isRunning ? "Running" : "Stopped";
-            $output->writeLine(sprintf(
-                "%-15s %-10d %-10s %-10d %-20s",
-                $entry->name,
-                $entry->pid,
-                $status,
-                $entry->port,
-                $entry->startedAt
-            ));
+            $status = $this->pidFile->isRunning($entry->pid) ? 'running' : 'stopped';
+            $port = $entry->port > 0 ? (string) $entry->port : '-';
+            $output->writeLine(
+                str_pad($entry->name, 12) .
+                str_pad((string) $entry->pid, 8) .
+                str_pad($status, 10) .
+                str_pad($port, 8) .
+                $entry->startedAt,
+            );
         }
 
         return 0;

@@ -80,6 +80,17 @@ php vendor/bin/phpstan analyze -c phpstan.neon --memory-limit=256M
 - [ ] Routing attributes used correctly
 - [ ] `readonly` classes for immutable services
 - [ ] Custom exceptions for domain errors
+- [ ] No module binding conflicts (two modules binding the same interface without preferences)
+- [ ] Module `composer.json` has `extra.marko.module: true` and correct PSR-4 autoload
+- [ ] Module metadata (`group`, `routes`, `idleTimeout`, `isCore`) present if module uses ModuleGroupManager
+- [ ] `vendor/marko` symlink points to correct path (`../packages`), not stale
+- [ ] `config/database.php['modules']` updated when module has its own database
+- [ ] ModuleGroupManager integration correct: groups registered, eviction config in `config/module.php`
+- [ ] Container unbind pattern not misused — eviction removes bindings but shared instances remain
+- [ ] Critical classes used in boot/binding closures registered as container instances (`$container->instance()`)
+- [ ] `EntityCollection` return type from `findAll()`/`findBy()` — callers use `iterator_to_array()` before `array_*()` functions
+- [ ] Template `resources/views/` directory exists in module, OR shared `templates/` fallback resolver is active
+- [ ] `bootstrap/app.php` registers Application and other key singletons after `$app->initialize()`
 
 ### Static Analysis (PHP)
 - [ ] PHPStan passes at configured level (project uses level max)

@@ -42,3 +42,59 @@ if (!function_exists('env')) {
         };
     }
 }
+
+if (!function_exists('array_first')) {
+    /**
+     * Return the first element in an array passing a given truth test.
+     *
+     * @template TKey of array-key
+     * @template TValue
+     *
+     * @param  array<TKey, TValue>  $array
+     * @param  (callable(TValue, TKey): bool)|null  $callback
+     * @param  TValue|null  $default
+     * @return TValue|null
+     */
+    function array_first(array $array, ?callable $callback = null, mixed $default = null): mixed
+    {
+        if (is_null($callback)) {
+            if (empty($array)) {
+                return $default;
+            }
+
+            foreach ($array as $item) {
+                return $item;
+            }
+        }
+
+        foreach ($array as $key => $value) {
+            if ($callback($value, $key)) {
+                return $value;
+            }
+        }
+
+        return $default;
+    }
+}
+
+if (!function_exists('array_last')) {
+    /**
+     * Return the last element in an array passing a given truth test.
+     *
+     * @template TKey of array-key
+     * @template TValue
+     *
+     * @param  array<TKey, TValue>  $array
+     * @param  (callable(TValue, TKey): bool)|null  $callback
+     * @param  TValue|null  $default
+     * @return TValue|null
+     */
+    function array_last(array $array, ?callable $callback = null, mixed $default = null): mixed
+    {
+        if (is_null($callback)) {
+            return empty($array) ? $default : end($array);
+        }
+
+        return array_first(array_reverse($array, true), $callback, $default);
+    }
+}

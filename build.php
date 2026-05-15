@@ -113,6 +113,9 @@ if (is_file($distDir . '/marko')) {
 
 // Create a minimal .gitignore for dist
 file_put_contents($distDir . '/.gitignore', "*\n!.gitignore\n");
+cleanupDevArtifacts($distDir);
+verifyProductionArtifact($distDir);
+
 
 echo "Build complete! Production ready files are in './dist'\n";
 echo "The 'dist' folder contains:\n";
@@ -495,4 +498,145 @@ PHP;
     $autoloadPath = $distDir . '/bootstrap/autoload.php';
     file_put_contents($autoloadPath, $productionAutoload);
     echo "   Updating autoload.php for production (no vendor)...\n";
+}
+
+/**
+ * Remove dev-only files from the production artifact.
+ *
+ * Strips test directories, test files, dev configs, and other
+ * artifacts that have no place in a production deployment.
+ */
+function cleanupDevArtifacts(string $distDir): void
+{
+    echo "   Cleaning dev artifacts from dist...\n";
+
+    // Directories to remove entirely
+    $removeDirs = [
+        'tests',
+        'Tests',
+        '__tests__',
+        '__Tests__',
+        '.phpunit.cache',
+    ];
+
+    // Remove matching directories recursively using find
+    foreach ($removeDirs as $dirName) {
+        $cmd = sprintf(
+            "find %s -type d -name %s -prune -exec rm -rf {} + 2>/dev/null",
+            escapeshellarg($distDir),
+            escapeshellarg($dirName),
+        );
+        exec($cmd);
+    }
+
+    // Individual test files (frontend)
+    $testFilePatterns = [
+        '/.*\.test\.ts$/',
+        '/.*\.spec\.ts$/',
+        '/.*\.test\.tsx$/',
+        '/.*\.spec\.tsx$/',
+    ];
+
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($distDir, RecursiveDirectoryIterator::SKIP_DOTS),
+    );
+
+    foreach ($iterator as $file) {
+        if ($file->isFile()) {
+            $pathname = $file->getPathname();
+            foreach ($testFilePatterns as $pattern) {
+                if (preg_match($pattern, $pathname)) {
+                    unlink($pathname);
+                    break;
+                }
+            }
+        }
+    }
+
+    // Remove dev config files at root level
+    $devConfigs = [
+        'phpunit.xml',
+        'phpunit.xml.dist',
+        'phpstan.neon',
+        'phpstan.neon.dist',
+        '.phpunit.cache',
+        'run_test.sh',
+        'test_server.sh',
+        'Makefile',
+        'docker-compose.yml',
+    ];
+
+    foreach ($devConfigs as $filename) {
+        $path = $distDir . '/' . $filename;
+        if (is_file($path)) {
+            unlink($path);
+            echo "     Removed dev file: $filename\n";
+        }
+        if (is_dir($path)) {
+            exec("rm -rf " . escapeshellarg($path));
+            echo "     Removed dev dir: $filename\n";
+        }
+    }
+
+    echo "   Dev artifact cleanup complete.\n";
+}
+
+/**
+ * Verify the production artifact is clean and deployment-ready.
+ *
+ * Checks that no vendor/, tests/, composer.json, or dev configs
+ * leaked into the production build. Exits with error if any are found.
+ */
+function verifyProductionArtifact(string $distDir): void
+{
+    echo "   Verifying production artifact...\n";
+    $errors = 0;
+
+    // Must NOT have vendor/
+    if (is_dir($distDir . '/vendor')) {
+        echo "     ERROR: vendor/ directory found in dist!\n";
+        $errors++;
+    }
+
+    // Must NOT have root composer.json
+    if (is_file($distDir . '/composer.json')) {
+        echo "     ERROR: composer.json found in dist root!\n";
+        $errors++;
+    }
+
+    // Must NOT have any composer.lock files
+    $lockFiles = findFilesByName($distDir, 'composer.lock');
+    if (count($lockFiles) > 0) {
+        echo "     ERROR: composer.lock files found in dist:\n";
+        foreach ($lockFiles as $f) {
+            echo "       - $f\n";
+        }
+        $errors++;
+    }
+
+    // Must NOT have test directories
+    $testDirs = findFilesByName($distDir, 'tests');
+    $testDirs = array_filter($testDirs, fn(string $p): bool => is_dir($p));
+    if (count($testDirs) > 0) {
+        echo "     ERROR: test directories found in dist:\n";
+        foreach ($testDirs as $d) {
+            echo "       - $d\n";
+        }
+        $errors++;
+    }
+
+    // Must NOT have dev configs at root
+    $rootDevFiles = ['phpunit.xml', 'phpunit.xml.dist', 'phpstan.neon', 'phpstan.neon.dist'];
+    foreach ($rootDevFiles as $f) {
+        if (is_file($distDir . '/' . $f)) {
+            echo "     ERROR: dev config '$f' found in dist root!\n";
+            $errors++;
+        }
+    }
+
+    if ($errors > 0) {
+        die("\n   Build FAILED: $errors issue(s) found in production artifact.\n");
+    }
+
+    echo "   Production artifact is clean.\n";
 }

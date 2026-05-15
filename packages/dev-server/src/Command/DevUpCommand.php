@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Marko\DevServer\Command;
 
+use Marko\Config\ConfigRepositoryInterface;
+use Marko\Config\Exceptions\ConfigNotFoundException;
 use Marko\Core\Attributes\Command;
 use Marko\Core\Command\CommandInterface;
 use Marko\Core\Command\Input;
@@ -11,127 +13,188 @@ use Marko\Core\Command\Output;
 use Marko\Core\Path\ProjectPaths;
 use Marko\DevServer\Detection\DockerDetector;
 use Marko\DevServer\Detection\FrontendDetector;
+use Marko\DevServer\Detection\PubSubDetector;
 use Marko\DevServer\Exceptions\DevServerException;
 use Marko\DevServer\Process\PidFile;
+use Marko\DevServer\Process\ProcessEntry;
 use Marko\DevServer\Process\ProcessManager;
 
+/** @noinspection PhpUnused */
 #[Command(name: 'dev:up', description: 'Start the development environment', aliases: ['up'])]
-class DevUpCommand implements CommandInterface
+readonly class DevUpCommand implements CommandInterface
 {
     public function __construct(
-        private readonly ProjectPaths $projectPaths,
+        private ConfigRepositoryInterface $config,
+        private DockerDetector $dockerDetector,
+        private FrontendDetector $frontendDetector,
+        private PubSubDetector $pubsubDetector,
+        private PidFile $pidFile,
+        private ProcessManager $processManager,
+        private ProjectPaths $paths,
     ) {}
 
-    public function execute(Input $input, Output $output): int
-    {
-        $projectRoot = $this->projectPaths->base;
-        $config = $this->loadConfig($projectRoot);
+    /**
+     * @throws ConfigNotFoundException|DevServerException
+     */
+    public function execute(
+        Input $input,
+        Output $output,
+    ): int {
+        $port = (int) ($input->getOption('port') ?? $input->getOption('p') ?? $this->config->getInt('dev.port'));
+        $foreground = $input->hasOption('foreground') || $input->hasOption('f');
+        $host = $input->getOption('host') ?? $this->config->getString('dev.host');
 
-        $portValue = $input->getOption('port') ?? $input->getOption('p') ?? $config['port'] ?? 8000;
-        $port = (int) $portValue;
-        
-        $detach = ($input->hasOption('detach') || $input->hasOption('d')) 
-            || (!($input->hasOption('foreground') || $input->hasOption('f')) && ($config['detach'] ?? true));
-
-        if ($this->isPortInUse($port)) {
-            throw DevServerException::portInUse($port);
+        if (!preg_match('/\A[a-zA-Z0-9.\-:]+\z/', $host)) {
+            throw new DevServerException(
+                message: "Invalid host value: '$host'",
+                suggestion: 'Use a valid hostname or IP address, e.g. --host=0.0.0.0 or --host=localhost',
+            );
         }
+        $detach = !$foreground && ($input->hasOption('detach') || $input->hasOption('d') || $this->config->getBool(
+            'dev.detach',
+        ));
+        $dockerConfig = $this->config->get('dev.docker');
+        $frontendConfig = $this->config->get('dev.frontend');
+        $pubsubConfig = $this->config->get('dev.pubsub');
 
-        if (!file_exists($projectRoot . '/public/index.php')) {
-            throw DevServerException::missingEntryPoint();
-        }
-
-        $pidFile = new PidFile($projectRoot);
-        $processManager = new ProcessManager($pidFile, $port);
-
-        $output->writeLine("Starting development environment on http://localhost:{$port}");
-
-        // 1. Docker
-        $dockerOption = $config['docker'] ?? true;
-        if ($dockerOption !== false) {
-            $dockerDetector = new DockerDetector($projectRoot);
-            $detected = $dockerDetector->detect();
-            if ($detected || is_string($dockerOption)) {
-                $cmd = is_string($dockerOption) ? $dockerOption : $detected['upCommand'];
-                $output->writeLine("Starting Docker: {$cmd}");
-                $processManager->start('docker', $cmd, $detach);
+        // Guard: check if services are already running
+        $existingEntries = $this->pidFile->read();
+        foreach ($existingEntries as $entry) {
+            if ($this->pidFile->isRunning($entry->pid)) {
+                throw new DevServerException(
+                    message: 'Development environment is already running.',
+                    context: "Process '$entry->name' (PID $entry->pid) is still active",
+                    suggestion: "Stop the existing environment first with 'marko down', then run 'marko up' again.",
+                );
             }
         }
 
-        // 2. PHP Server - use public/index.php as router for core Router
-        // This serves static files directly and bootstraps the core app for dynamic requests
-        $indexPath = $projectRoot . '/public/index.php';
-        $phpCommand = sprintf('php -S localhost:%d -t public %s', $port, escapeshellarg($indexPath));
-        $output->writeLine("Starting PHP server: {$phpCommand}");
-        $processManager->start('php', $phpCommand, $detach);
+        $indexPath = $this->paths->base . '/public/index.php';
+        if (!file_exists($indexPath)) {
+            throw new DevServerException(
+                message: 'Cannot start PHP server: public/index.php not found.',
+                context: "While starting PHP development server (expected at $indexPath)",
+                suggestion: "Create public/index.php with:\n\n" .
+                    "<?php\n\n" .
+                    "declare(strict_types=1);\n\n" .
+                    "require __DIR__ . '/../vendor/autoload.php';\n\n" .
+                    "use Marko\\Core\\Application;\n\n" .
+                    "\$app = Application::boot(dirname(__DIR__));\n" .
+                    "\$app->handleRequest();\n",
+            );
+        }
 
-        // 3. Frontend
-        $frontendOption = $config['frontend'] ?? true;
-        if ($frontendOption !== false) {
-            $frontendDetector = new FrontendDetector($projectRoot);
-            $detectedCmd = $frontendDetector->detect();
-            if ($detectedCmd || is_string($frontendOption)) {
-                $cmd = is_string($frontendOption) ? $frontendOption : $detectedCmd;
-                $output->writeLine("Starting Frontend: {$cmd}");
-                $processManager->start('frontend', $cmd, $detach);
+        $output->writeLine('Starting development environment...');
+
+        $entries = [];
+        $startProcess = $detach
+            ? $this->processManager->startDetached(...)
+            : $this->processManager->start(...);
+
+        // Docker
+        if ($dockerConfig !== false) {
+            $dockerCommand = is_string($dockerConfig)
+                ? $dockerConfig
+                : $this->dockerDetector->detect()['upCommand'] ?? null;
+
+            if ($dockerCommand !== null) {
+                $output->writeLine("  Starting Docker: $dockerCommand");
+                $pid = $startProcess('docker', $dockerCommand);
+                $entries[] = new ProcessEntry(
+                    name: 'docker',
+                    pid: $pid,
+                    command: $dockerCommand,
+                    port: 0,
+                    startedAt: date('c'),
+                );
             }
         }
 
-        // 4. PubSub
-        $pubsubOption = $config['pubsub'] ?? true;
-        if ($pubsubOption !== false) {
-            $cmd = is_string($pubsubOption) ? $pubsubOption : 'php marko pubsub:listen';
-            try {
-                 $processManager->start('pubsub', $cmd, $detach);
-                 $output->writeLine("Starting PubSub: {$cmd}");
-            } catch (\Exception $e) {
-                // Skip if it fails (might not be implemented in the app)
+        // Frontend
+        if ($frontendConfig !== false) {
+            $frontendCommand = is_string($frontendConfig)
+                ? $frontendConfig
+                : $this->frontendDetector->detect();
+
+            if ($frontendCommand !== null) {
+                $output->writeLine("  Starting frontend: $frontendCommand");
+                $pid = $startProcess('frontend', $frontendCommand);
+                $entries[] = new ProcessEntry(
+                    name: 'frontend',
+                    pid: $pid,
+                    command: $frontendCommand,
+                    port: 0,
+                    startedAt: date('c'),
+                );
             }
         }
 
-        // 5. Custom processes
-        $customProcesses = $config['processes'] ?? [];
-        foreach ($customProcesses as $name => $cmd) {
-            $output->writeLine("Starting {$name}: {$cmd}");
-            $processManager->start($name, $cmd, $detach);
+        // Pub/Sub listener
+        if ($pubsubConfig !== false) {
+            $pubsubCommand = is_string($pubsubConfig)
+                ? $pubsubConfig
+                : $this->pubsubDetector->detect();
+
+            if ($pubsubCommand !== null) {
+                $output->writeLine("  Starting pub/sub listener: $pubsubCommand");
+                $pid = $startProcess('pubsub', $pubsubCommand);
+                $entries[] = new ProcessEntry(
+                    name: 'pubsub',
+                    pid: $pid,
+                    command: $pubsubCommand,
+                    port: 0,
+                    startedAt: date('c'),
+                );
+            }
         }
 
+        // Custom processes
+        /** @var array<string, string> $processes */
+        $processes = $this->config->get('dev.processes');
+        foreach ($processes as $name => $processCommand) {
+            $output->writeLine("  Starting $name: $processCommand");
+            $pid = $startProcess($name, $processCommand);
+            $entries[] = new ProcessEntry(
+                name: $name,
+                pid: $pid,
+                command: $processCommand,
+                port: 0,
+                startedAt: date('c'),
+            );
+        }
+
+        // PHP server (always) — multiple workers needed for SSE
+        $phpCommand = "env PHP_CLI_SERVER_WORKERS=4 php -S $host:$port -t public/";
+        $output->writeLine("  Starting PHP server: php -S $host:$port");
+        $pid = $startProcess('php', $phpCommand);
+
+        // In foreground mode, verify PHP server is alive — if it died, port is likely in use.
+        // In detached mode, startDetached() already checks for immediate failure.
         if (!$detach) {
-            $output->writeLine("Running in foreground. Press Ctrl+C to stop.");
-            
-            if (function_exists('pcntl_signal')) {
-                pcntl_async_signals(true);
-                pcntl_signal(SIGINT, function () use ($processManager, $output) {
-                    $output->writeLine("\nStopping services...");
-                    $processManager->stopAll();
-                    exit(0);
-                });
+            usleep(100000); // 100ms — give the server time to attempt binding
+            if (!$this->processManager->isRunning('php')) {
+                throw DevServerException::portInUse($port);
             }
+        }
 
-            $processManager->runForeground();
+        $entries[] = new ProcessEntry(
+            name: 'php',
+            pid: $pid,
+            command: $phpCommand,
+            port: $port,
+            startedAt: date('c'),
+        );
+
+        if ($detach) {
+            $this->pidFile->write($entries);
+            $output->writeLine('Development environment started in background.');
+            $output->writeLine("Run 'marko dev:status' to check status.");
+            $output->writeLine("Run 'marko dev:down' to stop.");
         } else {
-            $output->writeLine("Services started in background. Use 'marko status' to check and 'marko down' to stop.");
+            $output->writeLine('Development environment running. Press Ctrl+C to stop.');
+            $this->processManager->runForeground();
         }
 
         return 0;
-    }
-
-    private function loadConfig(string $projectRoot): array
-    {
-        $configFile = $projectRoot . '/config/dev.php';
-        if (file_exists($configFile)) {
-            return require $configFile;
-        }
-        return [];
-    }
-
-    private function isPortInUse(int $port): bool
-    {
-        $connection = @fsockopen('localhost', $port, $errno, $errstr, 1);
-        if (is_resource($connection)) {
-            fclose($connection);
-            return true;
-        }
-        return false;
     }
 }

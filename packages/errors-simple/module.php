@@ -2,20 +2,12 @@
 
 declare(strict_types=1);
 
-use Marko\Core\Container\ContainerInterface;
-use Marko\Errors\Contracts\ErrorHandlerInterface;
-use Marko\ErrorsSimple\SimpleErrorHandler;
-
-// Marko-specific configuration for this module.
-// Name and version come from composer.json.
-
+/**
+ * errors-simple provides utility classes (Environment, formatters) used by
+ * errors-advanced. The module must remain enabled to satisfy the dependency.
+ *
+ * Binding is intentionally omitted — errors-advanced registers its own
+ * implementation of ErrorHandlerInterface.
+ */
 return [
-    'bindings' => [
-        ErrorHandlerInterface::class => SimpleErrorHandler::class,
-    ],
-    'boot' => function (ContainerInterface $container) {
-        // Get the error handler and register it
-        $handler = $container->get(ErrorHandlerInterface::class);
-        $handler->register();
-    },
 ];

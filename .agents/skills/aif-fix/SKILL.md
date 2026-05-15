@@ -206,34 +206,96 @@ try {
 }
 ```
 
-**For PHP projects:**
+### Step 2.1: Marko Framework-Specific Checks (PHP)
+
+When debugging Marko Framework projects, also check:
+
+**1. Module binding conflicts** — Two modules registering the same interface without
+PreferencesRegistry causes `BindingConflictException`. Check all `module.php` files
+and module `composer.json` files for conflicting bindings:
+
+```bash
+# Find all interface bindings across modules
+grep -rn "bindings" modules/*/module.php packages/*/module.php
+grep -rn "ErrorHandlerInterface" packages/*/module.php modules/*/module.php
+```
+
+**2. Container resolve with nullable parameters** — The upstream Container's
+`resolve()` method does NOT check `allowsNull()` on constructor parameters.
+If a nullable dependency (e.g., `?FormatterInterface $formatter = null`) is not
+bound, the container will throw `NoDriverException` instead of using the null
+default. Workaround: bind the interface to its implementation, or (if the boot
+callback is non-essential) remove the boot callback from module.php.
+
+**3. Vendor symlink** — If packages are not found, check the symlink:
+```bash
+ls -la vendor/marko
+readlink vendor/marko  # should point to ../packages
+```
+
+**4. Module dependency chain** — Use `DependencyResolver` debug output to see
+which modules fail and why:
+```bash
+vendor/bin/php vendor/marko/core/src/Module/DependencyResolver.php 2>&1
+```
+
+**5. Upstream API changes after sync** — `make sync-marko` pulls packages from upstream tag.
+Return types may change between versions. Common patterns that break:
+
+   - `Repository::findAll()` returned `array` in old versions but now returns `EntityCollection`
+     (implements `IteratorAggregate`, not `array`). Callers using `array_filter()`, `array_map()`,
+     `array_values()` etc. will throw `TypeError`.
+   - Fix: add a helper to convert `Traversable` to array: `$articles instanceof \Traversable ? iterator_to_array($articles) : $articles`
+   - Check all callers of DB methods (`findAll`, `findBy`, etc.) for `array_*` function usage
+
+**6. Template not found** — If templates exist in `templates/` but the resolver can't find them,
+check `ModuleTemplateResolver` — it only searches `{module}/resources/views/`. The project's
+shared `templates/` directory needs a custom resolver that falls back to `templates/{path}.php`.
+Implement in `modules/init/src/Bootstrap/TemplateResolver.php`.
+
+**7. Container instance registration** — When a class is used via `$container->get(ClassName::class)`
+in a module's binding closure, verify the class is registered as a container instance (via
+`$container->instance()`) and not just autowirable. For example, `Application::class` is NOT
+registered in the container by default — adding `$app->container->instance(Application::class, $app)`
+in `bootstrap/app.php` is required for closure bindings that reference the Application.
+
+
+
+**For PHP projects with Marko Framework:**
+
 ```php
 // ✅ REQUIRED: Add logging around the fix
-$logLevel = $_ENV['LOG_LEVEL'] ?? 'INFO';
+// Use the project's LoggerInterface — NOT raw error_log()
+use Marko\Log\Contracts\LoggerInterface;
 
-if (in_array($logLevel, ['debug', 'DEBUG'], true)) {
-    error_log("[FIX] Processing user input: " . json_encode(['userId' => $userId]));
-}
+$logger = $container->get(LoggerInterface::class);
+$logger->log('debug', '[FIX] Processing user input', ['userId' => $userId]);
 
 try {
     // The actual fix
     $result = fixedLogic($input);
-    
-    if (in_array($logLevel, ['debug', 'DEBUG'], true)) {
-        error_log("[FIX] Success: " . json_encode(['userId' => $userId, 'result' => $result]));
-    }
-    
+
+    $logger->log('debug', '[FIX] Success', [
+        'userId' => $userId,
+        'result' => $result,
+    ]);
+
     return $result;
 } catch (\Throwable $e) {
-    error_log("[FIX] Error in fixedLogic: " . json_encode([
+    $logger->log('error', '[FIX] Error in fixedLogic', [
         'userId' => $userId,
         'input' => $input,
         'error' => $e->getMessage(),
-        'stack' => $e->getTraceAsString()
-    ]));
+        'stack' => $e->getTraceAsString(),
+    ]);
     throw $e;
 }
 ```
+
+**Fallback for non-DI context (controllers, commands):**
+Use the same approach but resolve via service locator or config if container not available.
+Only use `error_log()` as last resort when LoggerInterface is unreachable.
+
 
 **Logging is MANDATORY because:**
 - User needs to verify the fix works

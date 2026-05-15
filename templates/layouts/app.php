@@ -53,8 +53,8 @@ $origin .= '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
         <?php
         // Generate responsive LCP URLs for Cloudinary
         $lcpBase = View::$lcpImage;
-        $lcpDesktop = str_replace('/upload/', '/upload/f_webp,q_40,w_1920/', $lcpBase);
-        $lcpMobile = str_replace('/upload/', '/upload/f_webp,q_30,w_640/', $lcpBase);
+        $lcpDesktop = str_replace('/upload/', '/upload/f_auto,q_auto,w_1920/', $lcpBase);
+        $lcpMobile = str_replace('/upload/', '/upload/f_auto,q_auto,w_640/', $lcpBase);
         ?>
         <link rel="preload" as="image" href="<?= $lcpDesktop ?>" fetchpriority="high" media="(min-width: 769px)">
         <link rel="preload" as="image" href="<?= $lcpMobile ?>" fetchpriority="high" media="(max-width: 768px)">

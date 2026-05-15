@@ -82,11 +82,6 @@ class SimpleView implements ViewInterface
         return htmlspecialchars($value ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
 
-    public function withAssets(string $page, array $js, array $css): self
-    {
-        return $this;
-    }
-
     private function renderLayout(string $layout): string
     {
         $layoutPath = $this->resolver->resolve($layout);

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Marko\View;
 
 use Marko\Core\Module\ModuleRepositoryInterface;
-use Marko\Core\Path\ProjectPaths;
 use Marko\View\Exceptions\TemplateNotFoundException;
 
 readonly class ModuleTemplateResolver implements TemplateResolverInterface
@@ -13,7 +12,6 @@ readonly class ModuleTemplateResolver implements TemplateResolverInterface
     public function __construct(
         private ModuleRepositoryInterface $moduleRepository,
         private ViewConfig $viewConfig,
-        private ProjectPaths $projectPaths,
     ) {}
 
     public function resolve(
@@ -38,28 +36,14 @@ readonly class ModuleTemplateResolver implements TemplateResolverInterface
 
         $paths = [];
 
-        if ($moduleName === '') {
-            $paths[] = $this->projectPaths->base . '/templates/views/' . $templatePath . $extension;
-            $paths[] = $this->projectPaths->base . '/templates/' . $templatePath . $extension;
-        }
-
         foreach ($this->moduleRepository->all() as $module) {
             if ($this->matchesModuleName($module->name, $moduleName)) {
-                $shortName = $this->getShortModuleName($module->name);
-                $legacyName = ($module->name === 'app/controllers') ? 'app' : $shortName;
-
-                $paths[] = $this->projectPaths->base . '/templates/' . $legacyName . '/' . $templatePath . $extension;
+                $fullPath = $module->path . '/resources/views/' . $templatePath . $extension;
+                $paths[] = $fullPath;
             }
         }
 
         return $paths;
-    }
-
-    private function getShortModuleName(string $fullName): string
-    {
-        $parts = explode('/', $fullName);
-
-        return (string) end($parts);
     }
 
     /**
@@ -70,8 +54,6 @@ readonly class ModuleTemplateResolver implements TemplateResolverInterface
     private function parseTemplate(
         string $template,
     ): array {
-        $template = str_replace('.', '/', $template);
-
         if (str_contains($template, '::')) {
             [$moduleName, $templatePath] = explode('::', $template, 2);
 

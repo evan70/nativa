@@ -45,7 +45,6 @@ class RouteDiscovery
                 continue;
             }
 
-            // Check for generic Route attribute first
             foreach ($method->getAttributes() as $attribute) {
                 try {
                     $instance = $attribute->newInstance();
@@ -60,7 +59,6 @@ class RouteDiscovery
                     }
                     throw $e;
                 }
-
                 if ($instance instanceof Route) {
                     $methodMiddleware = $this->getMethodMiddleware($method);
                     $routes[] = new RouteDefinition(
@@ -70,43 +68,6 @@ class RouteDiscovery
                         action: $method->getName(),
                         middleware: array_merge($classMiddleware, $instance->middleware, $methodMiddleware),
                     );
-                    continue 2;
-                }
-            }
-
-            // Check for concrete route attributes (Get, Post, Put, Patch, Delete)
-            foreach (['Get', 'Post', 'Put', 'Patch', 'Delete'] as $methodType) {
-                $concreteClass = 'Marko\\Routing\\Attributes\\' . $methodType;
-
-                if (!class_exists($concreteClass, false)) {
-                    continue;
-                }
-
-                $attrs = $method->getAttributes($concreteClass);
-
-                if (!empty($attrs)) {
-                    try {
-                        $instance = $attrs[0]->newInstance();
-                        $methodMiddleware = $this->getMethodMiddleware($method);
-                        $routes[] = new RouteDefinition(
-                            method: $instance->getMethod(),
-                            path: $instance->path,
-                            controller: $className,
-                            action: $method->getName(),
-                            middleware: array_merge($instance->middleware, $methodMiddleware),
-                        );
-                    } catch (Error $e) {
-                        $missingClass = MarkoException::extractMissingClass($e);
-                        if ($missingClass !== null) {
-                            // Skip attributes from uninstalled Marko packages
-                            if (MarkoException::inferPackageName($missingClass) !== null) {
-                                continue;
-                            }
-                            throw RouteException::attributeClassNotFound($className, $missingClass, $e);
-                        }
-                        throw $e;
-                    }
-                    break;
                 }
             }
         }

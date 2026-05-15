@@ -84,7 +84,7 @@ function cleanupDir(
 
 beforeEach(function (): void {
     $this->discovery = new EntityDiscovery(new ClassFileParser());
-    $this->uniqueId = uniqid();
+    $this->uniqueId = bin2hex(random_bytes(8));
     $this->tempDir = sys_get_temp_dir() . '/entity-discovery-' . $this->uniqueId;
     mkdir($this->tempDir, 0777, true);
 });
@@ -107,22 +107,6 @@ it('discovers entities in vendor path', function (): void {
     );
 
     $entities = $this->discovery->discoverInVendor($this->tempDir . '/vendor');
-
-    expect($entities)
-        ->toHaveCount(1)
-        ->and($entities[0])->toBe($expected);
-});
-
-it('discovers entities in flat packages path', function (): void {
-    $expected = createUniqueEntityFile(
-        $this->tempDir . '/packages/blog/src/Entity/Post.php',
-        'Packages\Blog\Entity',
-        'Post',
-        'posts',
-        $this->uniqueId,
-    );
-
-    $entities = $this->discovery->discoverInVendor($this->tempDir . '/packages');
 
     expect($entities)
         ->toHaveCount(1)

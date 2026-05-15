@@ -10,28 +10,19 @@ class DevServerException extends MarkoException
 {
     public static function processFailedToStart(string $name, string $command): self
     {
-        return new self("Process '{$name}' failed to start with command: {$command}. Check the command and run 'marko status' for details.");
+        return new self(
+            message: "Failed to start process '$name' with command: $command",
+            context: 'While starting development services',
+            suggestion: "Check that the command exists and is executable. Run 'marko dev:status' to see current state.",
+        );
     }
 
     public static function portInUse(int $port): self
     {
-        return new self("Port {$port} is already in use. Please use --port=XXXX to pick a different port.");
-    }
-
-    public static function missingEntryPoint(): self
-    {
-        $bootstrapCode = <<<'PHP'
-<?php
-
-declare(strict_types=1);
-
-use Marko\Core\Application;
-
-require dirname(__DIR__) . '/vendor/autoload.php';
-
-Application::boot(dirname(__DIR__))->handleRequest();
-PHP;
-
-        return new self("Missing public/index.php. Please create it with the following bootstrap code:\n\n{$bootstrapCode}");
+        return new self(
+            message: "Port $port is already in use",
+            context: 'While starting PHP development server',
+            suggestion: "Use a different port with --port=XXXX or stop the process using port $port.",
+        );
     }
 }

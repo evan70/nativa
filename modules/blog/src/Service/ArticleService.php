@@ -158,20 +158,20 @@ class ArticleService implements ArticleServiceInterface
      */
     public function findPublished(int $limit = 10, int $offset = 0): array
     {
-        $articles = $this->repository->findAll();
-        // Filter published only
-        $filtered = array_values(array_filter($articles, fn($a) => $a->published));
+        $articles = self::articlesToArray($this->repository->findAll());
+        $filtered = array_values(array_filter($articles, fn(Article $a): bool => $a->published));
+
         // Sort by createdAt DESC, then by ID DESC for consistent ordering
-        usort($filtered, function ($a, $b): int {
+        usort($filtered, function (Article $a, Article $b): int {
             $cmp = strcmp($b->createdAt ?? '', $a->createdAt ?? '');
             if ($cmp !== 0) {
                 return $cmp;
             }
-            return $b->id <=> $a->id;
+            return ($b->id ?? 0) <=> ($a->id ?? 0);
         });
         // Apply limit/offset and map to DTOs
         $sliced = array_slice($filtered, $offset, $limit);
-        return array_map(fn($article) => ArticleDTO::fromEntity($article), $sliced);
+        return array_map(fn(Article $article) => ArticleDTO::fromEntity($article), $sliced);
     }
 
     /**
@@ -179,19 +179,32 @@ class ArticleService implements ArticleServiceInterface
      */
     public function findByCategory(int $categoryId, int $limit = 10, int $offset = 0): array
     {
-        $articles = $this->repository->findAll();
+        $articles = self::articlesToArray($this->repository->findAll());
         // Filter by category and published
-        $filtered = array_values(array_filter($articles, fn($a) => $a->categoryId === $categoryId && $a->published));
+        $filtered = array_values(array_filter($articles, fn(Article $a): bool => $a->categoryId === $categoryId && $a->published));
         // Sort by createdAt DESC  
-        usort($filtered, fn($a, $b) => ($b->createdAt ?? '') <=> ($a->createdAt ?? ''));
+        usort($filtered, fn(Article $a, Article $b) => ($b->createdAt ?? '') <=> ($a->createdAt ?? ''));
         // Apply limit/offset and map to DTOs
         $sliced = array_slice($filtered, $offset, $limit);
-        return array_map(fn($article) => ArticleDTO::fromEntity($article), $sliced);
+        return array_map(fn(Article $article) => ArticleDTO::fromEntity($article), $sliced);
     }
 
     public function countPublished(): int
     {
-        $articles = $this->repository->findAll();
-        return count(array_filter($articles, fn($a) => $a->published));
+        $articles = self::articlesToArray($this->repository->findAll());
+        return count(array_filter($articles, fn(Article $a): bool => $a->published));
+    }
+
+    /**
+     * Convert EntityCollection (Traversable) to array for use with array_* functions.
+     *
+     * @param iterable<int, Article> $articles
+     * @return array<int, Article>
+     */
+    private static function articlesToArray(iterable $articles): array
+    {
+        /** @var array<int, Article> $result */
+        $result = $articles instanceof \Traversable ? iterator_to_array($articles) : $articles;
+        return $result;
     }
 }

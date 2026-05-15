@@ -27,10 +27,7 @@
     },
     "extra": {
         "marko": {
-            "module": true,
-            "group": "core",
-            "routes": [],
-            "isCore": true
+            "module": true
         }
     }
 }

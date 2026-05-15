@@ -25,10 +25,17 @@ class EntityDiscovery
     public function discoverInVendor(
         string $vendorPath,
     ): array {
-        return $this->discoverInDirectoryPatterns($vendorPath, [
-            '/*/*/src/Entity',
-            '/*/src/Entity',
-        ]);
+        if (!is_dir($vendorPath)) {
+            return [];
+        }
+
+        $entities = [];
+
+        foreach (glob($vendorPath . '/*/*/src/Entity', GLOB_ONLYDIR) as $entityDir) {
+            $entities = array_merge($entities, $this->discoverInPath($entityDir));
+        }
+
+        return $entities;
     }
 
     /**
@@ -39,9 +46,17 @@ class EntityDiscovery
     public function discoverInModules(
         string $modulesPath,
     ): array {
-        return $this->discoverInDirectoryPatterns($modulesPath, [
-            '/*/*/src/Entity',
-        ]);
+        if (!is_dir($modulesPath)) {
+            return [];
+        }
+
+        $entities = [];
+
+        foreach (glob($modulesPath . '/*/*/src/Entity', GLOB_ONLYDIR) as $entityDir) {
+            $entities = array_merge($entities, $this->discoverInPath($entityDir));
+        }
+
+        return $entities;
     }
 
     /**
@@ -52,12 +67,21 @@ class EntityDiscovery
     public function discoverInApp(
         string $appPath,
     ): array {
-        return $this->discoverInDirectoryPatterns($appPath, [
-            '/src/Entity',
-            '/Entity',
-            '/*/Entity',
-            '/*/src/Entity',
-        ]);
+        if (!is_dir($appPath)) {
+            return [];
+        }
+
+        $entities = [];
+
+        foreach (glob($appPath . '/*/Entity', GLOB_ONLYDIR) as $entityDir) {
+            $entities = array_merge($entities, $this->discoverInPath($entityDir));
+        }
+
+        foreach (glob($appPath . '/*/src/Entity', GLOB_ONLYDIR) as $entityDir) {
+            $entities = array_merge($entities, $this->discoverInPath($entityDir));
+        }
+
+        return $entities;
     }
 
     /**
@@ -120,42 +144,5 @@ class EntityDiscovery
             $this->discoverInModules($modulesPath),
             $this->discoverInApp($appPath),
         );
-    }
-
-    /**
-     * @param array<string> $patterns
-     * @return array<class-string<Entity>>
-     */
-    private function discoverInDirectoryPatterns(
-        string $rootPath,
-        array $patterns,
-    ): array {
-        if (!is_dir($rootPath)) {
-            return [];
-        }
-
-        $entities = [];
-        $seen = [];
-
-        foreach ($patterns as $pattern) {
-            $matches = glob($rootPath . $pattern, GLOB_ONLYDIR);
-
-            if ($matches === false) {
-                continue;
-            }
-
-            foreach ($matches as $entityDir) {
-                foreach ($this->discoverInPath($entityDir) as $entityClass) {
-                    if (isset($seen[$entityClass])) {
-                        continue;
-                    }
-
-                    $seen[$entityClass] = true;
-                    $entities[] = $entityClass;
-                }
-            }
-        }
-
-        return $entities;
     }
 }

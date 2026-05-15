@@ -20,7 +20,21 @@ The framework uses a build-based deployment strategy to eliminate the Composer s
 - ✅ Excludes the root `composer.json` and `composer.lock`
 - ✅ Boots directly from `packages/`
 - ✅ Preserves `app/`, `modules/`, `packages/`, `bootstrap/`
-- ✅ Can skip rebuilding frontend assets when CI already built them (`MARKO_SKIP_FRONTEND_BUILD=1`)
+- ✅ Automatically generates `bootstrap/runtime-manifest.php` (replaces `composer.json`)
+- ✅ Preserves `.env.production` as the production `.env`
+- ✅ Ensures all databases are migrated and seeded within the artifact
+- ✅ Strips all development artifacts (tests, dev configs, `vendor/`)
+
+## Environment Configuration
+
+The build script looks for a `.env.production` file in the root directory. If found, it will be copied to `dist/.env`. This is the recommended way to manage production secrets and settings.
+
+Example `.env.production`:
+```env
+APP_ENV=production
+APP_DEBUG=false
+LOG_LEVEL=info
+```
 
 ## GitHub Actions Workflow
 
@@ -72,7 +86,7 @@ Use the uploaded artifact from GitHub Actions in your deployment tool (e.g., Dep
 - **No vendor directory**: Runtime code lives in `packages/`
 - **Smaller footprint**: Production artifact contains only runtime code
 
-Note: `packages/*/composer.json` files remain in the artifact because Marko uses them as runtime manifests for autoloading and module discovery.
+Note: Root `composer.json` is removed from the artifact. Package metadata is preserved in `bootstrap/runtime-manifest.php`, which Marko uses for autoloading and module discovery in production, eliminating the need for `composer.json` files in the deployed artifact.
 
 ## Security Notes
 
@@ -87,12 +101,9 @@ Note: `packages/*/composer.json` files remain in the artifact because Marko uses
 # Build production artifact
 php build.php
 
-# Test the build
+# Test the build (simulates a real request)
 cd dist
-php -r "require 'bootstrap/autoload.php'; echo 'OK';"
-
-# Run your application
-php bootstrap/app.php
+php -r '$_SERVER["REQUEST_METHOD"] = "GET"; $_SERVER["REQUEST_URI"] = "/"; $_SERVER["SCRIPT_NAME"] = "/index.php"; require "public/index.php";'
 ```
 
 ## Troubleshooting

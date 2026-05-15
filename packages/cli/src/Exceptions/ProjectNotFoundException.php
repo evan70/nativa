@@ -12,7 +12,7 @@ class ProjectNotFoundException extends CliException
         return new self(
             message: "No Marko project found in '$directory' or any parent directory.",
             context: "Current directory: $directory",
-            suggestion: "Make sure you're running this command from within a Marko project (a directory containing vendor/marko/core or packages/core).",
+            suggestion: "Make sure you're running this command from within a Marko project (a directory containing vendor/marko/core).",
         );
     }
 }

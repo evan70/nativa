@@ -4,17 +4,40 @@ declare(strict_types=1);
 
 namespace Marko\Amphp;
 
-use Closure;
-use Amp\Future;
-use function Amp\async;
+use Revolt\EventLoop;
 
 class EventLoopRunner
 {
-    /**
-     * Run a task asynchronously.
-     */
-    public function run(Closure $callback): Future
+    private bool $running = false;
+
+    public function run(): void
     {
-        return async($callback);
+        $this->running = true;
+        $this->doRun();
+        $this->running = false;
+    }
+
+    public function stop(): void
+    {
+        if ($this->running) {
+            $this->doStop();
+        }
+
+        $this->running = false;
+    }
+
+    public function isRunning(): bool
+    {
+        return $this->running;
+    }
+
+    protected function doRun(): void
+    {
+        EventLoop::run();
+    }
+
+    protected function doStop(): void
+    {
+        EventLoop::getDriver()->stop();
     }
 }

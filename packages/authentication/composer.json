@@ -17,10 +17,7 @@
     },
     "extra": {
         "marko": {
-            "module": true,
-            "group": "auth",
-            "routes": ["/login", "/register", "/logout", "/api/auth/*"],
-            "idleTimeout": "30m"
+            "module": true
         }
     }
 }

@@ -100,10 +100,10 @@ class ArticleController
         }
 
         if ($article === null) {
-            return $this->view->render('pages/articles/not-found', [
+            return Response::html($this->view->renderToString('pages/articles/not-found', [
                 'title' => 'Article Not Found',
                 'message' => 'The requested article does not exist.',
-            ])->withStatus(404);
+            ]), 404);
         }
 
         return $this->view->render('pages/articles/show', [

@@ -17,13 +17,18 @@ env:
   PHP_VERSION: '8.5'
   NODE_VERSION: '24'
   PNPM_VERSION: '10'
-  APP_ENV: development
-  MARKO_ENV: development
 
 jobs:
+  # ────────────────────────────────────
+  # DEV CIRCUIT — full install, dev tools, tests
+  # ────────────────────────────────────
   quality:
     runs-on: ubuntu-latest
     name: Quality
+
+    env:
+      APP_ENV: development
+      MARKO_ENV: development
 
     steps:
       - name: Checkout code
@@ -54,7 +59,7 @@ jobs:
         working-directory: templates
         run: pnpm install --frozen-lockfile
 
-      - name: Install PHP dependencies
+      - name: Install PHP dependencies (full — includes dev)
         run: composer install --no-interaction --no-progress --prefer-dist
 
       - name: Composer validate
@@ -69,10 +74,17 @@ jobs:
       - name: Security audit
         run: composer audit --no-interaction
 
+  # ────────────────────────────────────
+  # PROD CIRCUIT — thin build, smoke test, deploy artifact
+  # ────────────────────────────────────
   build:
     runs-on: ubuntu-latest
     name: Build dist artifact
     needs: [quality]
+
+    env:
+      APP_ENV: production
+      MARKO_ENV: production
 
     steps:
       - name: Checkout code
@@ -111,7 +123,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-composer-
 
-      - name: Install PHP dependencies
+      - name: Install PHP dependencies (no-dev — runtime only)
         run: composer install --no-interaction --no-progress --prefer-dist --no-dev
 
       - name: Install frontend dependencies
@@ -131,10 +143,10 @@ jobs:
       - name: Seed data
         run: php marko db:seed --no-interaction
 
-      - name: Build production dist
+      - name: Build production dist (strips tests, verifies artifact)
         run: MARKO_SKIP_FRONTEND_BUILD=1 php build.php
 
-      - name: Copy vendor for smoke test (remove in production deploy)
+      - name: Copy vendor for smoke test
         run: cp -r vendor dist/vendor
 
       - name: Smoke test dist pages
@@ -160,7 +172,10 @@ jobs:
           grep -q "Articles" /tmp/articles.html
           grep -q "Selected Projects" /tmp/portfolio.html
 
-      - name: Upload dist artifact
+      - name: Remove vendor from dist before upload
+        run: rm -rf dist/vendor
+
+      - name: Upload dist artifact (thin — no vendor, no tests, no dev configs)
         uses: actions/upload-artifact@v6
         with:
           name: nativa-dist

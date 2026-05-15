@@ -6,6 +6,7 @@ namespace Marko\Cardboard\Controller;
 
 use App\Blog\Database\BlogConnection;
 use App\Database\NativaConnection;
+use App\Portfolio\Database\PortfolioConnection;
 use Marko\Admin\Contracts\AdminSectionRegistryInterface;
 use Marko\Mark\Middleware\MarkMiddleware;
 use Marko\Authentication\Contracts\GuardInterface;
@@ -23,6 +24,7 @@ class DashboardController
         private readonly GuardInterface $guard,
         private readonly NativaConnection $nativaConnection,
         private readonly BlogConnection $blogConnection,
+        private readonly PortfolioConnection $portfolioConnection,
     ) {}
 
     /**
@@ -50,11 +52,12 @@ class DashboardController
         $sections = $this->sectionRegistry->all();
         $nativaDb = $this->nativaConnection->getConnection();
         $articlesDb = $this->blogConnection->getConnection();
+        $portfolioDb = $this->portfolioConnection->getConnection();
 
         // Real data from database
         $userCount = (int) ($nativaDb->query('SELECT COUNT(*) as count FROM mark_users')[0]['count'] ?? 0);
         $articleCount = (int) ($articlesDb->query('SELECT COUNT(*) as count FROM articles')[0]['count'] ?? 0);
-        $portfolioCount = (int) ($nativaDb->query('SELECT COUNT(*) as count FROM portfolio_items')[0]['count'] ?? 0);
+        $portfolioCount = (int) ($portfolioDb->query('SELECT COUNT(*) as count FROM portfolio_items')[0]['count'] ?? 0);
         $recentUsers = $nativaDb->query(
             'SELECT id, email, name, "createdAt" FROM mark_users ORDER BY "createdAt" DESC LIMIT 3'
         );

@@ -178,9 +178,18 @@ TaskUpdate(taskId, status: "in_progress")
 - Read relevant files
 - Make necessary changes
 - Follow existing code patterns
-- **NO tests unless plan includes test tasks**
 - **NO reports or summaries**
 
+**Marko module creation checklist** (when creating a new module):
+- [ ] Create `modules/<name>/` directory
+- [ ] Create `composer.json` with PSR-4 `autoload` + `extra.marko.module: true`
+- [ ] Optionally add module metadata: `group`, `routes`, `idleTimeout`, `isCore` in `extra.marko`
+- [ ] Create `module.php` with bindings/singletons/boot callbacks
+- [ ] Add PSR-4 prefix to root `composer.json` (`require` autoload)
+- [ ] Update `config/database.php['modules']` if module uses its own database
+- [ ] Create `resources/views/` directory in the module if it uses templates (or ensure templates/ fallback exists)
+- [ ] If `module.php` closure uses `$container->get(ConcreteClass::class)`, verify that class is registered as container instance (not just autowirable) — add `$app->container->instance(...)` in `bootstrap/app.php` if needed
+- [ ] Create/update the `vendor/marko -> ../packages` symlink if packages are used
 **3.4: Verify implementation**
 - Check code compiles/runs
 - Verify functionality works
@@ -191,6 +200,18 @@ TaskUpdate(taskId, status: "in_progress")
 php vendor/bin/phpstan analyze --memory-limit=256M
 ```
 If PHPStan fails, fix type errors before marking task complete.
+
+**If the project has a custom `phpstan.neon`:**
+```bash
+php vendor/bin/phpstan analyze -c phpstan.neon --memory-limit=1G --error-format=table
+```
+Check for known ignored errors — they may mask real issues. Only ignore what's intentional
+(e.g., omitted third-party classes, nullable offsets on array access).
+
+**Marko-specific type traps:**
+- Container generics are not expressible in PHP — `@template` annotations may mismap
+- `Manifest` properties like `group`, `routes` are optional; PHPStan might flag null access
+- The `ResolvedModule` wraps `ModuleManifest`; use `$module->manifest->name` not `$module->name`
 
 **3.5: Mark as completed**
 ```

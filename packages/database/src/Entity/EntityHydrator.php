@@ -6,6 +6,8 @@ namespace Marko\Database\Entity;
 
 use BackedEnum;
 use DateTimeImmutable;
+use JsonException;
+use Marko\Database\Exceptions\EntityException;
 use ReflectionClass;
 use WeakMap;
 
@@ -21,8 +23,9 @@ class EntityHydrator
      */
     private WeakMap $originalValues;
 
-    public function __construct()
-    {
+    public function __construct(
+        private readonly ?EntityMetadataFactory $metadataFactory = null,
+    ) {
         $this->originalValues = new WeakMap();
     }
 
@@ -33,6 +36,8 @@ class EntityHydrator
      * @param class-string<T> $entityClass
      * @param array<string, mixed> $row Database row with column names as keys
      * @return T
+     *
+     * @throws EntityException
      */
     public function hydrate(
         string $entityClass,
@@ -42,7 +47,6 @@ class EntityHydrator
         $reflection = new ReflectionClass($entityClass);
         $entity = $reflection->newInstanceWithoutConstructor();
 
-        $columnToProperty = $metadata->getColumnToPropertyMap();
         $originalValues = [];
 
         foreach ($metadata->properties as $propName => $propMeta) {
@@ -62,6 +66,53 @@ class EntityHydrator
         }
 
         $this->originalValues[$entity] = $originalValues;
+
+        if ($metadata->extenders !== []) {
+            if ($this->metadataFactory === null) {
+                throw EntityException::hydratorRequiresMetadataFactory($entityClass);
+            }
+
+            foreach ($metadata->extenders as $extenderClass) {
+                $extenderMetadata = $this->metadataFactory->parse($extenderClass);
+
+                // Silently skip extenders whose columns are entirely absent from the row
+                $allPresent = array_all(
+                    $extenderMetadata->properties,
+                    fn (PropertyMetadata $propMeta) => array_key_exists($propMeta->columnName, $row),
+                );
+
+                if (!$allPresent) {
+                    continue;
+                }
+
+                $extenderReflection = new ReflectionClass($extenderClass);
+                $companion = $extenderReflection->newInstanceWithoutConstructor();
+                $companionOriginalValues = [];
+
+                foreach ($extenderMetadata->properties as $propName => $propMeta) {
+                    $columnName = $propMeta->columnName;
+
+                    if (!array_key_exists($columnName, $row)) {
+                        continue;
+                    }
+
+                    $dbValue = $row[$columnName];
+                    $phpValue = $this->convertToPhpType($dbValue, $propMeta);
+
+                    if ($phpValue === null && !$propMeta->nullable) {
+                        continue;
+                    }
+
+                    $property = $extenderReflection->getProperty($propName);
+                    $property->setValue($companion, $phpValue);
+
+                    $companionOriginalValues[$propName] = $phpValue;
+                }
+
+                $this->originalValues[$companion] = $companionOriginalValues;
+                $this->attachCompanion($entity, $companion);
+            }
+        }
 
         return $entity;
     }
@@ -89,6 +140,35 @@ class EntityHydrator
     }
 
     /**
+     * Extract parent entity columns plus all attached companion columns into a single row array.
+     *
+     * Calls extract() for the parent, then extract() for each attached companion using
+     * the companion's own metadata (fetched on-demand via the factory). The existing
+     * extract() signature is unchanged — new behavior lives here.
+     *
+     * @return array<string, mixed> Merged column name => value for parent + all companions
+     *
+     * @throws EntityException
+     */
+    public function extractAll(
+        Entity $parent,
+        EntityMetadata $parentMetadata,
+    ): array {
+        $row = $this->extract($parent, $parentMetadata);
+
+        foreach ($parent->companions() as $companion) {
+            if ($this->metadataFactory === null) {
+                throw EntityException::hydratorRequiresMetadataFactory($parentMetadata->entityClass);
+            }
+
+            $companionMetadata = $this->metadataFactory->parse($companion::class);
+            $row = array_merge($row, $this->extract($companion, $companionMetadata));
+        }
+
+        return $row;
+    }
+
+    /**
      * Check if an entity is new (not yet persisted).
      */
     public function isNew(
@@ -110,7 +190,54 @@ class EntityHydrator
 
         $value = $property->getValue($entity);
 
-        return $value === null;
+        // For auto-increment PKs, a null value means the entity has never been
+        // persisted (the DB assigns the ID on INSERT).
+        if ($pkProperty->isAutoIncrement) {
+            return $value === null;
+        }
+
+        // For non-auto-increment PKs (e.g. client-supplied UUIDs), a set PK value
+        // does NOT imply the entity was ever persisted. Use originalValues tracking:
+        // if no snapshot exists, the entity has never passed through hydrate() or
+        // registerOriginalValues(), so treat it as new.
+        return !isset($this->originalValues[$entity]);
+    }
+
+    /**
+     * Snapshot an entity's current property values into the originalValues WeakMap.
+     *
+     * Enables dirty-checking for entities that never passed through hydrate(),
+     * such as freshly inserted entities. Idempotent — overwrites any prior snapshot.
+     */
+    public function registerOriginalValues(
+        Entity $entity,
+        EntityMetadata $metadata,
+    ): void {
+        $reflection = new ReflectionClass($entity);
+        $values = [];
+
+        foreach ($metadata->properties as $propName => $propMeta) {
+            $property = $reflection->getProperty($propName);
+
+            if (!$property->isInitialized($entity)) {
+                continue;
+            }
+
+            $values[$propName] = $property->getValue($entity);
+        }
+
+        $this->originalValues[$entity] = $values;
+    }
+
+    /**
+     * Attach a companion to a parent entity (package-internal, used during hydration).
+     *
+     * Delegates into the shared EntityCompanionStorage so companions set here
+     * are visible through Entity::companions() / Entity::companion().
+     */
+    public function attachCompanion(Entity $entity, Entity $companion): void
+    {
+        EntityCompanionStorage::instance()->attach($entity, $companion);
     }
 
     /**
@@ -171,6 +298,8 @@ class EntityHydrator
 
     /**
      * Convert a database value to the appropriate PHP type.
+     *
+     * @throws EntityException
      */
     private function convertToPhpType(
         mixed $value,
@@ -178,6 +307,11 @@ class EntityHydrator
     ): mixed {
         if ($value === null) {
             return null;
+        }
+
+        // Handle JSON columns
+        if ($propMeta->columnType === 'json') {
+            return $this->decodeJson($value);
         }
 
         // Handle enums
@@ -201,7 +335,25 @@ class EntityHydrator
     }
 
     /**
+     * Decode a JSON string into a PHP array.
+     *
+     * @throws EntityException
+     */
+    private function decodeJson(mixed $value): array
+    {
+        try {
+            $decoded = json_decode((string) $value, associative: true, flags: JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            throw EntityException::invalidJsonFromDatabase($value, $e->getMessage());
+        }
+
+        return $decoded;
+    }
+
+    /**
      * Convert a PHP value to a database-compatible value.
+     *
+     * @throws EntityException
      */
     private function convertToDbValue(
         mixed $value,
@@ -209,6 +361,11 @@ class EntityHydrator
     ): mixed {
         if ($value === null) {
             return null;
+        }
+
+        // Handle JSON columns
+        if ($propMeta->columnType === 'json') {
+            return $this->encodeJson($value);
         }
 
         if (is_bool($value)) {
@@ -224,6 +381,20 @@ class EntityHydrator
         }
 
         return $value;
+    }
+
+    /**
+     * Encode a PHP array to a JSON string.
+     *
+     * @throws EntityException
+     */
+    private function encodeJson(mixed $value): string
+    {
+        try {
+            return json_encode($value, flags: JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+        } catch (JsonException $e) {
+            throw EntityException::invalidJsonEncode($e->getMessage());
+        }
     }
 
     /**

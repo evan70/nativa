@@ -10,7 +10,6 @@ use Marko\Cli\Exceptions\ProjectNotFoundException;
 use Marko\Core\Application;
 use Marko\Core\Command\Input;
 use Marko\Core\Command\Output;
-use Marko\Core\Path\ProjectPaths;
 use Throwable;
 
 readonly class CliKernel
@@ -29,10 +28,9 @@ readonly class CliKernel
         ?Output $output = null,
     ) {
         $this->applicationFactory = $applicationFactory ?? fn (string $projectRoot): Application => new Application(
-            vendorPath: ProjectPaths::resolvePackagesRoot($projectRoot),
+            vendorPath: $projectRoot . '/vendor',
             modulesPath: $projectRoot . '/modules',
             appPath: $projectRoot . '/app',
-            basePath: $projectRoot,
         );
         $this->output = $output ?? new Output();
     }
@@ -47,6 +45,10 @@ readonly class CliKernel
     ): int {
         try {
             return $this->doRun($argv);
+        } catch (CliException $e) {
+            $this->displayCliException($e);
+
+            return 1;
         } catch (Throwable $e) {
             $this->displayException($e);
 
@@ -69,14 +71,7 @@ readonly class CliKernel
         }
 
         // Load the project's autoloader
-        $bootstrapAutoload = $projectRoot . '/bootstrap/autoload.php';
-        $composerAutoload = $projectRoot . '/vendor/autoload.php';
-
-        if (is_file($bootstrapAutoload)) {
-            require_once $bootstrapAutoload;
-        } elseif (is_file($composerAutoload)) {
-            require_once $composerAutoload;
-        }
+        require_once $projectRoot . '/vendor/autoload.php';
 
         // Create and boot the application
         $app = ($this->applicationFactory)($projectRoot);
@@ -92,20 +87,28 @@ readonly class CliKernel
         return $app->commandRunner->run($commandName, $input, $this->output);
     }
 
+    private function displayCliException(
+        CliException $e,
+    ): void {
+        $this->output->writeLine('');
+        $this->output->writeLine("Error: {$e->getMessage()}");
+
+        if ($e->getContext() !== '') {
+            $this->output->writeLine("  Context: {$e->getContext()}");
+        }
+
+        if ($e->getSuggestion() !== '') {
+            $this->output->writeLine("  Suggestion: {$e->getSuggestion()}");
+        }
+
+        $this->output->writeLine('');
+    }
+
     private function displayException(
         Throwable $e,
     ): void {
         $this->output->writeLine('');
         $this->output->writeLine("Error: {$e->getMessage()}");
-
-        if (method_exists($e, 'getContext') && $e->getContext() !== '') {
-            $this->output->writeLine("  Context: {$e->getContext()}");
-        }
-
-        if (method_exists($e, 'getSuggestion') && $e->getSuggestion() !== '') {
-            $this->output->writeLine("  Suggestion: {$e->getSuggestion()}");
-        }
-
         $this->output->writeLine('');
     }
 }

@@ -9,9 +9,11 @@ use Marko\Database\Attributes\Table;
 use Marko\Database\Connection\ConnectionInterface;
 use Marko\Database\Connection\StatementInterface;
 use Marko\Database\Entity\Entity;
+use Marko\Database\Entity\EntityCollection;
 use Marko\Database\Entity\EntityHydrator;
 use Marko\Database\Entity\EntityMetadata;
 use Marko\Database\Entity\EntityMetadataFactory;
+use Marko\Database\Exceptions\BatchInsertException;
 use Marko\Database\Exceptions\RepositoryException;
 use Marko\Database\Query\QueryBuilderFactoryInterface;
 use Marko\Database\Query\QueryBuilderInterface;
@@ -49,6 +51,55 @@ class UserRepository extends Repository
  */
 class InvalidRepository extends Repository {}
 
+// --- Companion / extender fixtures ---
+
+/** Parent entity that can be extended by RepositoryTestUserProfile. */
+#[Table('accounts')]
+class RepositoryTestAccount extends Entity
+{
+    /** @noinspection PhpUnused - Entity property for structural definition */
+    #[Column(primaryKey: true, autoIncrement: true)]
+    public ?int $id = null;
+
+    /** @noinspection PhpUnused - Entity property for structural definition */
+    #[Column]
+    public string $username;
+}
+
+/** Extender entity — extends RepositoryTestAccount. */
+#[Table(extends: RepositoryTestAccount::class)]
+class RepositoryTestAccountProfile extends Entity
+{
+    /** @noinspection PhpUnused - Entity property for structural definition */
+    #[Column]
+    public string $bio;
+
+    /** @noinspection PhpUnused - Entity property for structural definition */
+    #[Column]
+    public string $website;
+}
+
+/** Second extender entity — extends RepositoryTestAccount. */
+#[Table(extends: RepositoryTestAccount::class)]
+class RepositoryTestAccountSettings extends Entity
+{
+    /** @noinspection PhpUnused - Entity property for structural definition */
+    #[Column]
+    public bool $notifications;
+}
+
+/** Repository for RepositoryTestAccount. */
+class AccountRepository extends Repository
+{
+    protected const string ENTITY_CLASS = RepositoryTestAccount::class;
+}
+
+/** Repository whose ENTITY_CLASS is an extender — should throw on construction. */
+class ExtenderRepository extends Repository
+{
+    protected const string ENTITY_CLASS = RepositoryTestAccountProfile::class;
+}
+
 // Test RepositoryInterface method definitions
 
 it('defines RepositoryInterface with find(id) method', function (): void {
@@ -61,9 +112,11 @@ it('defines RepositoryInterface with find(id) method', function (): void {
 
     $parameters = $method->getParameters();
     $returnType = $method->getReturnType();
+    $idType = (string) $parameters[0]->getType();
     expect($parameters)->toHaveCount(1)
         ->and($parameters[0]->getName())->toBe('id')
-        ->and($parameters[0]->getType()->getName())->toBe('int')
+        ->and(str_contains($idType, 'int'))->toBeTrue()
+        ->and(str_contains($idType, 'string'))->toBeTrue()
         ->and($returnType->allowsNull())->toBeTrue()
         ->and($returnType->getName())->toBe(Entity::class);
 });
@@ -77,7 +130,7 @@ it('defines RepositoryInterface with findAll() method', function (): void {
     $returnType = $method->getReturnType();
     expect($method->isPublic())->toBeTrue()
         ->and($method->getParameters())->toHaveCount(0)
-        ->and($returnType->getName())->toBe('array');
+        ->and($returnType->getName())->toBe(EntityCollection::class);
 });
 
 it('defines RepositoryInterface with findBy(criteria) method', function (): void {
@@ -92,7 +145,7 @@ it('defines RepositoryInterface with findBy(criteria) method', function (): void
         ->and($parameters)->toHaveCount(1)
         ->and($parameters[0]->getName())->toBe('criteria')
         ->and($parameters[0]->getType()->getName())->toBe('array')
-        ->and($returnType->getName())->toBe('array');
+        ->and($returnType->getName())->toBe(EntityCollection::class);
 });
 
 it('defines RepositoryInterface with findOneBy(criteria) method', function (): void {
@@ -185,13 +238,13 @@ it('uses EntityHydrator to convert rows to entities', function (): void {
     // - 'id' maps to 'id' column
     // - 'name' maps to 'name' column
     // - 'email' maps to 'email_address' column (explicit in #[Column('email_address')])
-    // - 'isActive' maps to 'isActive' column (no explicit name, uses property name)
+    // - 'isActive' maps to 'is_active' column (no explicit name, uses snake_case of property name)
     $connection = createMockConnection([
         [
             'id' => 1,
             'name' => 'John Doe',
             'email_address' => 'john@example.com',
-            'isActive' => 1,
+            'is_active' => 1,
         ],
     ]);
     $metadataFactory = new EntityMetadataFactory();
@@ -230,7 +283,7 @@ it('finds entity by primary key with find(id)', function (): void {
             'id' => 42,
             'name' => 'Jane Doe',
             'email_address' => 'jane@example.com',
-            'isActive' => 1,
+            'is_active' => 1,
         ],
     ]);
     $metadataFactory = new EntityMetadataFactory();
@@ -266,9 +319,11 @@ it('defines RepositoryInterface with findOrFail(id) method', function (): void {
 
     $parameters = $method->getParameters();
     $returnType = $method->getReturnType();
+    $idType = (string) $parameters[0]->getType();
     expect($parameters)->toHaveCount(1)
         ->and($parameters[0]->getName())->toBe('id')
-        ->and($parameters[0]->getType()->getName())->toBe('int')
+        ->and(str_contains($idType, 'int'))->toBeTrue()
+        ->and(str_contains($idType, 'string'))->toBeTrue()
         ->and($returnType->allowsNull())->toBeFalse()
         ->and($returnType->getName())->toBe(Entity::class);
 });
@@ -279,7 +334,7 @@ it('finds entity by primary key with findOrFail(id)', function (): void {
             'id' => 42,
             'name' => 'Jane Doe',
             'email_address' => 'jane@example.com',
-            'isActive' => 1,
+            'is_active' => 1,
         ],
     ]);
     $metadataFactory = new EntityMetadataFactory();
@@ -307,8 +362,8 @@ it('throws RepositoryException when findOrFail() entity not found', function ():
 
 it('finds all entities with findAll()', function (): void {
     $connection = createMockConnection([
-        ['id' => 1, 'name' => 'Alice', 'email_address' => 'alice@example.com', 'isActive' => 1],
-        ['id' => 2, 'name' => 'Bob', 'email_address' => 'bob@example.com', 'isActive' => 0],
+        ['id' => 1, 'name' => 'Alice', 'email_address' => 'alice@example.com', 'is_active' => 1],
+        ['id' => 2, 'name' => 'Bob', 'email_address' => 'bob@example.com', 'is_active' => 0],
     ]);
     $metadataFactory = new EntityMetadataFactory();
     $hydrator = new EntityHydrator();
@@ -316,16 +371,17 @@ it('finds all entities with findAll()', function (): void {
     $repository = new UserRepository($connection, $metadataFactory, $hydrator);
     $users = $repository->findAll();
 
-    expect($users)->toHaveCount(2)
-        ->and($users[0])->toBeInstanceOf(RepositoryTestUser::class)
-        ->and($users[0]->name)->toBe('Alice')
-        ->and($users[1]->name)->toBe('Bob');
+    expect($users)->toBeInstanceOf(EntityCollection::class)
+        ->and($users->count())->toBe(2)
+        ->and($users->first())->toBeInstanceOf(RepositoryTestUser::class)
+        ->and($users->first()->name)->toBe('Alice')
+        ->and($users->last()->name)->toBe('Bob');
 });
 
 it('finds entities by criteria array with findBy(array)', function (): void {
     $connection = createMockConnection([
-        ['id' => 1, 'name' => 'Alice', 'email_address' => 'alice@example.com', 'isActive' => 1],
-        ['id' => 3, 'name' => 'Charlie', 'email_address' => 'charlie@example.com', 'isActive' => 1],
+        ['id' => 1, 'name' => 'Alice', 'email_address' => 'alice@example.com', 'is_active' => 1],
+        ['id' => 3, 'name' => 'Charlie', 'email_address' => 'charlie@example.com', 'is_active' => 1],
     ]);
     $metadataFactory = new EntityMetadataFactory();
     $hydrator = new EntityHydrator();
@@ -333,14 +389,15 @@ it('finds entities by criteria array with findBy(array)', function (): void {
     $repository = new UserRepository($connection, $metadataFactory, $hydrator);
     $users = $repository->findBy(['isActive' => true]);
 
-    expect($users)->toHaveCount(2)
-        ->and($users[0]->isActive)->toBeTrue()
-        ->and($users[1]->isActive)->toBeTrue();
+    expect($users)->toBeInstanceOf(EntityCollection::class)
+        ->and($users->count())->toBe(2)
+        ->and($users->first()->isActive)->toBeTrue()
+        ->and($users->last()->isActive)->toBeTrue();
 });
 
 it('finds single entity by criteria with findOneBy(array)', function (): void {
     $connection = createMockConnection([
-        ['id' => 2, 'name' => 'Bob', 'email_address' => 'bob@example.com', 'isActive' => 1],
+        ['id' => 2, 'name' => 'Bob', 'email_address' => 'bob@example.com', 'is_active' => 1],
     ]);
     $metadataFactory = new EntityMetadataFactory();
     $hydrator = new EntityHydrator();
@@ -449,7 +506,7 @@ it('updates existing entity with save() when has ID', function (): void {
                 $this->firstQuery = false;
 
                 return [
-                    ['id' => 1, 'name' => 'Original', 'email_address' => 'orig@example.com', 'isActive' => 1],
+                    ['id' => 1, 'name' => 'Original', 'email_address' => 'orig@example.com', 'is_active' => 1],
                 ];
             }
 
@@ -524,7 +581,7 @@ it('only updates dirty fields on existing entity', function (): void {
                 $this->firstQuery = false;
 
                 return [
-                    ['id' => 1, 'name' => 'Original', 'email_address' => 'orig@example.com', 'isActive' => 1],
+                    ['id' => 1, 'name' => 'Original', 'email_address' => 'orig@example.com', 'is_active' => 1],
                 ];
             }
 
@@ -574,7 +631,7 @@ it('only updates dirty fields on existing entity', function (): void {
     $setClause = substr($sql, strpos($sql, 'SET'), strpos($sql, 'WHERE') - strpos($sql, 'SET'));
     expect($sql)->toContain('name')
         ->and($setClause)->not->toContain('email_address')
-        ->and($setClause)->not->toContain('isActive');
+        ->and($setClause)->not->toContain('is_active');
 });
 
 it('sets auto-generated ID on entity after insert', function (): void {
@@ -662,7 +719,7 @@ it('deletes entity with delete()', function (): void {
                 $this->firstQuery = false;
 
                 return [
-                    ['id' => 5, 'name' => 'ToDelete', 'email_address' => 'del@example.com', 'isActive' => 1],
+                    ['id' => 5, 'name' => 'ToDelete', 'email_address' => 'del@example.com', 'is_active' => 1],
                 ];
             }
 
@@ -721,7 +778,7 @@ it('provides query() method returning QueryBuilder for custom queries', function
 
 it('hydrates results from query() automatically', function (): void {
     $connection = createMockConnection([
-        ['id' => 1, 'name' => 'QueryUser', 'email_address' => 'query@example.com', 'isActive' => 1],
+        ['id' => 1, 'name' => 'QueryUser', 'email_address' => 'query@example.com', 'is_active' => 1],
     ]);
     $metadataFactory = new EntityMetadataFactory();
     $hydrator = new EntityHydrator();
@@ -735,9 +792,10 @@ it('hydrates results from query() automatically', function (): void {
         ->where('name', '=', 'QueryUser')
         ->getEntities();
 
+    $array = $users->toArray();
     expect($users)->toHaveCount(1)
-        ->and($users[0])->toBeInstanceOf(RepositoryTestUser::class)
-        ->and($users[0]->name)->toBe('QueryUser');
+        ->and($array[0])->toBeInstanceOf(RepositoryTestUser::class)
+        ->and($array[0]->name)->toBe('QueryUser');
 });
 
 it('supports count() method returning total count', function (): void {
@@ -816,7 +874,7 @@ it('supports exists(id) method returning boolean', function (): void {
 
             // First call (id=1) returns exists, second call (id=999) returns not exists
             if ($this->queryCount === 1 && $bindings[0] === 1) {
-                return [['id' => 1, 'name' => 'Exists', 'email_address' => 'exists@example.com', 'isActive' => 1]];
+                return [['id' => 1, 'name' => 'Exists', 'email_address' => 'exists@example.com', 'is_active' => 1]];
             }
 
             return [];
@@ -848,6 +906,133 @@ it('supports exists(id) method returning boolean', function (): void {
 
     expect($repository->exists(1))->toBeTrue()
         ->and($repository->exists(999))->toBeFalse();
+});
+
+// --- Regression tests: registerOriginalValues after insert/update ---
+
+describe('register original values after insert and update', function (): void {
+    it('persists update when entity is mutated and saved after initial insert in same request', function (): void {
+        $connection = createStorageConnection();
+
+        $metadataFactory = new EntityMetadataFactory();
+        $hydrator = new EntityHydrator();
+        $repository = new UserRepository($connection, $metadataFactory, $hydrator);
+
+        $user = new RepositoryTestUser();
+        $user->name = 'Alice';
+        $user->email = 'alice@example.com';
+        $user->isActive = true;
+
+        $repository->save($user);
+
+        expect($user->id)->not->toBeNull();
+
+        $user->name = 'Alice Updated';
+        $repository->save($user);
+
+        $found = $repository->find($user->id);
+
+        expect($found)->not->toBeNull()
+            ->and($found->name)->toBe('Alice Updated');
+    });
+
+    it('persists multiple sequential updates on an entity inserted in the same request', function (): void {
+        $connection = createStorageConnection();
+
+        $metadataFactory = new EntityMetadataFactory();
+        $hydrator = new EntityHydrator();
+        $repository = new UserRepository($connection, $metadataFactory, $hydrator);
+
+        $user = new RepositoryTestUser();
+        $user->name = 'Bob';
+        $user->email = 'bob@example.com';
+        $user->isActive = true;
+
+        $repository->save($user);
+
+        $user->name = 'Bob v2';
+        $repository->save($user);
+
+        $user->name = 'Bob v3';
+        $repository->save($user);
+
+        $found = $repository->find($user->id);
+
+        expect($found)->not->toBeNull()
+            ->and($found->name)->toBe('Bob v3');
+    });
+
+    it('does not execute SQL on save when no properties have changed since last insert', function (): void {
+        $sqlLog = [];
+        $connection = createStorageConnection($sqlLog);
+
+        $metadataFactory = new EntityMetadataFactory();
+        $hydrator = new EntityHydrator();
+        $repository = new UserRepository($connection, $metadataFactory, $hydrator);
+
+        $user = new RepositoryTestUser();
+        $user->name = 'Carol';
+        $user->email = 'carol@example.com';
+        $user->isActive = false;
+
+        $repository->save($user);
+
+        $insertCount = count($sqlLog);
+
+        // save again with no changes
+        $repository->save($user);
+
+        expect(count($sqlLog))->toBe($insertCount);
+    });
+
+    it('does not execute SQL on save when no properties have changed since last update', function (): void {
+        $sqlLog = [];
+        $connection = createStorageConnection($sqlLog);
+
+        $metadataFactory = new EntityMetadataFactory();
+        $hydrator = new EntityHydrator();
+        $repository = new UserRepository($connection, $metadataFactory, $hydrator);
+
+        $user = new RepositoryTestUser();
+        $user->name = 'Dave';
+        $user->email = 'dave@example.com';
+        $user->isActive = true;
+
+        $repository->save($user);
+
+        $user->name = 'Dave Updated';
+        $repository->save($user);
+
+        $afterUpdateCount = count($sqlLog);
+
+        // save again with no changes
+        $repository->save($user);
+
+        expect(count($sqlLog))->toBe($afterUpdateCount);
+    });
+
+    it('registers original values after insert for entities with non-auto-increment primary keys', function (): void {
+        $connection = createStorageConnection();
+
+        $metadataFactory = new EntityMetadataFactory();
+        $hydrator = new EntityHydrator();
+        $repository = new UserRepository($connection, $metadataFactory, $hydrator);
+
+        $user = new RepositoryTestUser();
+        $user->name = 'Eve';
+        $user->email = 'eve@example.com';
+        $user->isActive = true;
+
+        $repository->save($user);
+
+        $user->name = 'Eve Updated';
+        $repository->save($user);
+
+        $found = $repository->find($user->id);
+
+        expect($found)->not->toBeNull()
+            ->and($found->name)->toBe('Eve Updated');
+    });
 });
 
 // Helper function to create mock connection
@@ -901,8 +1086,9 @@ function createMockConnection(
 
 function createMockQueryBuilder(
     ConnectionInterface $connection,
+    bool &$countCalled = false,
 ): QueryBuilderInterface {
-    return new class ($connection) implements QueryBuilderInterface
+    return new class ($connection, $countCalled) implements QueryBuilderInterface
     {
         private string $table = '';
 
@@ -911,6 +1097,7 @@ function createMockQueryBuilder(
 
         public function __construct(
             private readonly ConnectionInterface $connection,
+            private bool &$countCalled,
         ) {}
 
         public function table(
@@ -953,6 +1140,21 @@ function createMockQueryBuilder(
         public function whereNotNull(
             string $column,
         ): static {
+            return $this;
+        }
+
+        public function whereJsonContains(string $path, mixed $value): static
+        {
+            return $this;
+        }
+
+        public function whereJsonExists(string $path): static
+        {
+            return $this;
+        }
+
+        public function whereJsonMissing(string $path): static
+        {
             return $this;
         }
 
@@ -1010,6 +1212,31 @@ function createMockQueryBuilder(
             return $this;
         }
 
+        public function distinct(): static
+        {
+            return $this;
+        }
+
+        public function union(QueryBuilderInterface $other): static
+        {
+            return $this;
+        }
+
+        public function unionAll(QueryBuilderInterface $other): static
+        {
+            return $this;
+        }
+
+        public function getColumnCount(): int
+        {
+            return 1;
+        }
+
+        public function compileSubquery(array &$bindings): string
+        {
+            return '';
+        }
+
         public function get(): array
         {
             // Use the connection to execute the query
@@ -1042,9 +1269,11 @@ function createMockQueryBuilder(
             return 1;
         }
 
-        public function count(): int
+        public function count(?string $column = null): int
         {
-            return 0;
+            $this->countCalled = true;
+
+            return 7;
         }
 
         public function raw(
@@ -1052,6 +1281,36 @@ function createMockQueryBuilder(
             array $bindings = [],
         ): array {
             return $this->connection->query($sql, $bindings);
+        }
+
+        public function groupBy(string ...$columns): static
+        {
+            return $this;
+        }
+
+        public function having(string $expression, array $bindings = []): static
+        {
+            return $this;
+        }
+
+        public function min(string $column): int|float|null
+        {
+            return null;
+        }
+
+        public function max(string $column): int|float|null
+        {
+            return null;
+        }
+
+        public function sum(string $column): int|float|null
+        {
+            return null;
+        }
+
+        public function avg(string $column): int|float|null
+        {
+            return null;
         }
     };
 }
@@ -1071,3 +1330,725 @@ function createMockQueryBuilderFactory(
         }
     };
 }
+
+/**
+ * Create a stateful in-memory storage connection for regression tests.
+ * Supports INSERT (auto-increment id), UPDATE (dirty fields), and SELECT by id.
+ *
+ * @param array<array{sql: string, bindings: array<mixed>}> $sqlLog Optional reference to log all executed SQL
+ */
+function createStorageConnection(
+    array &$sqlLog = [],
+): ConnectionInterface {
+    $storage = [];
+    $nextId = 1;
+
+    return new class ($storage, $nextId, $sqlLog) implements ConnectionInterface
+    {
+        public function __construct(
+            private array &$storage,
+            private int &$nextId,
+            private array &$sqlLog,
+        ) {}
+
+        public function connect(): void {}
+
+        public function disconnect(): void {}
+
+        public function isConnected(): bool
+        {
+            return true;
+        }
+
+        public function query(
+            string $sql,
+            array $bindings = [],
+        ): array {
+            if (str_contains($sql, 'WHERE id = ?') && count($bindings) > 0) {
+                $id = $bindings[0];
+
+                return isset($this->storage[$id]) ? [$this->storage[$id]] : [];
+            }
+
+            return array_values($this->storage);
+        }
+
+        public function execute(
+            string $sql,
+            array $bindings = [],
+        ): int {
+            $this->sqlLog[] = ['sql' => $sql, 'bindings' => $bindings];
+
+            if (str_starts_with($sql, 'INSERT INTO users')) {
+                $id = $this->nextId++;
+                $this->storage[$id] = [
+                    'id' => $id,
+                    'name' => '',
+                    'email_address' => '',
+                    'is_active' => false,
+                ];
+
+                // Map positional bindings to columns parsed from SQL
+                preg_match('/\(([^)]+)\)\s+VALUES/', $sql, $matches);
+                $columns = array_map('trim', explode(',', $matches[1] ?? ''));
+                foreach ($columns as $i => $col) {
+                    $this->storage[$id][$col] = $bindings[$i] ?? null;
+                }
+
+                return 1;
+            }
+
+            if (str_starts_with($sql, 'UPDATE users')) {
+                preg_match('/WHERE id = \?$/', $sql, $m);
+                $id = end($bindings);
+
+                if (!isset($this->storage[$id])) {
+                    return 0;
+                }
+
+                // Parse SET clause: "col1 = ?, col2 = ?"
+                preg_match('/SET (.+) WHERE/', $sql, $setMatch);
+                $setPairs = array_map('trim', explode(',', $setMatch[1] ?? ''));
+                $updateBindings = array_slice($bindings, 0, count($setPairs));
+
+                foreach ($setPairs as $i => $pair) {
+                    preg_match('/^(\S+)\s*=\s*\?$/', $pair, $colMatch);
+                    $col = $colMatch[1] ?? null;
+
+                    if ($col !== null) {
+                        $this->storage[$id][$col] = $updateBindings[$i];
+                    }
+                }
+
+                return 1;
+            }
+
+            return 0;
+        }
+
+        public function prepare(
+            string $sql,
+        ): StatementInterface {
+            throw new RuntimeException('Not implemented');
+        }
+
+        public function lastInsertId(): int
+        {
+            return $this->nextId - 1;
+        }
+    };
+}
+
+// Helper: create a spy connection that records all SQL and bindings
+function createSpyConnection(array &$sqlLog, array $queryResults = []): ConnectionInterface
+{
+    return new class ($sqlLog, $queryResults) implements ConnectionInterface
+    {
+        private int $queryIndex = 0;
+
+        public function __construct(
+            private array &$sqlLog,
+            private array $queryResults,
+        ) {}
+
+        public function connect(): void {}
+
+        public function disconnect(): void {}
+
+        public function isConnected(): bool
+        {
+            return true;
+        }
+
+        public function query(string $sql, array $bindings = []): array
+        {
+            $this->sqlLog[] = ['sql' => $sql, 'bindings' => $bindings];
+            $result = $this->queryResults[$this->queryIndex] ?? [];
+            $this->queryIndex++;
+
+            return $result;
+        }
+
+        public function execute(string $sql, array $bindings = []): int
+        {
+            $this->sqlLog[] = ['sql' => $sql, 'bindings' => $bindings];
+
+            return 1;
+        }
+
+        public function prepare(string $sql): StatementInterface
+        {
+            throw new RuntimeException('Not implemented');
+        }
+
+        public function lastInsertId(): int
+        {
+            return 0;
+        }
+    };
+}
+
+// Entity with a non-default PK column name for fallback-removal tests
+#[Table('orders')]
+class OrderWithCustomPk extends Entity
+{
+    #[Column(primaryKey: true, autoIncrement: true, name: 'order_uuid')]
+    public ?int $orderUuid = null;
+
+    #[Column]
+    public string $status = 'pending';
+}
+
+class OrderRepository extends Repository
+{
+    protected const string ENTITY_CLASS = OrderWithCustomPk::class;
+
+    public function exposeIsColumnUnique(string $column, mixed $value, ?int $excludeId = null): bool
+    {
+        return $this->isColumnUnique($column, $value, $excludeId);
+    }
+}
+
+it('it no longer falls back to the literal \'id\' column name in Repository::find', function (): void {
+    $sqlLog = [];
+    $connection = createSpyConnection($sqlLog, [[
+        ['order_uuid' => 5, 'status' => 'shipped'],
+    ]]);
+    $repository = new OrderRepository($connection, new EntityMetadataFactory(), new EntityHydrator());
+
+    $repository->find(5);
+
+    expect($sqlLog[0]['sql'])->toContain('order_uuid = ?')
+        ->and($sqlLog[0]['sql'])->not->toContain('WHERE id = ?');
+});
+
+it('it no longer falls back to the literal \'id\' column name in Repository::save update path', function (): void {
+    $sqlLog = [];
+    $connection = createSpyConnection($sqlLog, [
+        [['order_uuid' => 3, 'status' => 'pending']],
+    ]);
+    $repository = new OrderRepository($connection, new EntityMetadataFactory(), new EntityHydrator());
+
+    $entity = $repository->find(3);
+    $entity->status = 'shipped';
+    $repository->save($entity);
+
+    $updateSql = array_values(array_filter($sqlLog, fn ($entry) => str_starts_with($entry['sql'], 'UPDATE')));
+    expect($updateSql[0]['sql'])->toContain('WHERE order_uuid = ?')
+        ->and($updateSql[0]['sql'])->not->toContain('WHERE id = ?');
+});
+
+it('it no longer falls back to the literal \'id\' column name in Repository::delete', function (): void {
+    $sqlLog = [];
+    $connection = createSpyConnection($sqlLog, [
+        [['order_uuid' => 7, 'status' => 'pending']],
+    ]);
+    $repository = new OrderRepository($connection, new EntityMetadataFactory(), new EntityHydrator());
+
+    $entity = $repository->find(7);
+    $repository->delete($entity);
+
+    $deleteSql = array_values(array_filter($sqlLog, fn ($entry) => str_starts_with($entry['sql'], 'DELETE')));
+    expect($deleteSql[0]['sql'])->toContain('WHERE order_uuid = ?')
+        ->and($deleteSql[0]['sql'])->not->toContain('WHERE order_id = ?');
+});
+
+it('it no longer hardcodes \'id\' in Repository::isColumnUnique exclude clause — uses the real PK column', function (): void {
+    $sqlLog = [];
+    $connection = createSpyConnection($sqlLog, [[]], [[]]);
+    $repository = new OrderRepository($connection, new EntityMetadataFactory(), new EntityHydrator());
+
+    $repository->exposeIsColumnUnique('status', 'shipped', 42);
+
+    expect($sqlLog[0]['sql'])->toContain('AND order_uuid != ?')
+        ->and($sqlLog[0]['sql'])->not->toContain('AND status != ?');
+});
+
+it('continues to work for entities that DO declare a primary key explicitly', function (): void {
+    $connection = createMockConnection([
+        [
+            'id' => 1,
+            'name' => 'Alice',
+            'email_address' => 'alice@example.com',
+            'is_active' => 1,
+        ],
+    ]);
+    $metadataFactory = new EntityMetadataFactory();
+    $hydrator = new EntityHydrator();
+    $repository = new UserRepository($connection, $metadataFactory, $hydrator);
+
+    $user = $repository->find(1);
+
+    expect($user)->toBeInstanceOf(RepositoryTestUser::class)
+        ->and($user->id)->toBe(1)
+        ->and($user->name)->toBe('Alice');
+});
+
+it('Repository::count() delegates to the builder without duplicating logic', function (): void {
+    $builderCountCalled = false;
+    $rawQueryCalled = false;
+
+    $connection = new class ($rawQueryCalled) implements ConnectionInterface
+    {
+        public function __construct(private bool &$rawQueryCalled) {}
+
+        public function connect(): void {}
+
+        public function disconnect(): void {}
+
+        public function isConnected(): bool
+        {
+            return true;
+        }
+
+        public function query(
+            string $sql,
+            array $bindings = [],
+        ): array {
+            $this->rawQueryCalled = true;
+
+            return [['aggregate' => 99]];
+        }
+
+        public function execute(
+            string $sql,
+            array $bindings = [],
+        ): int {
+            return 0;
+        }
+
+        public function prepare(
+            string $sql,
+        ): StatementInterface {
+            throw new RuntimeException('Not implemented');
+        }
+
+        public function lastInsertId(): int
+        {
+            return 0;
+        }
+    };
+
+    $queryBuilderFactory = new class ($builderCountCalled, $connection) implements QueryBuilderFactoryInterface
+    {
+        public function __construct(
+            private bool &$builderCountCalled,
+            private readonly ConnectionInterface $connection,
+        ) {}
+
+        public function create(): QueryBuilderInterface
+        {
+            return createMockQueryBuilder($this->connection, $this->builderCountCalled);
+        }
+    };
+
+    $metadataFactory = new EntityMetadataFactory();
+    $hydrator = new EntityHydrator();
+    $repository = new UserRepository($connection, $metadataFactory, $hydrator, $queryBuilderFactory);
+
+    $result = $repository->count();
+
+    // count() routed through the builder, not raw SQL
+    expect($builderCountCalled)->toBeTrue()
+        ->and($rawQueryCalled)->toBeFalse()
+        ->and($result)->toBe(7);
+});
+
+// --- Companion / extender INSERT+UPDATE tests ---
+
+describe('companion insert and update', function (): void {
+    /**
+     * Helper: create a spy connection that records execute() SQL.
+     */
+    function createAccountSpyConnection(array &$sqlLog, int $lastInsertId = 1): ConnectionInterface
+    {
+        return new class ($sqlLog, $lastInsertId) implements ConnectionInterface
+        {
+            public function __construct(
+                private array &$sqlLog,
+                private readonly int $lastInsertId,
+            ) {}
+
+            public function connect(): void {}
+
+            public function disconnect(): void {}
+
+            public function isConnected(): bool
+            {
+                return true;
+            }
+
+            public function query(string $sql, array $bindings = []): array
+            {
+                return [];
+            }
+
+            public function execute(string $sql, array $bindings = []): int
+            {
+                $this->sqlLog[] = ['sql' => $sql, 'bindings' => $bindings];
+
+                return 1;
+            }
+
+            public function prepare(string $sql): StatementInterface
+            {
+                throw new RuntimeException('Not implemented');
+            }
+
+            public function lastInsertId(): int
+            {
+                return $this->lastInsertId;
+            }
+        };
+    }
+
+    it('inserts a parent entity without companions using only parent columns', function (): void {
+        $sqlLog = [];
+        $connection = createAccountSpyConnection($sqlLog);
+        $metadataFactory = new EntityMetadataFactory();
+        $hydrator = new EntityHydrator($metadataFactory);
+        $repository = new AccountRepository($connection, $metadataFactory, $hydrator);
+
+        $account = new RepositoryTestAccount();
+        $account->username = 'alice';
+
+        $repository->save($account);
+
+        expect($sqlLog)->toHaveCount(1)
+            ->and($sqlLog[0]['sql'])->toContain('INSERT INTO accounts')
+            ->and($sqlLog[0]['sql'])->toContain('username')
+            ->and($sqlLog[0]['sql'])->not->toContain('bio')
+            ->and($sqlLog[0]['sql'])->not->toContain('website');
+    });
+
+    it('inserts a parent entity with one attached companion using merged columns in a single INSERT', function (): void {
+        $sqlLog = [];
+        $connection = createAccountSpyConnection($sqlLog);
+        $metadataFactory = new EntityMetadataFactory();
+        $hydrator = new EntityHydrator($metadataFactory);
+        $repository = new AccountRepository($connection, $metadataFactory, $hydrator);
+
+        $account = new RepositoryTestAccount();
+        $account->username = 'bob';
+
+        $profile = new RepositoryTestAccountProfile();
+        $profile->bio = 'Hello';
+        $profile->website = 'https://example.com';
+        $account->attachCompanion($profile);
+
+        $repository->save($account);
+
+        expect($sqlLog)->toHaveCount(1)
+            ->and($sqlLog[0]['sql'])->toContain('INSERT INTO accounts')
+            ->and($sqlLog[0]['sql'])->toContain('username')
+            ->and($sqlLog[0]['sql'])->toContain('bio')
+            ->and($sqlLog[0]['sql'])->toContain('website');
+    });
+
+    it('inserts a parent entity with multiple attached companions using all merged columns', function (): void {
+        $sqlLog = [];
+        $connection = createAccountSpyConnection($sqlLog);
+        $metadataFactory = new EntityMetadataFactory();
+        $hydrator = new EntityHydrator($metadataFactory);
+        $repository = new AccountRepository($connection, $metadataFactory, $hydrator);
+
+        $account = new RepositoryTestAccount();
+        $account->username = 'carol';
+
+        $profile = new RepositoryTestAccountProfile();
+        $profile->bio = 'Bio';
+        $profile->website = 'https://carol.dev';
+        $account->attachCompanion($profile);
+
+        $settings = new RepositoryTestAccountSettings();
+        $settings->notifications = true;
+        $account->attachCompanion($settings);
+
+        $repository->save($account);
+
+        expect($sqlLog)->toHaveCount(1)
+            ->and($sqlLog[0]['sql'])->toContain('INSERT INTO accounts')
+            ->and($sqlLog[0]['sql'])->toContain('username')
+            ->and($sqlLog[0]['sql'])->toContain('bio')
+            ->and($sqlLog[0]['sql'])->toContain('website')
+            ->and($sqlLog[0]['sql'])->toContain('notifications');
+    });
+
+    it('sets the auto-increment id on the parent after insert when companions are attached', function (): void {
+        $sqlLog = [];
+        $connection = createAccountSpyConnection($sqlLog, lastInsertId: 99);
+        $metadataFactory = new EntityMetadataFactory();
+        $hydrator = new EntityHydrator($metadataFactory);
+        $repository = new AccountRepository($connection, $metadataFactory, $hydrator);
+
+        $account = new RepositoryTestAccount();
+        $account->username = 'dave';
+
+        $profile = new RepositoryTestAccountProfile();
+        $profile->bio = 'Dev';
+        $profile->website = 'https://dave.io';
+        $account->attachCompanion($profile);
+
+        expect($account->id)->toBeNull();
+
+        $repository->save($account);
+
+        expect($account->id)->toBe(99);
+    });
+
+    it('registers originalValues on each attached companion after insert', function (): void {
+        $sqlLog = [];
+        $connection = createAccountSpyConnection($sqlLog);
+        $metadataFactory = new EntityMetadataFactory();
+        $hydrator = new EntityHydrator($metadataFactory);
+        $repository = new AccountRepository($connection, $metadataFactory, $hydrator);
+
+        $account = new RepositoryTestAccount();
+        $account->username = 'eve';
+
+        $profile = new RepositoryTestAccountProfile();
+        $profile->bio = 'Original bio';
+        $profile->website = 'https://eve.dev';
+        $account->attachCompanion($profile);
+
+        $repository->save($account);
+
+        // After INSERT, profile should have originalValues registered so it is
+        // not dirty on its own (no net change since insert).
+        $originalValues = $hydrator->getOriginalValues($profile);
+
+        expect($originalValues)->not->toBeEmpty()
+            ->and($originalValues['bio'])->toBe('Original bio');
+    });
+
+    it('updates a parent entity with no companion changes using only parent dirty columns', function (): void {
+        $sqlLog = [];
+        $connection = createAccountSpyConnection($sqlLog);
+        $metadataFactory = new EntityMetadataFactory();
+        $hydrator = new EntityHydrator($metadataFactory);
+        $repository = new AccountRepository($connection, $metadataFactory, $hydrator);
+
+        $account = new RepositoryTestAccount();
+        $account->username = 'frank';
+
+        $profile = new RepositoryTestAccountProfile();
+        $profile->bio = 'Bio';
+        $profile->website = 'https://frank.io';
+        $account->attachCompanion($profile);
+
+        // INSERT
+        $repository->save($account);
+        $sqlLog = [];
+
+        // Only change the parent's field
+        $account->username = 'frank-updated';
+        $repository->save($account);
+
+        expect($sqlLog)->toHaveCount(1)
+            ->and($sqlLog[0]['sql'])->toContain('UPDATE accounts')
+            ->and($sqlLog[0]['sql'])->toContain('username')
+            ->and($sqlLog[0]['sql'])->not->toContain('bio')
+            ->and($sqlLog[0]['sql'])->not->toContain('website');
+    });
+
+    it('updates a parent entity and a dirty companion field in a single UPDATE', function (): void {
+        $sqlLog = [];
+        $connection = createAccountSpyConnection($sqlLog);
+        $metadataFactory = new EntityMetadataFactory();
+        $hydrator = new EntityHydrator($metadataFactory);
+        $repository = new AccountRepository($connection, $metadataFactory, $hydrator);
+
+        $account = new RepositoryTestAccount();
+        $account->username = 'grace';
+
+        $profile = new RepositoryTestAccountProfile();
+        $profile->bio = 'Old bio';
+        $profile->website = 'https://grace.io';
+        $account->attachCompanion($profile);
+
+        $repository->save($account);
+        $sqlLog = [];
+
+        $account->username = 'grace-updated';
+        $profile->bio = 'New bio';
+        $repository->save($account);
+
+        expect($sqlLog)->toHaveCount(1)
+            ->and($sqlLog[0]['sql'])->toContain('UPDATE accounts')
+            ->and($sqlLog[0]['sql'])->toContain('username')
+            ->and($sqlLog[0]['sql'])->toContain('bio');
+    });
+
+    it('skips a companion update when that companion has no dirty properties', function (): void {
+        $sqlLog = [];
+        $connection = createAccountSpyConnection($sqlLog);
+        $metadataFactory = new EntityMetadataFactory();
+        $hydrator = new EntityHydrator($metadataFactory);
+        $repository = new AccountRepository($connection, $metadataFactory, $hydrator);
+
+        $account = new RepositoryTestAccount();
+        $account->username = 'hank';
+
+        $profile = new RepositoryTestAccountProfile();
+        $profile->bio = 'Bio';
+        $profile->website = 'https://hank.io';
+        $account->attachCompanion($profile);
+
+        $repository->save($account);
+        $sqlLog = [];
+
+        // Only change parent, companion is unchanged
+        $account->username = 'hank-updated';
+        $repository->save($account);
+
+        expect($sqlLog)->toHaveCount(1)
+            ->and($sqlLog[0]['sql'])->toContain('UPDATE accounts')
+            ->and($sqlLog[0]['sql'])->not->toContain('bio')
+            ->and($sqlLog[0]['sql'])->not->toContain('website');
+    });
+
+    it('skips a companion update entirely when the companion was never hydrated (rolling deploy)', function (): void {
+        $sqlLog = [];
+        $connection = createAccountSpyConnection($sqlLog);
+        $metadataFactory = new EntityMetadataFactory();
+        $hydrator = new EntityHydrator($metadataFactory);
+        $repository = new AccountRepository($connection, $metadataFactory, $hydrator);
+
+        // Simulate a hydrated account with no companion (rolling deploy: extension
+        // columns not yet in the row)
+        $account = new RepositoryTestAccount();
+        $account->username = 'ivan';
+        $hydrator->registerOriginalValues($account, $metadataFactory->parse(RepositoryTestAccount::class));
+        // Manually set id so it's treated as existing (non-new)
+        $reflection = new ReflectionClass($account);
+        $reflection->getProperty('id')->setValue($account, 5);
+
+        $sqlLog = [];
+
+        // Attach a never-hydrated companion (no originalValues)
+        $profile = new RepositoryTestAccountProfile();
+        $profile->bio = 'Bio';
+        $profile->website = 'https://ivan.io';
+        $account->attachCompanion($profile);
+
+        // Change only parent
+        $account->username = 'ivan-updated';
+        $repository->save($account);
+
+        // Should only update the parent field; companion has no originalValues → skipped
+        expect($sqlLog)->toHaveCount(1)
+            ->and($sqlLog[0]['sql'])->toContain('UPDATE accounts')
+            ->and($sqlLog[0]['sql'])->toContain('username')
+            ->and($sqlLog[0]['sql'])->not->toContain('bio');
+    });
+
+    it('preserves WHERE clause using parent primary key when companions are present', function (): void {
+        $sqlLog = [];
+        $connection = createAccountSpyConnection($sqlLog, lastInsertId: 42);
+        $metadataFactory = new EntityMetadataFactory();
+        $hydrator = new EntityHydrator($metadataFactory);
+        $repository = new AccountRepository($connection, $metadataFactory, $hydrator);
+
+        $account = new RepositoryTestAccount();
+        $account->username = 'judy';
+
+        $profile = new RepositoryTestAccountProfile();
+        $profile->bio = 'Bio';
+        $profile->website = 'https://judy.io';
+        $account->attachCompanion($profile);
+
+        $repository->save($account);
+        $sqlLog = [];
+
+        $account->username = 'judy-updated';
+        $profile->bio = 'New bio';
+        $repository->save($account);
+
+        expect($sqlLog)->toHaveCount(1)
+            ->and($sqlLog[0]['sql'])->toContain('WHERE id = ?')
+            ->and($sqlLog[0]['bindings'])->toContain(42);
+    });
+
+    it('updates originalValues snapshot on each companion after update', function (): void {
+        $sqlLog = [];
+        $connection = createAccountSpyConnection($sqlLog);
+        $metadataFactory = new EntityMetadataFactory();
+        $hydrator = new EntityHydrator($metadataFactory);
+        $repository = new AccountRepository($connection, $metadataFactory, $hydrator);
+
+        $account = new RepositoryTestAccount();
+        $account->username = 'kate';
+
+        $profile = new RepositoryTestAccountProfile();
+        $profile->bio = 'First bio';
+        $profile->website = 'https://kate.io';
+        $account->attachCompanion($profile);
+
+        $repository->save($account);
+
+        $profile->bio = 'Second bio';
+        $repository->save($account);
+
+        // After the UPDATE the companion's snapshot should be refreshed; a second
+        // save with no further change should produce no SQL.
+        $sqlLog = [];
+        $repository->save($account);
+
+        expect($sqlLog)->toBeEmpty();
+    });
+
+    it('inserts a parent with a freshly-attached (never-hydrated) companion and registers original values on the companion after INSERT', function (): void {
+        $sqlLog = [];
+        $connection = createAccountSpyConnection($sqlLog, lastInsertId: 7);
+        $metadataFactory = new EntityMetadataFactory();
+        $hydrator = new EntityHydrator($metadataFactory);
+        $repository = new AccountRepository($connection, $metadataFactory, $hydrator);
+
+        $account = new RepositoryTestAccount();
+        $account->username = 'leo';
+
+        $profile = new RepositoryTestAccountProfile();
+        $profile->bio = 'Fresh bio';
+        $profile->website = 'https://leo.dev';
+        $account->attachCompanion($profile);
+
+        $repository->save($account);
+
+        // The companion was freshly constructed — after INSERT it must have
+        // originalValues so subsequent updates diff correctly.
+        $originalValues = $hydrator->getOriginalValues($profile);
+
+        expect($originalValues)->not->toBeEmpty()
+            ->and($originalValues['bio'])->toBe('Fresh bio')
+            ->and($originalValues['website'])->toBe('https://leo.dev');
+    });
+
+    it('throws RepositoryException when constructing a Repository whose ENTITY_CLASS is an extender', function (): void {
+        $ignored = [];
+        $connection = createAccountSpyConnection($ignored);
+        $metadataFactory = new EntityMetadataFactory();
+        $hydrator = new EntityHydrator($metadataFactory);
+
+        expect(fn () => new ExtenderRepository($connection, $metadataFactory, $hydrator))
+            ->toThrow(RepositoryException::class, 'has no primary key of its own');
+    });
+
+    it('throws BatchInsertException when insertBatch is called with entities that have companions attached', function (): void {
+        $ignored = [];
+        $connection = createAccountSpyConnection($ignored);
+        $metadataFactory = new EntityMetadataFactory();
+        $hydrator = new EntityHydrator($metadataFactory);
+        $repository = new AccountRepository($connection, $metadataFactory, $hydrator);
+
+        $account = new RepositoryTestAccount();
+        $account->username = 'mike';
+
+        $profile = new RepositoryTestAccountProfile();
+        $profile->bio = 'Bio';
+        $profile->website = 'https://mike.io';
+        $account->attachCompanion($profile);
+
+        expect(fn () => $repository->insertBatch([$account]))
+            ->toThrow(BatchInsertException::class, 'companions');
+    });
+});

@@ -3,6 +3,5 @@
 declare(strict_types=1);
 
 return [
-    'enabled' => true,
-    'concurrency' => 10,
+    'shutdown_timeout' => (int) ($_ENV['AMPHP_SHUTDOWN_TIMEOUT'] ?? 30),
 ];

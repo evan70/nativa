@@ -4,36 +4,43 @@ declare(strict_types=1);
 
 namespace Marko\DevServer\Detection;
 
-class FrontendDetector
+readonly class FrontendDetector
 {
-    private const array LOCK_FILES = [
-        'bun.lockb' => 'bun',
-        'pnpm-lock.yaml' => 'pnpm',
-        'yarn.lock' => 'yarn',
-        'package-lock.json' => 'npm',
-    ];
-
-    public function __construct(private readonly string $projectRoot) {}
+    public function __construct(
+        private string $projectRoot,
+    ) {}
 
     public function detect(): ?string
     {
-        $packageJsonPath = $this->projectRoot . '/package.json';
-        if (!file_exists($packageJsonPath)) {
+        $packageJson = $this->projectRoot . '/package.json';
+
+        if (!file_exists($packageJson)) {
             return null;
         }
 
-        $packageJson = json_decode(file_get_contents($packageJsonPath), true);
-        if (!isset($packageJson['scripts']['dev'])) {
+        $data = json_decode(file_get_contents($packageJson), true);
+
+        if (!isset($data['scripts']['dev'])) {
             return null;
         }
 
-        foreach (self::LOCK_FILES as $lockFile => $manager) {
-            if (file_exists($this->projectRoot . '/' . $lockFile)) {
-                return "{$manager} run dev";
-            }
+        return $this->buildCommand();
+    }
+
+    private function buildCommand(): string
+    {
+        if (file_exists($this->projectRoot . '/bun.lockb')) {
+            return 'bun run dev';
         }
 
-        // Default to npm if no lock file found but package.json exists
+        if (file_exists($this->projectRoot . '/pnpm-lock.yaml')) {
+            return 'pnpm run dev';
+        }
+
+        if (file_exists($this->projectRoot . '/yarn.lock')) {
+            return 'yarn dev';
+        }
+
         return 'npm run dev';
     }
 }

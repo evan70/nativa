@@ -1,6 +1,14 @@
 # marko/view
 
-View and template rendering interface using native PHP templates.
+View and template rendering interface -- defines how controllers render templates, not which engine is used.
+
+## Installation
+
+```bash
+composer require marko/view
+```
+
+Note: You also need a view driver. Install `marko/view-latte` for Latte template support.
 
 ## Quick Example
 

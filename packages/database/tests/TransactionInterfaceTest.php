@@ -14,16 +14,13 @@ describe('TransactionInterface', function (): void {
             ->and($reflection->hasMethod('rollback'))->toBeTrue();
 
         $begin = $reflection->getMethod('beginTransaction');
-        $returnType = $begin->getReturnType();
-        expect($returnType instanceof ReflectionNamedType ? $returnType->getName() : null)->toBe('void');
+        expect($begin->getReturnType()?->getName())->toBe('void');
 
         $commit = $reflection->getMethod('commit');
-        $returnType = $commit->getReturnType();
-        expect($returnType instanceof ReflectionNamedType ? $returnType->getName() : null)->toBe('void');
+        expect($commit->getReturnType()?->getName())->toBe('void');
 
         $rollback = $reflection->getMethod('rollback');
-        $returnType = $rollback->getReturnType();
-        expect($returnType instanceof ReflectionNamedType ? $returnType->getName() : null)->toBe('void');
+        expect($rollback->getReturnType()?->getName())->toBe('void');
     });
 
     it('defines TransactionInterface with transaction callback method', function (): void {
@@ -33,12 +30,9 @@ describe('TransactionInterface', function (): void {
 
         $transaction = $reflection->getMethod('transaction');
         $params = $transaction->getParameters();
-        $returnType = $transaction->getReturnType();
-        expect($returnType instanceof ReflectionNamedType ? $returnType->getName() : null)->toBe('mixed')
+        expect($transaction->getReturnType()?->getName())->toBe('mixed')
             ->and($params)->toHaveCount(1)
-            ->and($params[0]->getName())->toBe('callback');
-        
-        $paramType = $params[0]->getType();
-        expect($paramType instanceof ReflectionNamedType ? $paramType->getName() : null)->toBe('callable');
+            ->and($params[0]->getName())->toBe('callback')
+            ->and($params[0]->getType()?->getName())->toBe('callable');
     });
 });

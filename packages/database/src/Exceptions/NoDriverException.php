@@ -11,7 +11,6 @@ class NoDriverException extends MarkoException
     private const array DRIVER_PACKAGES = [
         'marko/database-mysql',
         'marko/database-pgsql',
-        'marko/sqlite',
     ];
 
     public static function noDriverInstalled(): self

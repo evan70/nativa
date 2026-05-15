@@ -22,10 +22,7 @@ class ProjectFinder
         }
 
         while (true) {
-            if (
-                is_dir($path . '/vendor/marko/core')
-                || is_dir($path . '/packages/core')
-            ) {
+            if (is_dir($path . '/vendor/marko/core')) {
                 return $path;
             }
 

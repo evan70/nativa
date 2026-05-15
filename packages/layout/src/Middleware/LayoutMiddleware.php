@@ -24,11 +24,6 @@ readonly class LayoutMiddleware implements MiddlewareInterface
         Request $request,
         callable $next,
     ): Response {
-        // Skip layout for HTMX requests - they return partial HTML for swap
-        if ($request->header('HX-Request') === 'true') {
-            return $next($request);
-        }
-
         $matched = $this->routeMatcher->match($request->method(), $request->path());
 
         if ($matched === null) {
