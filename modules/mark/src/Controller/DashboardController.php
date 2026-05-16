@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Marko\Cardboard\Controller;
+namespace Marko\Mark\Controller;
 
 use App\Blog\Database\BlogConnection;
-use App\Database\NativaConnection;
 use App\Portfolio\Database\PortfolioConnection;
+use Marko\Mark\Database\MarkConnection;
 use Marko\Admin\Contracts\AdminSectionRegistryInterface;
 use Marko\Mark\Middleware\MarkMiddleware;
 use Marko\Authentication\Contracts\GuardInterface;
@@ -22,7 +22,7 @@ class DashboardController
         private readonly ViewInterface $view,
         private readonly AdminSectionRegistryInterface $sectionRegistry,
         private readonly GuardInterface $guard,
-        private readonly NativaConnection $nativaConnection,
+        private readonly MarkConnection $markConnection,
         private readonly BlogConnection $blogConnection,
         private readonly PortfolioConnection $portfolioConnection,
     ) {}
@@ -34,8 +34,9 @@ class DashboardController
     {
         $items = [];
         foreach ($this->sectionRegistry->all() as $section) {
+            $id = $section->getId();
             $items[] = [
-                'url' => '/mark' . ($section->getSlug() !== 'dashboard' ? '/' . $section->getSlug() : ''),
+                'url' => '/mark' . ($id !== 'dashboard' ? '/' . $id : ''),
                 'label' => $section->getLabel(),
                 'icon' => $section->getIcon(),
                 'active' => false,
@@ -49,18 +50,46 @@ class DashboardController
     public function index(
         Request $request,
     ): Response {
+        error_log('[Dashboard] Accessing mark dashboard');
+        
         $sections = $this->sectionRegistry->all();
-        $nativaDb = $this->nativaConnection->getConnection();
+        $markDb = $this->markConnection->getConnection();
         $articlesDb = $this->blogConnection->getConnection();
         $portfolioDb = $this->portfolioConnection->getConnection();
 
         // Real data from database
-        $userCount = (int) ($nativaDb->query('SELECT COUNT(*) as count FROM mark_users')[0]['count'] ?? 0);
-        $articleCount = (int) ($articlesDb->query('SELECT COUNT(*) as count FROM articles')[0]['count'] ?? 0);
-        $portfolioCount = (int) ($portfolioDb->query('SELECT COUNT(*) as count FROM portfolio_items')[0]['count'] ?? 0);
-        $recentUsers = $nativaDb->query(
-            'SELECT id, email, name, "createdAt" FROM mark_users ORDER BY "createdAt" DESC LIMIT 3'
-        );
+        try {
+            /** @var array<array{count: int|string}> $userCountResult */
+            $userCountResult = $markDb->query('SELECT COUNT(*) as count FROM mark_users');
+            $userCount = (int) ($userCountResult[0]['count'] ?? 0);
+            
+            /** @var array<array{id: int|string, email: string, name: string, createdAt: string}> $recentUsers */
+            $recentUsers = $markDb->query(
+                'SELECT id, email, name, "createdAt" FROM mark_users ORDER BY "createdAt" DESC LIMIT 3'
+            );
+        } catch (\Exception $e) {
+            error_log('[Dashboard] Error fetching users: ' . $e->getMessage());
+            $userCount = 0;
+            $recentUsers = [];
+        }
+
+        try {
+            /** @var array<array{count: int|string}> $articleCountResult */
+            $articleCountResult = $articlesDb->query('SELECT COUNT(*) as count FROM articles');
+            $articleCount = (int) ($articleCountResult[0]['count'] ?? 0);
+        } catch (\Exception $e) {
+            error_log('[Dashboard] Error fetching articles: ' . $e->getMessage());
+            $articleCount = 0;
+        }
+
+        try {
+            /** @var array<array{count: int|string}> $portfolioCountResult */
+            $portfolioCountResult = $portfolioDb->query('SELECT COUNT(*) as count FROM portfolio_items');
+            $portfolioCount = (int) ($portfolioCountResult[0]['count'] ?? 0);
+        } catch (\Exception $e) {
+            error_log('[Dashboard] Error fetching portfolio: ' . $e->getMessage());
+            $portfolioCount = 0;
+        }
 
         error_log('[Dashboard] Real data: users=' . $userCount . ', articles=' . $articleCount . ', portfolio=' . $portfolioCount);
 

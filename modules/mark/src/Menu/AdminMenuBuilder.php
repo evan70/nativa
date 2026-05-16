@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Marko\Cardboard\Menu;
+namespace Marko\Mark\Menu;
 
 use Marko\Admin\Contracts\AdminSectionInterface;
 use Marko\Admin\Contracts\AdminSectionRegistryInterface;

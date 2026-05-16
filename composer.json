@@ -35,7 +35,6 @@
             "Marko\\DevServer\\": "packages/dev-server/src/",
             "Marko\\Testing\\": "packages/testing/src/",
             "Marko\\Admin\\": "packages/admin/src/",
-            "Marko\\Cardboard\\": "modules/cardboard/src/",
             "App\\Blog\\": "modules/blog/src/",
             "Marko\\Mark\\": "modules/mark/src/",
             "App\\Htmx\\": "modules/htmx/src/",

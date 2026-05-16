@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Marko\Cardboard\Controller;
+namespace Marko\Mark\Controller;
 
 use Marko\Admin\Config\AdminConfigInterface;
 use Marko\Authentication\Contracts\GuardInterface;

@@ -11,7 +11,7 @@ return [
     // Hodnota = názov databázy (bez .db prípony)
     'modules' => [
         'blog' => 'articles',
-        'cardboard' => 'cardboard',
+        'mark' => 'nativa',
         'portfolio' => 'portfolio',
         'nativa' => 'nativa',
         'database-modular' => 'database-modular',

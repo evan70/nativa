@@ -19,11 +19,12 @@ return [
         ErrorHandlerInterface::class => AdvancedErrorHandler::class,
         // Override TemplateResolver to check app templates first, then modules
         TemplateResolverInterface::class => function (ContainerInterface $container): TemplateResolverInterface {
-            /** @var \Marko\View\ModuleTemplateResolver $moduleResolver */
-            $moduleResolver = new \Marko\View\ModuleTemplateResolver(
-                $container->get(\Marko\Core\Module\ModuleRepositoryInterface::class),
-                $container->get(\Marko\View\ViewConfig::class)
-            );
+            /** @var \Marko\Core\Module\ModuleRepositoryInterface $repository */
+            $repository = $container->get(\Marko\Core\Module\ModuleRepositoryInterface::class);
+            /** @var \Marko\View\ViewConfig $config */
+            $config = $container->get(\Marko\View\ViewConfig::class);
+            
+            $moduleResolver = new \Marko\View\ModuleTemplateResolver($repository, $config);
             return new AppTemplateResolver($moduleResolver);
         },
         AssetAwareViewInterface::class => function (ContainerInterface $container): AssetAwareViewInterface {
@@ -43,7 +44,5 @@ return [
             return $view;
         },
     ],
-    'preferences' => [
-        UserProviderInterface::class => DefaultUserProvider::class,
-    ],
+    'preferences' => [],
 ];

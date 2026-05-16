@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Marko\Cardboard\Command;
+namespace Marko\Mark\Command;
 
 use Marko\Core\Attributes\Command;
 use Marko\Core\Command\CommandInterface;

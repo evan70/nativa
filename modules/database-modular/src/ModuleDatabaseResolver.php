@@ -118,7 +118,6 @@ class ModuleConnection implements ConnectionInterface
     {
         // Already initialized - use shared instance
         if (self::$initialized) {
-            $this->memcached = self::$sharedMemcached;
             return;
         }
 
@@ -156,7 +155,6 @@ class ModuleConnection implements ConnectionInterface
             self::$sharedMemcached->setOption(Memcached::OPT_PREFIX_KEY, $prefix);
             
             self::$initialized = true;
-            $this->memcached = self::$sharedMemcached;
             AppLogger::info('[ModuleConnection] Memcached connected to ' . $host . ':' . $port . ' (TTL: ' . self::$cacheTtl . 's)');
         } catch (\Exception $e) {
             AppLogger::error('[ModuleConnection] Memcached connection failed: ' . $e->getMessage());
@@ -164,23 +162,9 @@ class ModuleConnection implements ConnectionInterface
         }
     }
 
-    private function getMemcached(): ?Memcached
-    {
-        return self::$sharedMemcached;
-    }
-
-    private function isCacheEnabled(): bool
-    {
-        return self::$cacheEnabled;
-    }
-
-    private function getCacheTtl(): int
-    {
-        return self::$cacheTtl;
-    }
-
     /**
      * Generate cache key from SQL and params
+     * @param array<string, mixed> $params
      */
     private function getCacheKey(string $sql, array $params): string
     {
@@ -189,6 +173,7 @@ class ModuleConnection implements ConnectionInterface
 
     /**
      * Get cached result if available
+     * @return array<array<string, mixed>>|null
      */
     private function getCached(string $key): ?array
     {
@@ -197,8 +182,9 @@ class ModuleConnection implements ConnectionInterface
         }
 
         $result = self::$sharedMemcached->get($key);
-        if (self::$sharedMemcached->getResultCode() === Memcached::RES_SUCCESS) {
+        if (self::$sharedMemcached->getResultCode() === Memcached::RES_SUCCESS && is_array($result)) {
             AppLogger::debug('[ModuleConnection] Cache HIT: ' . $key);
+            /** @var array<array<string, mixed>> $result */
             return $result;
         }
         
@@ -208,6 +194,7 @@ class ModuleConnection implements ConnectionInterface
 
     /**
      * Store result in cache
+     * @param array<mixed> $data
      */
     private function setCached(string $key, array $data, ?int $ttl = null): void
     {
@@ -222,6 +209,7 @@ class ModuleConnection implements ConnectionInterface
 
     /**
      * Invalidate cache for a specific key
+     * @param array<string, mixed> $params
      */
     public function invalidateCache(string $sql, array $params = []): void
     {
@@ -242,9 +230,6 @@ class ModuleConnection implements ConnectionInterface
         AppLogger::warning('[ModuleConnection] Cache flush requested (consider using version key)');
     }
     
-    /**
-     * @param array<string, mixed> $params
-     */
     /**
      * @param array<string, mixed> $params
      * @return array<array<string, mixed>>

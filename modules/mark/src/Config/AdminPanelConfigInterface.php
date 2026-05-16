@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Marko\Cardboard\Config;
+namespace Marko\Mark\Config;
 
 interface AdminPanelConfigInterface
 {

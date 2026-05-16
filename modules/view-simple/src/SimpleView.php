@@ -80,6 +80,30 @@ class SimpleView implements ViewInterface
         return $this->sections[$name] ?? '';
     }
 
+    /**
+     * Include a partial template
+     * @param array<string, mixed> $data
+     */
+    public function include(string $template, array $data = []): string
+    {
+        $path = $this->resolver->resolve($template);
+        if (!file_exists($path)) {
+            throw TemplateNotFoundException::forTemplate($template, [$path]);
+        }
+
+        extract($this->layoutData, EXTR_SKIP);
+        extract($data, EXTR_OVERWRITE);
+
+        ob_start();
+        try {
+            include $path;
+            return ob_get_clean();
+        } catch (\Throwable $e) {
+            ob_end_clean();
+            throw $e;
+        }
+    }
+
     public function e(?string $value): string
     {
         return htmlspecialchars($value ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');

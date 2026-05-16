@@ -25,7 +25,7 @@ This distinction is critical to how Nativa works:
 | Directory | Contents | Ownership | Updates |
 |-----------|----------|-----------|---------|
 | `packages/` | **Marko Framework core** — runtime engine, routing, database, view, CLI, admin, etc. | Upstream (Marko) | `composer update` — keep on latest |
-| `modules/` | **Nativa custom code** — blog, cardboard, htmx, database drivers, etc. | **Ours** — all rewrites and new features go here |
+| `modules/` | **Nativa custom code** — blog, mark (auth + admin UI), htmx, database drivers, etc. | **Ours** — all rewrites and new features go here |
 
 ### Rules
 
