@@ -45,19 +45,21 @@ $origin .= '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
     <link rel="icon" type="image/svg+xml" href="/dist/favicon.svg" />
     
     <!-- Critical font preloads (prevent FOUT) -->
-    <link rel="preload" as="font" href="<?= View::fontUrl('Inter-Regular') ?>" crossorigin type="font/woff2">
-    <link rel="preload" as="font" href="<?= View::fontUrl('PlayfairDisplay-Bold') ?>" crossorigin type="font/woff2">
+    <link rel="preload" as="font" href="<?= View::fontUrl('Inter-Regular') ?>" crossorigin>
     
-    <!-- LCP image preload with responsive variants -->
+    <!-- LCP image preload (imagesrcset for responsive matching) -->
     <?php if (!empty(View::$lcpImage)): ?>
         <?php
-        // Generate responsive LCP URLs for Cloudinary
+        // Generate responsive LCP URLs matching hero template (f_webp, not f_auto)
         $lcpBase = View::$lcpImage;
-        $lcpDesktop = str_replace('/upload/', '/upload/f_auto,q_auto,w_1920/', $lcpBase);
-        $lcpMobile = str_replace('/upload/', '/upload/f_auto,q_auto,w_640/', $lcpBase);
+        $lcpDesktop = str_replace('/upload/', '/upload/f_webp,q_auto,w_1920/', $lcpBase);
+        $lcpMobile = str_replace('/upload/', '/upload/f_webp,q_auto,w_640/', $lcpBase);
         ?>
-        <link rel="preload" as="image" href="<?= $lcpDesktop ?>" fetchpriority="high" media="(min-width: 769px)">
-        <link rel="preload" as="image" href="<?= $lcpMobile ?>" fetchpriority="high" media="(max-width: 768px)">
+        <link rel="preload" as="image"
+              fetchpriority="high"
+              imagesrcset="<?= $lcpMobile ?> 640w, <?= $lcpDesktop ?> 1920w"
+              imagesizes="100vw"
+              href="<?= $lcpDesktop ?>">
     <?php endif; ?>
     
     <!-- Init first (theme FOUC prevention) -->
