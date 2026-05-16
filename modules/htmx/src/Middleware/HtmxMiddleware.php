@@ -18,6 +18,8 @@ readonly class HtmxMiddleware implements MiddlewareInterface
             return $response;
         }
 
-        return $response->withHeader('Vary', 'HX-Request');
+        header('Vary: HX-Request');
+
+        return $response;
     }
 }
