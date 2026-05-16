@@ -162,7 +162,7 @@ class ArticleController
         if ($hasMore) {
             $nextPage = $page + 1;
             $loadMore = <<<HTML
-                <div class="load-more-container" id="load-more-container">
+                <div class="load-more-container">
                     <button
                         class="btn btn--secondary load-more-btn"
                         hx-get="/articles/load?page={$nextPage}"
@@ -184,7 +184,10 @@ class ArticleController
             HTML;
         }
 
-        return $items . $loadMore;
+        // OOB swap: replace the load-more-section so button disappears or updates
+        $oob = '<div id="load-more-section" hx-swap-oob="true">' . $loadMore . '</div>';
+
+        return $items . $oob;
     }
 
     private function h(string $s): string
