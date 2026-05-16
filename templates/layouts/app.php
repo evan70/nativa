@@ -77,7 +77,7 @@ $origin .= '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
     <nav class="navbar" data-section="navbar">
         <div class="navbar__container container">
             <a href="/" class="navbar__brand">
-                <svg class="navbar__logo" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <svg class="navbar__logo" width="24" height="24" viewBox="0 0 24 24" fill="#ffffff">
                     <path d="M12 2L2 22h20L12 2z"/>
                 </svg>
                 Nativa

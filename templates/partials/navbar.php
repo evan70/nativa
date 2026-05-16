@@ -9,7 +9,7 @@
                 </svg>
             </button>
             <a href="/mark" class="navbar__brand">
-                <svg class="navbar__logo" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <svg class="navbar__logo" width="24" height="24" viewBox="0 0 24 24" fill="#ffffff">
                     <path d="M12 2L2 22h20L12 2z"/>
                 </svg>
                 Marko Admin
