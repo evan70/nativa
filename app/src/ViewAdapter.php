@@ -43,9 +43,6 @@ class ViewAdapter implements ViewInterface, AssetAwareViewInterface
     {
         $templatePath = str_replace('.', '/', $template);
         
-        // DEBUG: Log page detection
-        $detectedPage = PageLayout::detect($templatePath);
-        error_log('[ViewAdapter] template=' . $templatePath . ' detected=' . $detectedPage);
 
         // Set current template and page for asset resolution
         View::$currentTemplate = $templatePath;
