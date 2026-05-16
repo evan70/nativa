@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\AppLogger;
 use App\Database\NativaConnection;
 use App\DatabaseModular\Contracts\ModuleDatabaseResolverInterface;
 use App\DatabaseModular\ModuleDatabaseResolver;
@@ -17,7 +18,7 @@ return [
             $mapping = $config->getArray('database.modules');
             $storagePath = dirname(__DIR__, 2) . '/storage/data';
 
-            error_log('[DatabaseModular] Initialized with mapping: ' . json_encode($mapping));
+            AppLogger::debug('[DatabaseModular] Initialized with mapping: ' . json_encode($mapping));
 
             return new ModuleDatabaseResolver($mapping, $storagePath);
         },
@@ -25,7 +26,7 @@ return [
         // NativaConnection - for system database access
         // Note: resolver is singleton, so this closure is called only once
         NativaConnection::class => function (ContainerInterface $container): NativaConnection {
-            error_log('[DatabaseModular] Binding NativaConnection (singleton)');
+            AppLogger::debug('[DatabaseModular] Binding NativaConnection (singleton)');
             
             // Get already-initialized singleton resolver
             $resolver = $container->get(ModuleDatabaseResolverInterface::class);

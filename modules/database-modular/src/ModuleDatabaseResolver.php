@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\DatabaseModular;
 
+use App\AppLogger;
 use App\DatabaseModular\Contracts\ModuleDatabaseResolverInterface;
 use Marko\Database\Connection\ConnectionInterface;
 use Marko\Database\Connection\StatementInterface;
@@ -99,9 +100,10 @@ class ModuleDatabaseResolver implements ModuleDatabaseResolverInterface
 class ModuleConnection implements ConnectionInterface
 {
     private ?PDO $pdo = null;
-    private ?Memcached $memcached = null;
-    private int $cacheTtl = 300; // 5 minutes default
-    private bool $cacheEnabled = true;
+    private static ?Memcached $sharedMemcached = null;  // Shared across all instances
+    private static bool $cacheEnabled = true;
+    private static int $cacheTtl = 300;  // Shared TTL
+    private static bool $initialized = false;
     
     public function __construct(PDO $pdo)
     {
@@ -110,22 +112,28 @@ class ModuleConnection implements ConnectionInterface
     }
 
     /**
-     * Initialize memcached connection
+     * Initialize memcached connection (static - only once)
      */
     private function initMemcached(): void
     {
+        // Already initialized - use shared instance
+        if (self::$initialized) {
+            $this->memcached = self::$sharedMemcached;
+            return;
+        }
+
         // Check if Memcached extension is available
         if (!class_exists('Memcached')) {
-            error_log('[ModuleConnection] Memcached extension not installed - caching disabled');
-            $this->cacheEnabled = false;
+            AppLogger::info('[ModuleConnection] Memcached extension not installed - caching disabled');
+            self::$cacheEnabled = false;
             return;
         }
 
         // Check if caching is enabled via environment variable
         $cacheEnabled = getenv('CACHE_ENABLED');
         if ($cacheEnabled !== false && strtolower($cacheEnabled) === 'false') {
-            error_log('[ModuleConnection] Caching disabled via CACHE_ENABLED env');
-            $this->cacheEnabled = false;
+            AppLogger::info('[ModuleConnection] Caching disabled via CACHE_ENABLED env');
+            self::$cacheEnabled = false;
             return;
         }
 
@@ -136,22 +144,39 @@ class ModuleConnection implements ConnectionInterface
         // Get TTL from environment (default 5 minutes)
         $envTtl = getenv('CACHE_TTL');
         if ($envTtl !== false) {
-            $this->cacheTtl = (int)$envTtl;
+            self::$cacheTtl = (int)$envTtl;
         }
 
         try {
-            $this->memcached = new Memcached();
-            $this->memcached->addServer($host, $port);
-            $this->memcached->setOption(Memcached::OPT_BINARY_PROTOCOL, true);
+            self::$sharedMemcached = new Memcached();
+            self::$sharedMemcached->addServer($host, $port);
+            self::$sharedMemcached->setOption(Memcached::OPT_BINARY_PROTOCOL, true);
             
             // Set prefix for namespace isolation
-            $this->memcached->setOption(Memcached::OPT_PREFIX_KEY, $prefix);
+            self::$sharedMemcached->setOption(Memcached::OPT_PREFIX_KEY, $prefix);
             
-            error_log('[ModuleConnection] Memcached connected to ' . $host . ':' . $port . ' (TTL: ' . $this->cacheTtl . 's)');
+            self::$initialized = true;
+            $this->memcached = self::$sharedMemcached;
+            AppLogger::info('[ModuleConnection] Memcached connected to ' . $host . ':' . $port . ' (TTL: ' . self::$cacheTtl . 's)');
         } catch (\Exception $e) {
-            error_log('[ModuleConnection] Memcached connection failed: ' . $e->getMessage());
-            $this->cacheEnabled = false;
+            AppLogger::error('[ModuleConnection] Memcached connection failed: ' . $e->getMessage());
+            self::$cacheEnabled = false;
         }
+    }
+
+    private function getMemcached(): ?Memcached
+    {
+        return self::$sharedMemcached;
+    }
+
+    private function isCacheEnabled(): bool
+    {
+        return self::$cacheEnabled;
+    }
+
+    private function getCacheTtl(): int
+    {
+        return self::$cacheTtl;
     }
 
     /**
@@ -167,17 +192,17 @@ class ModuleConnection implements ConnectionInterface
      */
     private function getCached(string $key): ?array
     {
-        if (!$this->cacheEnabled || !$this->memcached) {
+        if (!self::$cacheEnabled || !self::$sharedMemcached) {
             return null;
         }
 
-        $result = $this->memcached->get($key);
-        if ($this->memcached->getResultCode() === Memcached::RES_SUCCESS) {
-            error_log('[ModuleConnection] Cache HIT: ' . $key);
+        $result = self::$sharedMemcached->get($key);
+        if (self::$sharedMemcached->getResultCode() === Memcached::RES_SUCCESS) {
+            AppLogger::debug('[ModuleConnection] Cache HIT: ' . $key);
             return $result;
         }
         
-        error_log('[ModuleConnection] Cache MISS: ' . $key);
+        AppLogger::debug('[ModuleConnection] Cache MISS: ' . $key);
         return null;
     }
 
@@ -186,13 +211,13 @@ class ModuleConnection implements ConnectionInterface
      */
     private function setCached(string $key, array $data, ?int $ttl = null): void
     {
-        if (!$this->cacheEnabled || !$this->memcached) {
+        if (!self::$cacheEnabled || !self::$sharedMemcached) {
             return;
         }
 
-        $ttl = $ttl ?? $this->cacheTtl;
-        $this->memcached->set($key, $data, $ttl);
-        error_log('[ModuleConnection] Cached: ' . $key . ' (TTL: ' . $ttl . 's)');
+        $ttl = $ttl ?? self::$cacheTtl;
+        self::$sharedMemcached->set($key, $data, $ttl);
+        AppLogger::debug('[ModuleConnection] Cached: ' . $key . ' (TTL: ' . $ttl . 's)');
     }
 
     /**
@@ -201,9 +226,9 @@ class ModuleConnection implements ConnectionInterface
     public function invalidateCache(string $sql, array $params = []): void
     {
         $key = $this->getCacheKey($sql, $params);
-        if ($this->memcached) {
-            $this->memcached->delete($key);
-            error_log('[ModuleConnection] Cache invalidated: ' . $key);
+        if (self::$sharedMemcached) {
+            self::$sharedMemcached->delete($key);
+            AppLogger::debug('[ModuleConnection] Cache invalidated: ' . $key);
         }
     }
 
@@ -214,7 +239,7 @@ class ModuleConnection implements ConnectionInterface
     {
         // With prefix key, we can't easily flush - would need to iterate and delete
         // For now, just log that we should consider a version key approach
-        error_log('[ModuleConnection] Cache flush requested (consider using version key)');
+        AppLogger::warning('[ModuleConnection] Cache flush requested (consider using version key)');
     }
     
     /**
@@ -270,7 +295,7 @@ class ModuleConnection implements ConnectionInterface
             str_starts_with($sqlUpper, 'UPDATE') || 
             str_starts_with($sqlUpper, 'DELETE')) {
             $this->invalidateAllCache();
-            error_log('[ModuleConnection] Cache invalidated due to: ' . $sqlUpper);
+            AppLogger::debug('[ModuleConnection] Cache invalidated due to: ' . $sqlUpper);
         }
 
         return $rowCount;
