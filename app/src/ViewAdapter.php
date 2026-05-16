@@ -42,6 +42,10 @@ class ViewAdapter implements ViewInterface, AssetAwareViewInterface
     public function renderToString(string $template, array $data = []): string
     {
         $templatePath = str_replace('.', '/', $template);
+        
+        // DEBUG: Log page detection
+        $detectedPage = PageLayout::detect($templatePath);
+        error_log('[ViewAdapter] template=' . $templatePath . ' detected=' . $detectedPage);
 
         // Set current template and page for asset resolution
         View::$currentTemplate = $templatePath;

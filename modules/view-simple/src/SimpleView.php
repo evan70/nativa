@@ -15,6 +15,8 @@ class SimpleView implements ViewInterface
     private ?string $layout = null;
     private array $sections = [];
     private ?string $currentSection = null;
+    /** @var array<string, mixed> */
+    private array $layoutData = [];
 
     public function __construct(
         private TemplateResolverInterface $resolver,
@@ -36,6 +38,7 @@ class SimpleView implements ViewInterface
         $this->layout = null;
         $this->sections = [];
         $this->currentSection = null;
+        $this->layoutData = $data;
 
         extract($data, EXTR_SKIP);
 
@@ -88,6 +91,7 @@ class SimpleView implements ViewInterface
         if (!file_exists($layoutPath)) {
             throw TemplateNotFoundException::forTemplate($layout, [$layoutPath]);
         }
+        extract($this->layoutData, EXTR_SKIP);
         extract($this->sections, EXTR_SKIP);
         ob_start();
         try {

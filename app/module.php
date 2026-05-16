@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\AppTemplateResolver;
 use App\Contracts\AssetAwareViewInterface;
 use App\ViewAdapter;
 use App\ViewSimple\SimpleView;
@@ -10,11 +11,21 @@ use Marko\Authentication\DefaultUserProvider;
 use Marko\Core\Container\ContainerInterface;
 use Marko\Errors\Contracts\ErrorHandlerInterface;
 use Marko\ErrorsAdvanced\AdvancedErrorHandler;
+use Marko\View\TemplateResolverInterface;
 use Marko\View\ViewInterface;
 
 return [
     'bindings' => [
         ErrorHandlerInterface::class => AdvancedErrorHandler::class,
+        // Override TemplateResolver to check app templates first, then modules
+        TemplateResolverInterface::class => function (ContainerInterface $container): TemplateResolverInterface {
+            /** @var \Marko\View\ModuleTemplateResolver $moduleResolver */
+            $moduleResolver = new \Marko\View\ModuleTemplateResolver(
+                $container->get(\Marko\Core\Module\ModuleRepositoryInterface::class),
+                $container->get(\Marko\View\ViewConfig::class)
+            );
+            return new AppTemplateResolver($moduleResolver);
+        },
         AssetAwareViewInterface::class => function (ContainerInterface $container): AssetAwareViewInterface {
             /** @var \Marko\View\TemplateResolverInterface $resolver */
             $resolver = $container->get(\Marko\View\TemplateResolverInterface::class);

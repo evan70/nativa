@@ -5,7 +5,8 @@
     "type": "project",
     "require": {
         "php": "^8.5",
-        "psr/container": "^2.0"
+        "psr/container": "^2.0",
+        "ext-memcached": "*"
     },
     "autoload": {
         "psr-4": {

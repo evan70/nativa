@@ -1,12 +1,5 @@
 // core.ts — Shared layout + components (always loaded)
-
-// Lazy load htmx only if page has htmx attributes
-// This reduces initial JS payload significantly
-if (document.querySelector('[hx-get], [hx-post], [hx-put], [hx-delete], [hx-trigger]')) {
-    import('htmx.org').then(() => {
-        (window as any).htmx?.process(document.body);
-    });
-}
+// NOTE: htmx is NOT included here - it's loaded only in pages that need it (articles, dashboard, etc.)
 
 // Tokens + reset
 import './core/tokens/unified.css';
@@ -44,17 +37,7 @@ function initDeferred() {
     const loadCookieConsent = async () => {
         const { CookieConsent } = await import('./core/components/CookieConsent.ts');
         CookieConsent.init();
-        
-        // Add htmx indicator styles if needed
-        if (document.querySelector('[hx-get], [hx-post], [hx-put], [hx-delete]')) {
-            const htmxStyles = document.createElement('style');
-            htmxStyles.textContent = `
-                .htmx-indicator { opacity: 0; }
-                .htmx-request .htmx-indicator { opacity: 1; }
-                .htmx-request > .btn__text { opacity: 0.3; }
-            `;
-            document.head.appendChild(htmxStyles);
-        }
+        // NOTE: htmx indicator styles are now in page-specific bundles (articles, dash, auth)
     };
     
     // Trigger on scroll (only once)

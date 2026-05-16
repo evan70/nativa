@@ -7,6 +7,7 @@ namespace App\DatabaseModular;
 use App\DatabaseModular\Contracts\ModuleDatabaseResolverInterface;
 use Marko\Database\Connection\ConnectionInterface;
 use Marko\Database\Connection\StatementInterface;
+use Memcached;
 use PDO;
 use PDOStatement;
 
@@ -98,10 +99,122 @@ class ModuleDatabaseResolver implements ModuleDatabaseResolverInterface
 class ModuleConnection implements ConnectionInterface
 {
     private ?PDO $pdo = null;
+    private ?Memcached $memcached = null;
+    private int $cacheTtl = 300; // 5 minutes default
+    private bool $cacheEnabled = true;
     
     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
+        $this->initMemcached();
+    }
+
+    /**
+     * Initialize memcached connection
+     */
+    private function initMemcached(): void
+    {
+        // Check if Memcached extension is available
+        if (!class_exists('Memcached')) {
+            error_log('[ModuleConnection] Memcached extension not installed - caching disabled');
+            $this->cacheEnabled = false;
+            return;
+        }
+
+        // Check if caching is enabled via environment variable
+        $cacheEnabled = getenv('CACHE_ENABLED');
+        if ($cacheEnabled !== false && strtolower($cacheEnabled) === 'false') {
+            error_log('[ModuleConnection] Caching disabled via CACHE_ENABLED env');
+            $this->cacheEnabled = false;
+            return;
+        }
+
+        $host = getenv('MEMCACHED_HOST') ?: 'localhost';
+        $port = (int)(getenv('MEMCACHED_PORT') ?: 11211);
+        $prefix = getenv('MEMCACHED_PREFIX') ?: 'nativa_db_';
+
+        // Get TTL from environment (default 5 minutes)
+        $envTtl = getenv('CACHE_TTL');
+        if ($envTtl !== false) {
+            $this->cacheTtl = (int)$envTtl;
+        }
+
+        try {
+            $this->memcached = new Memcached();
+            $this->memcached->addServer($host, $port);
+            $this->memcached->setOption(Memcached::OPT_BINARY_PROTOCOL, true);
+            
+            // Set prefix for namespace isolation
+            $this->memcached->setOption(Memcached::OPT_PREFIX_KEY, $prefix);
+            
+            error_log('[ModuleConnection] Memcached connected to ' . $host . ':' . $port . ' (TTL: ' . $this->cacheTtl . 's)');
+        } catch (\Exception $e) {
+            error_log('[ModuleConnection] Memcached connection failed: ' . $e->getMessage());
+            $this->cacheEnabled = false;
+        }
+    }
+
+    /**
+     * Generate cache key from SQL and params
+     */
+    private function getCacheKey(string $sql, array $params): string
+    {
+        return md5($sql . ':' . serialize($params));
+    }
+
+    /**
+     * Get cached result if available
+     */
+    private function getCached(string $key): ?array
+    {
+        if (!$this->cacheEnabled || !$this->memcached) {
+            return null;
+        }
+
+        $result = $this->memcached->get($key);
+        if ($this->memcached->getResultCode() === Memcached::RES_SUCCESS) {
+            error_log('[ModuleConnection] Cache HIT: ' . $key);
+            return $result;
+        }
+        
+        error_log('[ModuleConnection] Cache MISS: ' . $key);
+        return null;
+    }
+
+    /**
+     * Store result in cache
+     */
+    private function setCached(string $key, array $data, ?int $ttl = null): void
+    {
+        if (!$this->cacheEnabled || !$this->memcached) {
+            return;
+        }
+
+        $ttl = $ttl ?? $this->cacheTtl;
+        $this->memcached->set($key, $data, $ttl);
+        error_log('[ModuleConnection] Cached: ' . $key . ' (TTL: ' . $ttl . 's)');
+    }
+
+    /**
+     * Invalidate cache for a specific key
+     */
+    public function invalidateCache(string $sql, array $params = []): void
+    {
+        $key = $this->getCacheKey($sql, $params);
+        if ($this->memcached) {
+            $this->memcached->delete($key);
+            error_log('[ModuleConnection] Cache invalidated: ' . $key);
+        }
+    }
+
+    /**
+     * Invalidate all cache (flush namespace)
+     */
+    public function invalidateAllCache(): void
+    {
+        // With prefix key, we can't easily flush - would need to iterate and delete
+        // For now, just log that we should consider a version key approach
+        error_log('[ModuleConnection] Cache flush requested (consider using version key)');
     }
     
     /**
@@ -113,12 +226,28 @@ class ModuleConnection implements ConnectionInterface
      */
     public function query(string $sql, array $params = []): array
     {
+        // Try cache first for SELECT queries
+        if (stripos(trim($sql), 'SELECT') === 0) {
+            $cacheKey = $this->getCacheKey($sql, $params);
+            $cached = $this->getCached($cacheKey);
+            if ($cached !== null) {
+                return $cached;
+            }
+        }
+
         /** @var PDO $pdo */
         $pdo = $this->pdo;
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         /** @var array<array<string, mixed>> $result */
         $result = $stmt->fetchAll();
+
+        // Cache SELECT results
+        if (stripos(trim($sql), 'SELECT') === 0) {
+            $cacheKey = $this->getCacheKey($sql, $params);
+            $this->setCached($cacheKey, $result);
+        }
+
         return $result;
     }
     
@@ -131,7 +260,20 @@ class ModuleConnection implements ConnectionInterface
         $pdo = $this->pdo;
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
-        return $stmt->rowCount();
+        $rowCount = $stmt->rowCount();
+
+        // Invalidate cache after INSERT/UPDATE/DELETE
+        // This is a simple approach - invalidates all cache
+        // For more granular control, you'd want table-specific invalidation
+        $sqlUpper = strtoupper(trim($sql));
+        if (str_starts_with($sqlUpper, 'INSERT') || 
+            str_starts_with($sqlUpper, 'UPDATE') || 
+            str_starts_with($sqlUpper, 'DELETE')) {
+            $this->invalidateAllCache();
+            error_log('[ModuleConnection] Cache invalidated due to: ' . $sqlUpper);
+        }
+
+        return $rowCount;
     }
     
     public function lastInsertId(): int

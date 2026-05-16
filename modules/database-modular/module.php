@@ -8,7 +8,7 @@ use App\DatabaseModular\ModuleDatabaseResolver;
 use Marko\Core\Container\ContainerInterface;
 
 return [
-    'bindings' => [
+    'singletons' => [
         ModuleDatabaseResolverInterface::class => function (ContainerInterface $container): ModuleDatabaseResolverInterface {
             /** @var \Marko\Config\ConfigRepositoryInterface $config */
             $config = $container->get(\Marko\Config\ConfigRepositoryInterface::class);
@@ -23,10 +23,12 @@ return [
         },
         
         // NativaConnection - for system database access
+        // Note: resolver is singleton, so this closure is called only once
         NativaConnection::class => function (ContainerInterface $container): NativaConnection {
-            $resolver = $container->get(ModuleDatabaseResolverInterface::class);
+            error_log('[DatabaseModular] Binding NativaConnection (singleton)');
             
-            error_log('[DatabaseModular] Binding NativaConnection');
+            // Get already-initialized singleton resolver
+            $resolver = $container->get(ModuleDatabaseResolverInterface::class);
             
             return new NativaConnection($resolver);
         },

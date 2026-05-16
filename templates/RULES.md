@@ -14,6 +14,7 @@ This document outlines the rules and guidelines for development in the Vanilla C
 - Do not use deep nesting in CSS.
 
 ## JavaScript/TypeScript Rules
+- **NO inline code in templates** — All JavaScript must be in TypeScript files. No `<script>` tags (except `View::viteJs()`), no inline event handlers (`onclick`, `onsubmit`, `onchange`, etc.).
 - Use TypeScript for all logic.
 - Sections must be auto-instantiated via the `SectionLoader` and `data-section` attributes.
 - Keep the core bundle small; put page-specific logic in dedicated entry points.

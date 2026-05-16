@@ -2,3 +2,8 @@
 @import '../../core/sections/hero/hero.css';
 @import '../../core/sections/features/features.css';
 @import '../../core/components/form.css';
+
+/* htmx indicator styles */
+.htmx-indicator { opacity: 0; }
+.htmx-request .htmx-indicator { opacity: 1; }
+.htmx-request > .btn__text { opacity: 0.3; }

@@ -171,20 +171,6 @@ $origin .= '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
         </div>
     </footer>
 
-    <!-- Deferred JS (after DOM is parsed) -->
-    <script type="module">
-        // Lazy load htmx only when needed for dynamic content
-        // This reduces initial page load for static pages
-        window.addEventListener('load', () => {
-            // Only load htmx if there's HTMX-annotated content
-            if (document.querySelector('[hx-get], [hx-post], [hx-put], [hx-delete]')) {
-                import('/dist/assets/htmx.min.js').catch(() => {
-                    // htmx not available, graceful fallback
-                });
-            }
-        });
-    </script>
-    
     <!-- Core + page JS (deferred for faster first paint) -->
     <?= View::viteJs('core', true) ?>
     <?= View::viteJs('page-' . $page, true) ?>
