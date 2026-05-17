@@ -29,7 +29,7 @@ class PortfolioSeeder implements SeederInterface
                 'role' => 'Frontend lead',
                 'year' => '2026',
                 'stack' => 'TypeScript, Charts, API',
-                'image' => '/dist/assets/images/26d7d834d1eda62fc868808f37c9b157.webp',
+                'image' => '/public/dist/assets/images/26d7d834d1eda62fc868808f37c9b157.webp',
                 'display_order' => 10,
             ],
             [
@@ -41,7 +41,7 @@ class PortfolioSeeder implements SeederInterface
                 'role' => 'Backend architecture',
                 'year' => '2025',
                 'stack' => 'PHP, Marko, SQLite',
-                'image' => '/dist/assets/images/afe59aa58f41fc48817094cfe7519d0b.webp',
+                'image' => '/public/dist/assets/images/afe59aa58f41fc48817094cfe7519d0b.webp',
                 'display_order' => 20,
             ],
             [
@@ -53,7 +53,7 @@ class PortfolioSeeder implements SeederInterface
                 'role' => 'Product engineer',
                 'year' => '2025',
                 'stack' => 'React, Node.js, PostgreSQL',
-                'image' => '/dist/assets/images/c492faf34ca219ceccfbde6eedaf2b6b.webp',
+                'image' => '/public/dist/assets/images/c492faf34ca219ceccfbde6eedaf2b6b.webp',
                 'display_order' => 30,
             ],
             [
@@ -65,7 +65,7 @@ class PortfolioSeeder implements SeederInterface
                 'role' => 'Delivery automation',
                 'year' => '2026',
                 'stack' => 'Docker, GitHub Actions, Bash',
-                'image' => '/dist/assets/images/d1a18cb5ea2f538c0a8d06e4f6e74264.webp',
+                'image' => '/public/dist/assets/images/d1a18cb5ea2f538c0a8d06e4f6e74264.webp',
                 'display_order' => 40,
             ],
             [
@@ -77,7 +77,7 @@ class PortfolioSeeder implements SeederInterface
                 'role' => 'Platform tooling',
                 'year' => '2026',
                 'stack' => 'Swift, Kotlin, React Native',
-                'image' => '/dist/assets/images/d76d493024744f5142823636a88bb4dd.webp',
+                'image' => '/public/dist/assets/images/d76d493024744f5142823636a88bb4dd.webp',
                 'display_order' => 50,
             ],
         ];

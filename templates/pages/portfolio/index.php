@@ -20,10 +20,16 @@ $stackTags = static function (string $stack): array {
                 <?php foreach ($projects as $project): ?>
                     <?php $tags = $stackTags($project->stack); ?>
                     <article class="card card--interactive">
+                        <?php if (!empty($project->image) && file_exists(public_path() . $project->image)): ?>
                         <img class="card__image"
                              src="<?= $this->e($project->image) ?>"
                              alt="<?= $this->e($project->title) ?> project screenshot"
                              fetchpriority="high" decoding="async" width="400" height="250">
+                        <?php else: ?>
+                        <div class="card__image card__image--placeholder" style="background-color: #f5f5f5; height: 250px; display: flex; align-items: center; justify-content: center;">
+                            <span style="color: #999;">Project Image</span>
+                        </div>
+                        <?php endif; ?>
                         <div class="card__header">
                             <h2 class="card__title"><?= $this->e($project->title) ?></h2>
                             <p class="card__subtitle"><?= $this->e($project->subtitle) ?></p>
