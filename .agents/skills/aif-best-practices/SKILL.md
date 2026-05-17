@@ -136,6 +136,24 @@ php vendor/bin/phpstan analyze --memory-limit=256M
 
 Run PHPStan at the highest level (max) for best results. Configure in `phpstan.neon`.
 
+**Marko Framework Type Safety:**
+When using Repository methods: `findAll()` and `findBy()` return `EntityCollection` (which implements `IteratorAggregate`/`Traversable`), not `array`. Always convert to array before using array functions:
+
+```php
+$articles = $repository->findAll();
+$array = $articles instanceof \Traversable ? iterator_to_array($articles) : $articles;
+$result = array_filter($array, ...);
+```
+
+Or use a helper method for repeated conversions:
+
+```php
+function entitiesToArray(mixed $entities): array
+{
+    return $entities instanceof \Traversable ? iterator_to_array($entities) : $entities;
+}
+```
+
 ### Do's and Don'ts
 ```typescript
 // ✅ Good: Specific errors, meaningful messages

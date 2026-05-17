@@ -256,6 +256,7 @@ From the description, identify:
 - Components/files that need changes
 - Dependencies between tasks
 - **Marko modules**: If creating a new module, plan includes: `composer.json` with `extra.marko.module`, `module.php`, PSR-4 autoload, and `config/database.php['modules']` mapping if it uses its own database
+- **EntityCollection type safety**: If using `findAll()`/`findBy()` Repository methods, account for `EntityCollection` return type (not `array`) — use `iterator_to_array()` before `array_filter()`, `array_map()`, `array_values()`, or other array functions
 - Edge cases to handle
 If requirements are ambiguous, ask clarifying questions:
 ```

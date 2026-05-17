@@ -36,7 +36,10 @@ Generate commit messages following the [Conventional Commits](https://www.conven
 
 **PHP/Framework-specific scopes:**
 - `migration` — database migrations
-- `module` — module configuration changes
+- `module` — module configuration changes (module.php, bindings)
+- `template` — template resolution changes
+- `container` — DI/container registration fixes
+- `entity` — Entity/Collection type changes
 - `controller` — HTTP controllers/routes
 - `command` — CLI commands
 - `service` — business logic services
