@@ -5,9 +5,9 @@ $this->layout('layouts.app');
 <?php
 $lcpBase = 'https://res.cloudinary.com/epithemic/image/upload';
 $lcpId = 'v1773169416/blog/dae2d1fd9b13c89bb5b4a89280099d7a_hqfarh';
-$lcpDesktop = $lcpBase . '/f_webp,q_auto,w_1920/' . $lcpId . '.webp';
-$lcpMobile = $lcpBase . '/f_webp,q_auto,w_640/' . $lcpId . '.webp';
-$lcpFallback = $lcpBase . '/f_webp,q_auto/' . $lcpId . '.webp';
+$lcpDesktop = $lcpBase . '/f_auto,q_auto:eco,w_1280/' . $lcpId;
+$lcpMobile = $lcpBase . '/f_auto,q_auto:eco,w_480/' . $lcpId;
+$lcpFallback = $lcpBase . '/f_auto,q_auto:eco,w_800/' . $lcpId;
 ?>
 
 <?php $this->section('content') ?>
@@ -56,7 +56,7 @@ $lcpFallback = $lcpBase . '/f_webp,q_auto/' . $lcpId . '.webp';
                         <p>Our vanilla components are extremely small, resulting in better load times and overall performance.</p>
                     </div>
                     <footer class="card__footer">
-                        <button class="btn btn--secondary btn--sm">Read More</button>
+                        <button class="btn btn--secondary btn--sm">Learn about Lightning Fast</button>
                     </footer>
                 </article>
 

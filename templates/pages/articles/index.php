@@ -9,6 +9,17 @@ $formatDate = static function (?\DateTimeInterface $value): ?string {
 
 <?php $this->section('content') ?>
     <section class="hero-section hero-section--fw" data-section="hero">
+        <!-- LCP image - hero with responsive picture element -->
+        <picture>
+            <source media="(min-width: 769px)" srcset="<?= $this->e($lcpDesktop) ?>" fetchpriority="high">
+            <img class="hero-section__bg-img"
+                 src="<?= $this->e($lcpMobile) ?>"
+                 alt="Articles hero background"
+                 fetchpriority="high"
+                 loading="eager"
+                 decoding="async">
+        </picture>
+        <div class="hero-section__overlay" aria-hidden="true"></div>
         <div class="hero-section__content">
             <h1 class="hero-section__title"><?= $this->e($title) ?></h1>
             <p class="hero-section__description">
@@ -29,7 +40,7 @@ $formatDate = static function (?\DateTimeInterface $value): ?string {
                                  loading="lazy" width="400" height="250">
                         <?php endif; ?>
                         <div class="card__header">
-                            <h3 class="card__title"><?= $this->e($article->title) ?></h3>
+                            <h2 class="card__title"><?= $this->e($article->title) ?></h2>
                             <p class="card__subtitle"><?= $this->e($article->excerpt ?: $article->slug) ?></p>
                         </div>
                         <div class="card__body">
@@ -52,7 +63,7 @@ $formatDate = static function (?\DateTimeInterface $value): ?string {
                             <p><?= $this->e(substr($article->content, 0, 140)) ?>...</p>
                         </div>
                         <footer class="card__footer">
-                            <a href="/articles/<?= $this->e($article->slug) ?>" class="btn btn--secondary btn--sm">Read More</a>
+                            <a href="/articles/<?= $this->e($article->slug) ?>" class="btn btn--secondary btn--sm">Read More about <?= $this->e($article->title) ?></a>
                         </footer>
                     </article>
                 <?php endforeach ?>
@@ -83,7 +94,7 @@ $formatDate = static function (?\DateTimeInterface $value): ?string {
             <div class="section section--sm">
                 <article class="card">
                     <div class="card__body">
-                        <h3 class="card__title">Create a new article</h3>
+                        <h2 class="card__title">Create a new article</h2>
                         <p class="card__subtitle">Publish fresh content to the blog.</p>
                     </div>
                     <footer class="card__footer">

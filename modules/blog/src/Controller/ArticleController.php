@@ -52,7 +52,10 @@ class ArticleController
         $total = $this->service->countPublished();
         $hasMore = ($page * self::PER_PAGE) < $total;
 
-        return $this->view->render('pages/articles/index', [
+        // LCP: Hero background image (preloaded for above-the-fold)
+        return $this->view
+            ->withLcpImage('https://res.cloudinary.com/epithemic/image/upload/f_auto,q_auto:eco/v1773169416/blog/dae2d1fd9b13c89bb5b4a89280099d7a_hqfarh')
+            ->render('pages/articles/index', [
             'title' => 'Articles',
             'currentPage' => 'articles',
             'message' => 'Read existing articles.',
@@ -63,6 +66,12 @@ class ArticleController
                 'has_more' => $hasMore,
                 'total' => $total,
             ],
+            // LCP: Hero background image (same as home page for consistency)
+            'lcpBase' => 'https://res.cloudinary.com/epithemic/image/upload',
+            'lcpId' => 'v1773169416/blog/dae2d1fd9b13c89bb5b4a89280099d7a_hqfarh',
+            'lcpDesktop' => 'https://res.cloudinary.com/epithemic/image/upload/f_auto,q_auto:eco,w_1280/v1773169416/blog/dae2d1fd9b13c89bb5b4a89280099d7a_hqfarh',
+            'lcpMobile' => 'https://res.cloudinary.com/epithemic/image/upload/f_auto,q_auto:eco,w_480/v1773169416/blog/dae2d1fd9b13c89bb5b4a89280099d7a_hqfarh',
+            'lcpFallback' => 'https://res.cloudinary.com/epithemic/image/upload/f_auto,q_auto:eco,w_800/v1773169416/blog/dae2d1fd9b13c89bb5b4a89280099d7a_hqfarh',
         ]);
     }
 

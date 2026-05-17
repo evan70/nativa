@@ -24,7 +24,7 @@ class HomeController
         
         // LCP: Hero background image (preloaded for above-the-fold)
         return $this->view
-            ->withLcpImage('https://res.cloudinary.com/epithemic/image/upload/v1773169416/blog/dae2d1fd9b13c89bb5b4a89280099d7a_hqfarh.webp')
+            ->withLcpImage('https://res.cloudinary.com/epithemic/image/upload/f_auto,q_auto:eco/v1773169416/blog/dae2d1fd9b13c89bb5b4a89280099d7a_hqfarh')
             ->render('pages/home/template', [
                 'eyebrow' => 'Nativa',
                 'title' => 'Welcome to Nativa',
