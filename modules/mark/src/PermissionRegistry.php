@@ -13,7 +13,7 @@ class PermissionRegistry implements PermissionRegistryInterface
     private array $permissions = [];
 
     /**
-     * @throws AdminAuthException
+     * @throws MarkException
      */
     public function register(
         string $key,

@@ -19,19 +19,23 @@ return [
         ErrorHandlerInterface::class => AdvancedErrorHandler::class,
         // Override TemplateResolver to check app templates first, then modules
         TemplateResolverInterface::class => function (ContainerInterface $container): TemplateResolverInterface {
-            /** @var \Marko\Core\Module\ModuleRepositoryInterface $repository */
             $repository = $container->get(\Marko\Core\Module\ModuleRepositoryInterface::class);
-            /** @var \Marko\View\ViewConfig $config */
             $config = $container->get(\Marko\View\ViewConfig::class);
+            
+            if (!$repository instanceof \Marko\Core\Module\ModuleRepositoryInterface || !$config instanceof \Marko\View\ViewConfig) {
+                throw new \RuntimeException('Invalid DI configuration');
+            }
             
             $moduleResolver = new \Marko\View\ModuleTemplateResolver($repository, $config);
             return new AppTemplateResolver($moduleResolver);
         },
         AssetAwareViewInterface::class => function (ContainerInterface $container): AssetAwareViewInterface {
-            /** @var \Marko\View\TemplateResolverInterface $resolver */
             $resolver = $container->get(\Marko\View\TemplateResolverInterface::class);
-            /** @var \Marko\View\ViewConfig $config */
             $config = $container->get(\Marko\View\ViewConfig::class);
+
+            if (!$resolver instanceof \Marko\View\TemplateResolverInterface || !$config instanceof \Marko\View\ViewConfig) {
+                throw new \RuntimeException('Invalid DI configuration');
+            }
 
             $view = new SimpleView($resolver, $config);
 

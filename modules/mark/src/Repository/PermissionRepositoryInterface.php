@@ -10,6 +10,8 @@ use Marko\Database\Repository\RepositoryInterface;
 
 /**
  * Interface for Permission entity repository.
+ *
+ * @extends RepositoryInterface<Permission>
  */
 interface PermissionRepositoryInterface extends RepositoryInterface
 {

@@ -42,7 +42,7 @@ readonly class MarkProvider implements UserProviderInterface
     ): ?AuthenticatableInterface {
         $email = $credentials['email'] ?? null;
 
-        if ($email === null) {
+        if (!is_string($email)) {
             return null;
         }
 
@@ -66,6 +66,10 @@ readonly class MarkProvider implements UserProviderInterface
         array $credentials,
     ): bool {
         $password = $credentials['password'] ?? '';
+
+        if (!is_string($password)) {
+            return false;
+        }
 
         return $this->passwordHasher->verify($password, $user->getAuthPassword());
     }
@@ -109,7 +113,11 @@ readonly class MarkProvider implements UserProviderInterface
     private function loadRolesAndPermissions(
         Mark $user,
     ): void {
-        $roles = $this->userRepository->getRolesForUser($user->id);
+        if ($user->id === null) {
+            return;
+        }
+
+        $roles = $this->userRepository->getRolesForUser((int) $user->id);
 
         $permissionKeys = [];
 

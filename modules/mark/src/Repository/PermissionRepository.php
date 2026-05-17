@@ -41,7 +41,7 @@ class PermissionRepository extends Repository implements PermissionRepositoryInt
 
         return array_map(
             fn (array $row): Permission => $this->hydrator->hydrate(
-                static::ENTITY_CLASS,
+                Permission::class,
                 $row,
                 $this->metadata,
             ),

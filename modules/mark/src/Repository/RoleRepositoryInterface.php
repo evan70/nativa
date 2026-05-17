@@ -10,6 +10,8 @@ use Marko\Database\Repository\RepositoryInterface;
 
 /**
  * Interface for Role entity repository.
+ *
+ * @extends RepositoryInterface<Role>
  */
 interface RoleRepositoryInterface extends RepositoryInterface
 {

@@ -5,6 +5,7 @@ parameters:
         - app
         - modules/blog/src
         - modules/database-modular/src
+        - modules/mark/src
     excludePaths:
         - vendor
         - packages
