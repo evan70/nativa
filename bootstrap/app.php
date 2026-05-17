@@ -2,6 +2,19 @@
 
 declare(strict_types=1);
 
+// Load Composer autoload if available (dev environment)
+$composerAutoload = dirname(__DIR__) . '/vendor/autoload.php';
+if (is_file($composerAutoload)) {
+    require_once $composerAutoload;
+}
+
+// Load environment variables using Marko Env package
+$envLoader = new \Marko\Env\EnvLoader();
+$envLoader->load(dirname(__DIR__));
+
+// Load env() helper function
+require_once dirname(__DIR__) . '/packages/env/src/functions.php';
+
 use App\Init\Bootstrap\Paths;
 use Marko\Core\Application;
 

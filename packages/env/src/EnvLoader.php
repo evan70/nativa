@@ -59,6 +59,17 @@ class EnvLoader
             return;
         }
 
+        // Handle inline comments
+        if (preg_match('/^(["\']).*?\1/', $value, $matches)) {
+            $quotedValue = $matches[0];
+            $remainder = substr($value, strlen($quotedValue));
+            if (str_contains($remainder, '#')) {
+                $value = $quotedValue;
+            }
+        } elseif (str_contains($value, '#')) {
+            $value = trim(explode('#', $value, 2)[0]);
+        }
+
         // Remove surrounding quotes if present
         $value = $this->unquote($value);
 

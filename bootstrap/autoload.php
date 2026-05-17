@@ -12,6 +12,12 @@ if (is_file($composerAutoload)) {
     require_once $composerAutoload;
 }
 
+// Load environment variables early so they're available everywhere
+if (class_exists('\Marko\Env\EnvLoader')) {
+    $envLoader = new \Marko\Env\EnvLoader();
+    $envLoader->load(dirname(__DIR__));
+}
+
 class MarkoAutoloader
 {
     private array $classMap = [];
