@@ -40,7 +40,9 @@ $stackTags = static function (string $stack): array {
                                     <span class="tag"><?= $this->e($tag) ?></span>
                                 <?php endforeach; ?>
                             </div>
-                            <a href="/portfolio/<?= $this->e($project->slug) ?>" class="btn btn--secondary btn--sm">View Details</a>
+                            <a href="/portfolio/<?= $this->e($project->slug) ?>" 
+                               class="btn btn--secondary btn--sm"
+                               aria-label="View details for <?= $this->e($project->title) ?>">View Details</a>
                         </footer>
                     </article>
                 <?php endforeach; ?>

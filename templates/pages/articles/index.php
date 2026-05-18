@@ -52,7 +52,9 @@ $formatDate = static function (?\DateTimeInterface $value): ?string {
                             <p><?= $this->e(substr($article->content, 0, 140)) ?>...</p>
                         </div>
                         <footer class="card__footer">
-                            <a href="/articles/<?= $this->e($article->slug) ?>" class="btn btn--secondary btn--sm">Read More</a>
+                            <a href="/articles/<?= $this->e($article->slug) ?>" 
+                               class="btn btn--secondary btn--sm"
+                               aria-label="Read more about <?= $this->e($article->title) ?>">Read More</a>
                         </footer>
                     </article>
                 <?php endforeach ?>

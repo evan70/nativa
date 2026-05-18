@@ -56,7 +56,7 @@ $lcpFallback = $lcpBase . '/f_webp,q_auto/' . $lcpId . '.webp';
                         <p>Our vanilla components are extremely small, resulting in better load times and overall performance.</p>
                     </div>
                     <footer class="card__footer">
-                        <button class="btn btn--secondary btn--sm">Read More</button>
+                        <button class="btn btn--secondary btn--sm" aria-label="Read more about Lightning Fast features">Read More</button>
                     </footer>
                 </article>
 
@@ -70,7 +70,7 @@ $lcpFallback = $lcpBase . '/f_webp,q_auto/' . $lcpId . '.webp';
                         <p>Strict naming conventions make our styling robust, reusable and independent of page structure.</p>
                     </div>
                     <footer class="card__footer">
-                        <button class="btn btn--block">Use This</button>
+                        <button class="btn btn--block" aria-label="Use BEM Methodology in your project">Use This</button>
                     </footer>
                 </article>
 
