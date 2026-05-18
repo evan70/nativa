@@ -15,9 +15,11 @@ $this->layout('layouts.app');
     <div class="fs-parallax"></div>
 
     <div class="hero-section__content">
-        <span class="fs-text-stroke fs-reveal-hl fs-d0">OHNIVÁ</span>
-        <span class="fs-text-fire fs-reveal-hl fs-d1">SHOW</span>
-        <span class="fs-text-stroke fs-reveal-hl fs-d2">DEMO</span>
+        <h1 class="fs-hero-title">
+            <span class="fs-text-stroke fs-reveal-hl fs-d0">OHNIVÁ</span>
+            <span class="fs-text-fire fs-reveal-hl fs-d1">SHOW</span>
+            <span class="fs-text-stroke fs-reveal-hl fs-d2">DEMO</span>
+        </h1>
 
         <p class="hero-section__description fs-reveal-hl fs-d3">
             Ukážka všetkých 12 interaktívnych efektov.<br>
@@ -102,7 +104,7 @@ $this->layout('layouts.app');
         <div class="card-grid card-grid--cols-3">
             <article class="card card--interactive">
                 <div class="card__header">
-                    <h3 class="card__title">Skúsenosti</h3>
+                    <h2 class="card__title">Skúsenosti</h2>
                     <p class="card__subtitle">11 rokov</p>
                 </div>
                 <div class="card__body">
@@ -112,7 +114,7 @@ $this->layout('layouts.app');
             
             <article class="card card--interactive">
                 <div class="card__header">
-                    <h3 class="card__title">Bezpečnosť</h3>
+                    <h2 class="card__title">Bezpečnosť</h2>
                     <p class="card__subtitle">Prvoradá</p>
                 </div>
                 <div class="card__body">
@@ -122,7 +124,7 @@ $this->layout('layouts.app');
             
             <article class="card card--interactive">
                 <div class="card__header">
-                    <h3 class="card__title">Individuálne</h3>
+                    <h2 class="card__title">Individuálne</h2>
                     <p class="card__subtitle">Na mieru</p>
                 </div>
                 <div class="card__body">

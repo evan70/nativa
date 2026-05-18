@@ -29,7 +29,7 @@ $formatDate = static function (?\DateTimeInterface $value): ?string {
                                  loading="lazy" width="400" height="250">
                         <?php endif; ?>
                         <div class="card__header">
-                            <h3 class="card__title"><?= $this->e($article->title) ?></h3>
+                            <h2 class="card__title"><?= $this->e($article->title) ?></h2>
                             <p class="card__subtitle"><?= $this->e($article->excerpt ?: $article->slug) ?></p>
                         </div>
                         <div class="card__body">
@@ -83,7 +83,7 @@ $formatDate = static function (?\DateTimeInterface $value): ?string {
             <div class="section section--sm">
                 <article class="card">
                     <div class="card__body">
-                        <h3 class="card__title">Create a new article</h3>
+                        <h2 class="card__title">Create a new article</h2>
                         <p class="card__subtitle">Publish fresh content to the blog.</p>
                     </div>
                     <footer class="card__footer">

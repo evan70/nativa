@@ -144,7 +144,7 @@ class ArticleController
                     <a href="/articles/{$dto->slug}" class="card__link">
                         {$imageHtml}
                         <div class="card__body">
-                            <h3 class="card__title">{$this->h($dto->title)}</h3>
+                            <h2 class="card__title">{$this->h($dto->title)}</h2>
                             <p class="card__excerpt">{$this->h($dto->excerpt)}</p>
                             <div class="card__meta">
                                 <span class="card__date">{$this->formatDate($dto->createdAt)}</span>
