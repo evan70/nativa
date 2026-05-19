@@ -52,7 +52,7 @@ echo "Preparing production artifacts...\n";
 
 // Copy source code directories
 // Note: vendor is NOT included - production deploy runs: composer install --no-dev
-$sourceDirs = ['app', 'bootstrap', 'modules', 'packages', 'config', 'database', 'routes', 'public', 'storage', 'templates'];
+$sourceDirs = ['bootstrap', 'modules', 'packages', 'config', 'database', 'routes', 'public', 'storage', 'templates'];
 foreach ($sourceDirs as $dir) {
     if (is_dir($rootDir . '/' . $dir)) {
         echo "   Copying $dir...\n";
@@ -65,7 +65,19 @@ foreach ($sourceDirs as $dir) {
     }
 }
 
+// 4. Ensure packages directory exists in dist
+if (!is_dir($distDir . '/packages')) {
+    mkdir($distDir . '/packages', 0755, true);
+}
+
+// 5. Copy marko packages that still live only under vendor/marko into dist/packages
 copyVendorMarkoPackages($rootDir, $distDir);
+
+// 5.5. Create vendor/marko/* symlinks so ModuleDiscovery::discoverInVendor()
+// finds the flat packages/ structure.  In dev this is done by make install
+// (vendor/marko -> ../packages).  In dist we need vendor/marko/{package} -> ../../packages/{package}
+// because discoverInVendor() expects 2-level nesting (vendor/vendor-name/package-name/).
+createVendorSymlinks($distDir);
 
 if (is_file($rootDir . '/marko')) {
     echo "   Copying marko CLI binary...\n";
@@ -73,7 +85,11 @@ if (is_file($rootDir . '/marko')) {
     chmod($distDir . '/marko', 0755);
 }
 
+// 6. Generate runtime manifest AFTER copying vendor packages
+// DEBUG: check for composer.json before manifest generation
+passthru("find " . escapeshellarg($distDir) . " -name composer.json");
 writeRuntimeManifest($distDir);
+
 removeComposerFiles($distDir);
 replaceAutoloadForProduction($distDir);
 
@@ -122,9 +138,9 @@ echo "The 'dist' folder contains:\n";
 echo "   - Bootstrap autoloader resolving packages/ directly\n";
 echo "   - Source code (app, modules, packages)\n";
 echo "   - All required marko/* runtime packages moved into packages/\n";
-echo "   - NO vendor directory\n";
+echo "   - vendor/marko/* symlinks to ../../packages/* for ModuleDiscovery\n";
 echo "   - NO root composer.json / composer.lock\n";
-echo "   - NO package composer.json files (runtime manifest generated)\n";
+echo "   - Package composer.json files kept for ModuleDiscovery (modules/ + packages/)\n";
 echo "   - autoload.php updated for production (no vendor dependency)\n";
 echo "\nDeploy the contents of './dist' to production.\n";
 
@@ -167,7 +183,7 @@ function writeRuntimeManifest(
 ): void {
     $manifest = [];
 
-    foreach (findFilesByName($distDir, 'composer.json') as $composerFile) {
+    foreach (findFilesByNameInDist($distDir, 'composer.json') as $composerFile) {
         $contents = file_get_contents($composerFile);
 
         if ($contents === false) {
@@ -182,6 +198,8 @@ function writeRuntimeManifest(
 
         $modulePath = dirname($composerFile);
         $relativePath = ltrim(str_replace(str_replace('\\', '/', $distDir), '', str_replace('\\', '/', $modulePath)), '/');
+        
+        echo "Found manifest for: $relativePath\n";
         $manifest[$relativePath] = $decoded;
     }
 
@@ -193,16 +211,69 @@ function writeRuntimeManifest(
 }
 
 /**
+ * Create vendor/marko/* -> ../../packages/* symlinks in dist.
+ *
+ * ModuleDiscovery::discoverInVendor() expects 2-level nesting:
+ *   vendor/vendor-name/package-name/
+ *
+ * The flat packages/ directory (packages/core/, packages/session/, etc.)
+ * does not satisfy this, so we bridge by creating vendor/marko/ with
+ * symlinks to the actual package directories.
+ */
+function createVendorSymlinks(string $distDir): void
+{
+    $vendorMarkoDir = $distDir . '/vendor/marko';
+    $packagesDir = $distDir . '/packages';
+
+    if (!is_dir($packagesDir)) {
+        return;
+    }
+
+    if (!is_dir($vendorMarkoDir)) {
+        mkdir($vendorMarkoDir, 0755, true);
+    }
+
+    foreach (scandir($packagesDir) ?: [] as $packageName) {
+        if ($packageName === '.' || $packageName === '..' || !is_dir($packagesDir . '/' . $packageName)) {
+            continue;
+        }
+
+        $target = $vendorMarkoDir . '/' . $packageName;
+
+        // Skip if already exists (e.g. manual setup, previous run)
+        if (file_exists($target)) {
+            continue;
+        }
+
+        $relativeTarget = '../../packages/' . $packageName;
+        symlink($relativeTarget, $target);
+        echo "   Symlink vendor/marko/$packageName -> $relativeTarget\n";
+    }
+}
+
+/**
  * Remove composer metadata from dist after runtime-manifest.php has been generated.
+ *
+ * Keeps composer.json in modules/ AND packages/ because:
+ * - ModuleDiscovery::isMarkoModule() needs them to detect Marko modules
+ * - The vendor/marko/* symlinks point into packages/, so packages/
+ *   composer.json files must remain intact for the symlinked discovery to work.
+ *
+ * All other composer.json files (config/, database/, etc.) are removed
+ * since the runtime manifest provides their metadata.
  */
 function removeComposerFiles(
     string $distDir,
 ): void {
-    foreach (findFilesByName($distDir, 'composer.json') as $composerFile) {
+    foreach (findFilesByNameInDist($distDir, 'composer.json') as $composerFile) {
+        // Keep composer.json in modules/ and packages/ for ModuleDiscovery
+        if (str_contains($composerFile, '/modules/') || str_contains($composerFile, '/packages/')) {
+            continue;
+        }
         unlink($composerFile);
     }
 
-    foreach (findFilesByName($distDir, 'composer.lock') as $composerLockFile) {
+    foreach (findFilesByNameInDist($distDir, 'composer.lock') as $composerLockFile) {
         unlink($composerLockFile);
     }
 }
@@ -225,6 +296,30 @@ function findFilesByName(
 
     foreach ($iterator as $file) {
         if ($file->isFile() && $file->getFilename() === $filename) {
+            $files[] = $file->getPathname();
+        }
+    }
+
+    return $files;
+}
+
+/**
+ * Robust find files by name that handles directory access issues.
+ */
+function findFilesByNameInDist(
+    string $directory,
+    string $filename,
+): array {
+    if (!is_dir($directory)) {
+        return [];
+    }
+
+    $files = [];
+    $it = new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS);
+    $it = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::SELF_FIRST);
+
+    foreach ($it as $file) {
+        if ($file->getFilename() === $filename) {
             $files[] = $file->getPathname();
         }
     }
@@ -592,9 +687,10 @@ function verifyProductionArtifact(string $distDir): void
     echo "   Verifying production artifact...\n";
     $errors = 0;
 
-    // Must NOT have vendor/
-    if (is_dir($distDir . '/vendor')) {
-        echo "     ERROR: vendor/ directory found in dist!\n";
+    // Must NOT have composer's vendor/ with full autoloader
+    // Our intentionally created vendor/marko/* -> ../../packages/* symlinks are OK.
+    if (is_file($distDir . '/vendor/autoload.php')) {
+        echo "     ERROR: vendor/autoload.php found in dist! Composer autoloader leaked.\n";
         $errors++;
     }
 
@@ -605,7 +701,7 @@ function verifyProductionArtifact(string $distDir): void
     }
 
     // Must NOT have any composer.lock files
-    $lockFiles = findFilesByName($distDir, 'composer.lock');
+    $lockFiles = findFilesByNameInDist($distDir, 'composer.lock');
     if (count($lockFiles) > 0) {
         echo "     ERROR: composer.lock files found in dist:\n";
         foreach ($lockFiles as $f) {
@@ -615,7 +711,7 @@ function verifyProductionArtifact(string $distDir): void
     }
 
     // Must NOT have test directories
-    $testDirs = findFilesByName($distDir, 'tests');
+    $testDirs = findFilesByNameInDist($distDir, 'tests');
     $testDirs = array_filter($testDirs, fn(string $p): bool => is_dir($p));
     if (count($testDirs) > 0) {
         echo "     ERROR: test directories found in dist:\n";

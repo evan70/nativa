@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Cardboard\Admin;
+namespace Marko\Cardboard\Admin;
 
 use Marko\Admin\Attributes\AdminSection;
 use Marko\Admin\Contracts\AdminSectionInterface;

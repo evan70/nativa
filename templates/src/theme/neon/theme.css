@@ -59,3 +59,11 @@
   --shadow-sm: 0 4px 10px rgba(255, 0, 255, 0.1);
   --shadow-lg: 0 10px 25px rgba(255, 0, 255, 0.15);
 }
+
+.navbar__number {
+  display: inline-block;
+  margin-right: var(--space-2);
+  color: var(--brand-emerald);
+  font-weight: var(--font-bold);
+  opacity: 0.8;
+}

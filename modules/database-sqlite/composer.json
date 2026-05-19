@@ -31,7 +31,9 @@
     "prefer-stable": true,
     "extra": {
         "marko": {
-            "module": true
+            "module": true,
+            "group": "database",
+            "isCore": true
         }
     }
 }

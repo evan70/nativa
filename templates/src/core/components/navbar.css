@@ -50,6 +50,10 @@
   color: var(--color-text);
 }
 
+.navbar__number {
+  display: none;
+}
+
 .navbar__actions {
   display: flex;
   align-items: center;

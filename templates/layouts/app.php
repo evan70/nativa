@@ -84,10 +84,10 @@ $origin .= '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
             </a>
 
             <div class="navbar__menu">
-                <a href="/" class="navbar__link <?= $_SERVER['REQUEST_URI'] === '/' ? 'navbar__link--active' : '' ?>">Home</a>
-                <a href="/portfolio" class="navbar__link <?= str_starts_with($_SERVER['REQUEST_URI'], '/portfolio') ? 'navbar__link--active' : '' ?>">Portfolio</a>
-                <a href="/articles/" class="navbar__link <?= str_starts_with($_SERVER['REQUEST_URI'], '/articles/') ? 'navbar__link--active' : '' ?>">Blog</a>
-                <a href="/mark" class="navbar__link">Mark</a>
+                <a href="/" class="navbar__link <?= $_SERVER['REQUEST_URI'] === '/' ? 'navbar__link--active' : '' ?>"><span class="navbar__number">01</span> Home</a>
+                <a href="/portfolio" class="navbar__link <?= str_starts_with($_SERVER['REQUEST_URI'], '/portfolio') ? 'navbar__link--active' : '' ?>"><span class="navbar__number">02</span> Portfolio</a>
+                <a href="/articles/" class="navbar__link <?= str_starts_with($_SERVER['REQUEST_URI'], '/articles/') ? 'navbar__link--active' : '' ?>"><span class="navbar__number">03</span> Blog</a>
+                <a href="/mark" class="navbar__link"><span class="navbar__number">04</span> Mark</a>
             </div>
 
             <div class="navbar__actions">

@@ -46,6 +46,9 @@ class SimpleView implements ViewInterface
         try {
             include $path;
             $content = ob_get_clean();
+            if ($content === false) {
+                $content = '';
+            }
             if ($this->layout !== null) {
                 return $this->renderLayout($this->layout);
             }
@@ -71,7 +74,7 @@ class SimpleView implements ViewInterface
     {
         if ($this->currentSection === null) return;
         $content = ob_get_clean();
-        $this->sections[$this->currentSection] = $content;
+        $this->sections[$this->currentSection] = $content !== false ? $content : '';
         $this->currentSection = null;
     }
 
@@ -96,7 +99,11 @@ class SimpleView implements ViewInterface
         ob_start();
         try {
             include $layoutPath;
-            return ob_get_clean();
+            $content = ob_get_clean();
+            if ($content === false) {
+                $content = '';
+            }
+            return $content;
         } catch (\Throwable $e) {
             ob_end_clean();
             throw $e;

@@ -13,7 +13,13 @@ $envLoader = new \Marko\Env\EnvLoader();
 $envLoader->load(dirname(__DIR__));
 
 // Load env() helper function
-require_once dirname(__DIR__) . '/packages/env/src/functions.php';
+$envFunctions = is_dir(dirname(__DIR__) . '/vendor/marko/env')
+    ? dirname(__DIR__) . '/vendor/marko/env/src/functions.php'
+    : dirname(__DIR__) . '/packages/env/src/functions.php';
+
+if (file_exists($envFunctions)) {
+    require_once $envFunctions;
+}
 
 use App\Init\Bootstrap\Paths;
 use Marko\Core\Application;
