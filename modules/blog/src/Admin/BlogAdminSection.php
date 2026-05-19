@@ -39,6 +39,10 @@ class BlogAdminSection implements AdminSectionInterface
         return [
             new MenuItem('articles_index', 'Articles', '/mark/articles', 'list', 10),
             new MenuItem('articles_create', 'New Article', '/mark/articles/new', 'plus', 20),
+            new MenuItem('categories_index', 'Categories', '/mark/categories', 'folder', 30),
+            new MenuItem('categories_create', 'New Category', '/mark/categories/new', 'plus-circle', 40),
+            new MenuItem('tags_index', 'Tags', '/mark/tags', 'tag', 50),
+            new MenuItem('tags_create', 'New Tag', '/mark/tags/new', 'plus-circle', 60),
         ];
     }
 }

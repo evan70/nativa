@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\AppLogger;
-use App\Database\NativaConnection;
+use App\Database\CardboardConnection;
 use App\DatabaseModular\Contracts\ModuleDatabaseResolverInterface;
 use App\DatabaseModular\ModuleDatabaseResolver;
 use Marko\Core\Container\ContainerInterface;
@@ -23,15 +23,15 @@ return [
             return new ModuleDatabaseResolver($mapping, $storagePath);
         },
         
-        // NativaConnection - for system database access
+        // CardboardConnection - for main database access (users, roles, settings)
         // Note: resolver is singleton, so this closure is called only once
-        NativaConnection::class => function (ContainerInterface $container): NativaConnection {
-            AppLogger::debug('[DatabaseModular] Binding NativaConnection (singleton)');
-            
+        CardboardConnection::class => function (ContainerInterface $container): CardboardConnection {
+            AppLogger::debug('[DatabaseModular] Binding CardboardConnection (singleton)');
+
             // Get already-initialized singleton resolver
             $resolver = $container->get(ModuleDatabaseResolverInterface::class);
-            
-            return new NativaConnection($resolver);
+
+            return new CardboardConnection($resolver);
         },
     ],
 ];

@@ -24,14 +24,10 @@ $bodyClass = PageLayout::bodyClass($page);
 
     <?= $this->yield('head') ?>
 </head>
-<body class="layout-admin <?= $bodyClass ?> is-collapsed">
-
-    <aside class="layout-admin__sidebar sidebar">
-        <?= $this->include('partials/sidebar', ['menuItems' => $menuItems ?? []]) ?>
-    </aside>
+<body class="layout-admin <?= $bodyClass ?>">
 
     <header class="layout-admin__navbar navbar">
-        <?= $this->include('partials/navbar', ['currentUser' => $currentUser ?? null]) ?>
+        <?= $this->include('partials/navbar', ['currentUser' => $currentUser ?? null, 'menuItems' => $menuItems ?? []]) ?>
     </header>
 
     <main class="layout-admin__main">

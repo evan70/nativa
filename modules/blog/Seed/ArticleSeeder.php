@@ -182,5 +182,11 @@ class ArticleSeeder implements SeederInterface
                 }
             }
         }
+
+        // Repopulate FTS index for all seeded articles
+        $this->connection->execute('DELETE FROM articles_fts');
+        $this->connection->execute(
+            'INSERT INTO articles_fts(docid, title, excerpt, content) SELECT id, title, excerpt, content FROM articles',
+        );
     }
 }

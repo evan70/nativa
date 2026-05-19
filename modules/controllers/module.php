@@ -12,6 +12,8 @@ use Marko\Core\Container\ContainerInterface;
 use Marko\Errors\Contracts\ErrorHandlerInterface;
 use Marko\ErrorsAdvanced\AdvancedErrorHandler;
 use Marko\View\TemplateResolverInterface;
+use App\Mail\LogMailer;
+use Marko\Mail\Contracts\MailerInterface;
 use Marko\View\ViewInterface;
 
 return [
@@ -28,6 +30,12 @@ return [
 
             return new ViewAdapter($view);
         },
+            // Mail: LogMailer for development (writes to storage/logs/mail.log)
+        MailerInterface::class => fn (ContainerInterface $container): MailerInterface => new LogMailer(
+            (\class_exists(\Marko\Mail\Config\MailConfig::class) && $container->has(\Marko\Config\ConfigRepositoryInterface::class))
+                ? $container->get(\Marko\Mail\Config\MailConfig::class)->driverConfig('log')
+                : [],
+        ),
     ],
     'sequence' => [
         'after' => ['app/view-simple', 'app/init'],

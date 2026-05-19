@@ -1,110 +1,79 @@
-# Plan: Dev & Prod Circuits for Nativa
+# Plan: Password Reset Flow
 
-> Creation date: 2026-05-15
+> Creation date: 2026-05-18
 > Branch: (fast mode — no branch)
 
 ## Goal
 
-Formalize two distinct operation modes (circuits) for the Nativa project:
-- **Dev circuit** — full development environment with vendor, dev tools, tests, frontend HMR
-- **Prod circuit** — stripped-down production artifact (no vendor, no composer.json, no tests, min thin)
+Implement complete password reset flow for the Marko skeleton app:
+1. "Forgot password?" form → generuje token → pošle email (log driver v dev)
+2. Reset link → formulár pre nové heslo → zmena hesla
+3. Token tabuľka v cardboard.db, bezpečný proces
 
 ## Settings
 
-- Testing: N/A (plan is about infrastructure, not code)
-- Logging: N/A
-- Docs: minimal inline docs in Makefile + circuit documentation
+- **Testing:** Yes — PHPUnit tests for forgot + reset flows
+- **Logging:** Verbose — log each step of the password reset process
+- **Docs:** Minimal — update AGENTS.md
 
-## Current State
-
-The project already has:
-- `build.php` — generates `dist/` without vendor/composer.json
-- `composer.json` with `require-dev` (pest, phpstan)
-- CI pipeline that runs quality checks then builds prod dist
-- `composer install --no-dev` used in CI build job
-
-**What's missing:**
-- `build.php` copies everything including test dirs → prod dist has test files
-- No Makefile for common dev tasks
-- No Docker Compose for dev
-- No documentation of the two circuits
-- No automated way to verify prod dist is clean
+---
 
 ## Tasks
 
-### Phase 1: Formalize Circuits
+### ✅ Phase 1: Database
 
-1. **Add `CIRCUITS.md` documenting dev and prod circuits**
-   - Dev: `composer install`, vendor/, tests, phpstan, phpunit, frontend dev server
-   - Prod: `php build.php` → `dist/`, no vendor, no composer.json, no tests, deployable
-   - Explicitly describe what each circuit contains and how to switch between them
-   - Cover: dependencies, tooling, testing, database, frontend assets
+- [x] **Add `password_resets` table to `database/init/cardboard.sql`**
+   - Columns: `email` TEXT NOT NULL, `token` TEXT NOT NULL, `createdAt` TEXT NOT NULL
+   - Index on `email` + `token` for lookups
+   - Placed before `-- === SCHEMA END ===` marker
 
-### Phase 2: Dev Circuit Tooling
+### ✅ Phase 2: Mail Config & Helper
 
-2. **Create `Makefile` for common dev operations**
-   - `make install` — install PHP + frontend deps
-   - `make dev` — start PHP dev server + frontend HMR
-   - `make test` — run pest tests
-   - `make analyse` — run phpstan
-   - `make lint` — run composer validate + phpstan
-   - `make build` — php build.php (prod artifact)
-   - `make clean` — clean vendor, dist, etc.
+- [x] **Create `config/mail.php`**
+   - `driver` = `log` (dev — log emails to file)
+   - `from.address` = `noreply@marko.local`
+   - `from.name` = `Marko App`
 
-3. **Create `docker-compose.yml` for dev circuit**
-   - PHP 8.5 CLI image with composer
-   - Mount source code as volume
-   - Expose dev server port
-   - Run `make install` on startup
-   - No prod Docker (user wants `build.php` for prod)
+- [x] **Create `PasswordResetService`** — `modules/cardboard/src/Service/PasswordResetService.php`
+   - `generateToken(string $email): string` — `bin2hex(random_bytes(32))` + DB store
+   - `validateToken(string $email, string $token): bool` — 60 minút TTL
+   - `deleteToken(string $email): void` — clean up after use
+   - `sendResetEmail(string $email, string $token, string $resetUrl): void` — logs to `storage/logs/mail.log`
+   - Registered in `modules/cardboard/module.php` via DI factory
 
-### Phase 3: Prod Circuit — Max Thin Build
+### ✅ Phase 3: Controllers
 
-4. **Update `build.php` to strip test directories**
-   - Exclude `**/tests/`, `**/Tests/`, `**/*.test.ts`, `**/*.spec.ts` from all copied dirs
-   - Exclude `.phpunit.cache/`, `phpunit.xml`, `phpstan.neon`, `.phpstan` from dist
-   - Exclude dev-only configs (`phpunit.xml`, `run_test.sh`, `test_server.sh`)
-   - Verify prod dist has zero test files
+- [x] **Create `ForgotPasswordController`** — `modules/cardboard/src/Controller/ForgotPasswordController.php`
+   - `#[Get(path: '/mark/forgot-password')]` — show form (guest only)
+   - `#[Post(path: '/mark/forgot-password')]` — validate email → always success (no info leak)
 
-5. **Add `dist/ verification` step to build.php**
-   - After build, assert no `vendor/` dir exists in dist
-   - Assert no `composer.json` exists in dist
-   - Assert no `**/tests/` dirs exist in dist
-   - Assert no dev config files exist in dist
-   - Exit with error if any dev artifact leaked into prod
+- [x] **Create `ResetPasswordController`** — `modules/cardboard/src/Controller/ResetPasswordController.php`
+   - `#[Get(path: '/mark/reset-password/{token}')]` — show form with token in URL
+   - `#[Post(path: '/mark/reset-password/{token}')]` — validate token, new password + confirmation, update user, delete token, redirect to `/mark/login?reset=success`
 
-### Phase 4: CI Alignment
+### ✅ Phase 4: Templates
 
-6. **Update CI workflow to use the same dev/prod patterns**
-   - Quality job → dev circuit (composer install, tests, phpstan)
-   - Build job → build.php with `MARKO_SKIP_FRONTEND_BUILD=1`
-   - Smoke test uses dist/ (already done)
-   - Ensure CI build job runs the new verification step
+- [x] **Create `templates/pages/auth/forgot-password.php`** — form with email input + success notification + link späť na login
+- [x] **Create `templates/pages/auth/reset-password.php`** — form with email + new password + confirm + token error handling
+- [x] **Create `templates/emails/reset-password.php`** — HTML email with reset button, dev token display
 
-### Phase 5: Documentation
+### ✅ Phase 5: Login Template Update
 
-7. **Update `README.md` with circuit badges/summary**
-   - Add quick "Dev Circuit" and "Prod Circuit" section
-   - Link to CIRCUITS.md
-   - Update `AGENTS.md` with new files
+- [x] **Verify login template** — `$forgotPasswordUrl` default `/mark/forgot-password` už existuje, netreba meniť
 
-## Edge Cases
+### ✅ Phase 6: Testing
 
-- **Dev Docker**: permissions for storage/ directory must be writable by www-data inside container
-- **Build stripping**: `packages/` contains first-party tests that MUST NOT be in prod — use explicit exclusion list, not just a blanket `tests/` pattern, to avoid false matches
-- **Composer.lock**: must exist for reproducible builds in CI; dev circuit uses `--frozen-lockfile`
-- **Frontend assets**: prod dist includes built assets from templates/ — build.php should exclude `node_modules/` (already done) and source maps in prod
+- [x] **`tests/Unit/Auth/ForgotPasswordTest.php`** — 5 testov (show form, authenticated redirect, valid email, invalid email, empty email)
+- [x] **`tests/Unit/Auth/ResetPasswordTest.php`** — 6 testov (show form, authenticated redirect, valid reset, invalid token, password mismatch, empty fields)
 
-## Verification
+---
 
-After implementation:
-1. `make install && make test && make analyse` → all pass
-2. `make build` → `dist/` has:
-   - No `vendor/` dir
-   - No `composer.json` or `composer.lock`
-   - No `tests/` directories anywhere
-   - No `phpunit.xml`, `phpstan.neon`, `run_test.sh`, `test_server.sh`
-   - No `.phpunit.cache/`
-   - Frontend assets built (no `node_modules/`, no raw `.ts` sources)
-3. `make dev` (or Docker) → PHP dev server + frontend HMR work
-4. CI pipeline passes same checks
+## Verification ✅
+
+1. ✅ `GET /mark/forgot-password` → form renders
+2. ✅ `POST /mark/forgot-password` with valid email → success message + token logged
+3. ✅ `POST /mark/forgot-password` with invalid email → same success message (no info leak)
+4. ✅ `GET /mark/reset-password/{valid-token}` → form renders
+5. ✅ `POST /mark/reset-password/{valid-token}` with matching passwords → password changed, redirect to login
+6. ✅ `POST /mark/reset-password/{invalid-token}` → error shown
+7. ✅ `php vendor/bin/phpunit` — **25/25 tests pass**

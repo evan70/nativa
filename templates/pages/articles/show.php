@@ -38,6 +38,15 @@ $formatDate = static function (?\DateTimeInterface $value): ?string {
                     <?php if (!empty($article->categoryId)): ?>
                         <p class="card__subtitle">Category: #<?= $this->e((string) $article->categoryId) ?></p>
                     <?php endif; ?>
+                    <?php if (!empty($article->tags)): ?>
+                        <div class="article-tags">
+                            <?php foreach ($article->tags as $tag): ?>
+                                <a href="/articles?tag=<?= $this->e($tag['slug']) ?>" class="article-tag">
+                                    <?= $this->e($tag['name']) ?>
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                     <div><?= $article->content ?></div>
                 </div>
 

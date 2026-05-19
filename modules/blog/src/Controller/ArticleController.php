@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Blog\Controller;
 
 use App\Blog\Contracts\ArticleServiceInterface;
+use App\Blog\Database\BlogConnection;
 use App\Blog\DTO\ArticleDTO;
 use App\Blog\Repository\ArticleRepository;
 use App\Htmx\HtmxContext;
+use Marko\Database\Connection\ConnectionInterface;
 use Marko\Routing\Attributes\Get;
 use Marko\Routing\Http\Request;
 use Marko\Routing\Http\Response;
@@ -21,6 +23,7 @@ class ArticleController
         private readonly ArticleRepository $repository,
         private readonly ArticleServiceInterface $service,
         private readonly ViewInterface $view,
+        private readonly BlogConnection $blogConnection,
     ) {}
 
     #[Get('/articles')]
@@ -31,18 +34,34 @@ class ArticleController
         $page = is_numeric($pageInput) ? (int) $pageInput : 1;
         $page = max(1, $page);
 
+        $searchQuery = trim($_GET['q'] ?? '');
+        $tagSlug = trim((string) ($_GET['tag'] ?? ''));
+
         // If HTMX swap request targeting article-list, return partial
         if ($htmx !== null && $htmx->target() === 'article-list') {
-            return $this->renderPartial($page);
+            return $this->renderPartial($page, $searchQuery, $tagSlug);
         }
 
-        $articles = $this->service->findPublished(
+        // Handle FTS search
+        if ($searchQuery !== '') {
+            return $this->renderSearchResults($searchQuery, $tagSlug, $page);
+        }
+
+        // Handle tag filter
+        if ($tagSlug !== '') {
+            return $this->filterByTag($tagSlug, $page);
+        }
+
+        $allTags = $this->fetchAllTags();
+
+        $articleEntities = $this->service->findPublished(
             limit: self::PER_PAGE,
             offset: ($page - 1) * self::PER_PAGE
         );
+
         $articles = array_map(
-            static fn (object $article): ArticleDTO => ArticleDTO::fromEntity($article),
-            $articles ?: []
+            fn (object $a): ArticleDTO => $this->attachTagsToDto(ArticleDTO::fromEntity($a)),
+            $articleEntities ?: []
         );
 
         if ($articles === []) {
@@ -57,6 +76,9 @@ class ArticleController
             'currentPage' => 'articles',
             'message' => 'Read existing articles.',
             'articles' => $articles,
+            'searchQuery' => '',
+            'tagSlug' => $tagSlug,
+            'allTags' => $allTags,
             'pagination' => [
                 'limit' => self::PER_PAGE,
                 'page' => $page,
@@ -67,8 +89,91 @@ class ArticleController
     }
 
     /**
-     * Load more articles via HTMX
-     * Target: #article-list
+     * Render FTS search results with snippet highlighting.
+     */
+    private function renderSearchResults(string $searchQuery, string $tagSlug, int $page): Response
+    {
+        $ftsResults = $this->searchArticlesByFts($searchQuery);
+        $matchedIds = $ftsResults['ids'];
+        $snippets = $ftsResults['snippets'];
+
+        // If tag filter is also active, intersect with tag-matched IDs
+        if ($tagSlug !== '') {
+            $taggedIds = $this->getArticleIdsByTagSlug($tagSlug);
+            $matchedIds = array_values(array_intersect($matchedIds, $taggedIds));
+        }
+
+        $total = count($matchedIds);
+        $pageIds = array_slice($matchedIds, ($page - 1) * self::PER_PAGE, self::PER_PAGE);
+
+        // Fetch articles by matched IDs
+        $articles = [];
+        foreach ($pageIds as $id) {
+            $entity = $this->repository->find($id);
+            if ($entity === null) {
+                continue;
+            }
+            $dto = ArticleDTO::fromEntity($entity);
+            $dto = $this->attachTagsToDto($dto);
+
+            // Attach snippet via constructor copy
+            $snippet = $snippets[$id] ?? null;
+            $articles[] = new ArticleDTO(
+                id: $dto->id,
+                title: $dto->title,
+                content: $dto->content,
+                slug: $dto->slug,
+                excerpt: $dto->excerpt,
+                image: $dto->image,
+                published: $dto->published,
+                status: $dto->status,
+                categoryId: $dto->categoryId,
+                createdAt: $dto->createdAt,
+                tags: $dto->tags,
+                snippet: $snippet,
+            );
+        }
+
+        $hasMore = ($page * self::PER_PAGE) < $total;
+
+        $title = 'Search: "' . $searchQuery . '"';
+        if ($tagSlug !== '') {
+            $title .= ' (tag: ' . $tagSlug . ')';
+        }
+
+        return $this->view->render('pages/articles/index', [
+            'title' => $title,
+            'currentPage' => 'articles',
+            'message' => 'Search results for: ' . $searchQuery,
+            'articles' => $articles,
+            'searchQuery' => $searchQuery,
+            'tagSlug' => $tagSlug,
+            'allTags' => $this->fetchAllTags(),
+            'pagination' => [
+                'limit' => self::PER_PAGE,
+                'page' => $page,
+                'has_more' => $hasMore,
+                'total' => $total,
+            ],
+        ]);
+    }
+
+    /**
+     * Get article IDs that have a tag with the given slug.
+     *
+     * @return array<int, int>
+     */
+    private function getArticleIdsByTagSlug(string $tagSlug): array
+    {
+        $rows = $this->getDbConnection()->query(
+            'SELECT at.article_id FROM article_tags at INNER JOIN tags t ON t.id = at.tag_id WHERE t.slug = ?',
+            [$tagSlug],
+        );
+        return array_map(fn (array $row): int => (int) $row['article_id'], $rows);
+    }
+
+    /**
+     * Load more articles via HTMX (supports search + tag params).
      */
     #[Get('/articles/load')]
     public function loadMore(): Response
@@ -77,7 +182,10 @@ class ArticleController
         $page = is_numeric($pageInput) ? (int) $pageInput : 2;
         $page = max(1, $page);
 
-        return $this->renderPartial($page);
+        $searchQuery = trim($_GET['q'] ?? '');
+        $tagSlug = trim((string) ($_GET['tag'] ?? ''));
+
+        return $this->renderPartial($page, $searchQuery, $tagSlug);
     }
 
     #[Get('/articles/{slug}')]
@@ -106,38 +214,119 @@ class ArticleController
             ]), 404);
         }
 
+        // Attach tags to the article
+        $article = $this->attachTagsToDto($article);
+
         return $this->view->render('pages/articles/show', [
             'title' => $article->title,
             'article' => $article,
         ]);
     }
 
-    private function renderPartial(int $page): Response
+    private function renderPartial(int $page, string $searchQuery = '', string $tagSlug = ''): Response
     {
-        $articles = $this->service->findPublished(
+        if ($searchQuery !== '') {
+            $ftsResults = $this->searchArticlesByFts($searchQuery);
+            $matchedIds = $ftsResults['ids'];
+            $snippets = $ftsResults['snippets'];
+
+            if ($tagSlug !== '') {
+                $taggedIds = $this->getArticleIdsByTagSlug($tagSlug);
+                $matchedIds = array_values(array_intersect($matchedIds, $taggedIds));
+            }
+
+            $pageIds = array_slice($matchedIds, ($page - 1) * self::PER_PAGE, self::PER_PAGE);
+
+            $articles = [];
+            foreach ($pageIds as $id) {
+                $entity = $this->repository->find($id);
+                if ($entity === null) {
+                    continue;
+                }
+                $dto = ArticleDTO::fromEntity($entity);
+                $dto = $this->attachTagsToDto($dto);
+                $articles[] = new ArticleDTO(
+                    id: $dto->id,
+                    title: $dto->title,
+                    content: $dto->content,
+                    slug: $dto->slug,
+                    excerpt: $dto->excerpt,
+                    image: $dto->image,
+                    published: $dto->published,
+                    status: $dto->status,
+                    categoryId: $dto->categoryId,
+                    createdAt: $dto->createdAt,
+                    tags: $dto->tags,
+                    snippet: $snippets[$id] ?? null,
+                );
+            }
+
+            if ($articles === []) {
+                return Response::html('');
+            }
+
+            $html = $this->renderArticlesHtml($articles, $page, $searchQuery, $tagSlug);
+            return Response::html($html);
+        }
+
+        if ($tagSlug !== '') {
+            $allPublished = $this->service->findPublished(limit: 100, offset: 0);
+            $filtered = [];
+            foreach ($allPublished as $article) {
+                $dto = $this->attachTagsToDto(ArticleDTO::fromEntity($article));
+                foreach ($dto->tags as $tag) {
+                    if ($tag['slug'] === $tagSlug) {
+                        $filtered[] = $dto;
+                        break;
+                    }
+                }
+            }
+            $pageArticles = array_slice($filtered, ($page - 1) * self::PER_PAGE, self::PER_PAGE);
+            if ($pageArticles === []) {
+                return Response::html('');
+            }
+            return Response::html($this->renderArticlesHtml($pageArticles, $page, '', $tagSlug));
+        }
+
+        $articleEntities = $this->service->findPublished(
             limit: self::PER_PAGE,
             offset: ($page - 1) * self::PER_PAGE
         );
 
-        if ($articles === []) {
+        if ($articleEntities === []) {
             return Response::html('');
         }
 
-        $html = $this->renderArticlesHtml($articles, $page);
-
+        $html = $this->renderArticlesHtml($articleEntities, $page);
         return Response::html($html);
     }
 
     /**
-     * @param array<int, \App\Blog\DTO\ArticleDTO> $articles
+     * @param array<int, ArticleDTO> $articles
      */
-    private function renderArticlesHtml(array $articles, int $page): string
+    private function renderArticlesHtml(array $articles, int $page, string $searchQuery = '', string $tagSlug = ''): string
     {
         $items = '';
         foreach ($articles as $dto) {
+            $dto = $this->attachTagsToDto($dto);
+
             $imageHtml = $dto->image
                 ? '<div class="card__image"><img src="' . htmlspecialchars($dto->image) . '" alt="' . htmlspecialchars($dto->title) . '"></div>'
                 : '';
+
+            $tagsHtml = '';
+            if (!empty($dto->tags)) {
+                $tagLinks = array_map(
+                    fn (array $t): string => '<a href="/articles?tag=' . htmlspecialchars($t['slug']) . '" class="article-tag">' . htmlspecialchars($t['name']) . '</a>',
+                    $dto->tags,
+                );
+                $tagsHtml = '<div class="article-tags">' . implode('', $tagLinks) . '</div>';
+            }
+
+            // Show snippet when FTS search is active, otherwise excerpt
+            $bodyText = $dto->snippet !== null
+                ? '<p class="card__snippet">' . $dto->snippet . '</p>'
+                : '<p class="card__excerpt">' . $this->h($dto->excerpt) . '</p>';
 
             $items .= <<<HTML
                 <article class="card card--interactive" data-article-id="{$dto->id}">
@@ -145,27 +334,59 @@ class ArticleController
                         {$imageHtml}
                         <div class="card__body">
                             <h2 class="card__title">{$this->h($dto->title)}</h2>
-                            <p class="card__excerpt">{$this->h($dto->excerpt)}</p>
+                            {$bodyText}
                             <div class="card__meta">
                                 <span class="card__date">{$this->formatDate($dto->createdAt)}</span>
                             </div>
+                            {$tagsHtml}
                         </div>
                     </a>
                 </article>
             HTML;
         }
 
+        // Determine total for pagination
         $total = $this->service->countPublished();
+        if ($searchQuery !== '') {
+            $total = count($this->searchArticlesByFts($searchQuery)['ids']);
+        }
+        if ($tagSlug !== '' && $searchQuery === '') {
+            $allPublished = $this->service->findPublished(limit: 100, offset: 0);
+            $total = 0;
+            foreach ($allPublished as $article) {
+                $dto = $this->attachTagsToDto(ArticleDTO::fromEntity($article));
+                foreach ($dto->tags as $tag) {
+                    if ($tag['slug'] === $tagSlug) {
+                        $total++;
+                        break;
+                    }
+                }
+            }
+        }
+        if ($searchQuery !== '' && $tagSlug !== '') {
+            $ftsResults = $this->searchArticlesByFts($searchQuery);
+            $matchedIds = $ftsResults['ids'];
+            $taggedIds = $this->getArticleIdsByTagSlug($tagSlug);
+            $total = count(array_intersect($matchedIds, $taggedIds));
+        }
+
         $hasMore = ($page * self::PER_PAGE) < $total;
 
         $loadMore = '';
         if ($hasMore) {
             $nextPage = $page + 1;
+            $queryParams = "page={$nextPage}";
+            if ($searchQuery !== '') {
+                $queryParams .= '&q=' . urlencode($searchQuery);
+            }
+            if ($tagSlug !== '') {
+                $queryParams .= '&tag=' . urlencode($tagSlug);
+            }
             $loadMore = <<<HTML
                 <div class="load-more-container">
                     <button
                         class="btn btn--secondary load-more-btn"
-                        hx-get="/articles/load?page={$nextPage}"
+                        hx-get="/articles/load?{$queryParams}"
                         hx-target="#article-list"
                         hx-swap="beforeend"
                         hx-trigger="click"
@@ -176,15 +397,14 @@ class ArticleController
                             <svg class="spinner" viewBox="0 0 24 24" width="20" height="20">
                                 <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4">
                                     <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
-                                </svg>
-                            </span>
+                                </circle>
+                            </svg>
                         </span>
                     </button>
                 </div>
             HTML;
         }
 
-        // OOB swap: replace the load-more-section so button disappears or updates
         $oob = '<div id="load-more-section" hx-swap-oob="true">' . $loadMore . '</div>';
 
         return $items . $oob;
@@ -254,5 +474,159 @@ class ArticleController
         }
 
         return null;
+    }
+
+    /**
+     * Filter articles by tag slug.
+     */
+    private function filterByTag(string $tagSlug, int $page): Response
+    {
+        $allPublished = $this->service->findPublished(limit: 100, offset: 0);
+
+        $filtered = [];
+        foreach ($allPublished as $article) {
+            $dto = $this->attachTagsToDto(ArticleDTO::fromEntity($article));
+            foreach ($dto->tags as $tag) {
+                if ($tag['slug'] === $tagSlug) {
+                    $filtered[] = $dto;
+                    break;
+                }
+            }
+        }
+
+        $articles = array_slice($filtered, ($page - 1) * self::PER_PAGE, self::PER_PAGE);
+        $total = count($filtered);
+        $hasMore = ($page * self::PER_PAGE) < $total;
+
+        return $this->view->render('pages/articles/index', [
+            'title' => 'Articles tagged with "' . $tagSlug . '"',
+            'currentPage' => 'articles',
+            'message' => 'Filtered by tag: ' . $tagSlug,
+            'articles' => $articles,
+            'searchQuery' => '',
+            'tagSlug' => $tagSlug,
+            'allTags' => $this->fetchAllTags(),
+            'pagination' => [
+                'limit' => self::PER_PAGE,
+                'page' => $page,
+                'has_more' => $hasMore,
+                'total' => $total,
+            ],
+        ]);
+    }
+
+    // ---- Tag helpers ----
+
+    /**
+     * Fetch all tags with article count (for tag cloud).
+     *
+     * @return array<int, array{id: int, name: string, slug: string, article_count: int}>
+     */
+    private function fetchAllTags(): array
+    {
+        return $this->getDbConnection()->query(
+            'SELECT t.*, (SELECT COUNT(*) FROM article_tags WHERE tag_id = t.id) as article_count FROM "tags" t ORDER BY "article_count" DESC, "name" ASC'
+        );
+    }
+
+    /**
+     * Fetch tags for an article and attach them to the DTO via constructor copy.
+     */
+    private function attachTagsToDto(ArticleDTO $dto): ArticleDTO
+    {
+        if ($dto->id === null) {
+            return $dto;
+        }
+
+        $tags = $this->fetchTagsForArticle($dto->id);
+
+        return new ArticleDTO(
+            id: $dto->id,
+            title: $dto->title,
+            content: $dto->content,
+            slug: $dto->slug,
+            excerpt: $dto->excerpt,
+            image: $dto->image,
+            published: $dto->published,
+            status: $dto->status,
+            categoryId: $dto->categoryId,
+            createdAt: $dto->createdAt,
+            tags: $tags,
+        );
+    }
+
+    /**
+     * Fetch tags assigned to a given article.
+     *
+     * @return array<int, array{id: int, name: string, slug: string}>
+     */
+    private function fetchTagsForArticle(int $articleId): array
+    {
+        return $this->getDbConnection()->query(
+            'SELECT t.* FROM "tags" t INNER JOIN "article_tags" at ON t.id = at.tag_id WHERE at.article_id = ? ORDER BY t.name',
+            [$articleId],
+        );
+    }
+
+    // ---- FTS search ----
+
+    /**
+     * Search articles using SQLite FTS4 full-text index.
+     *
+     * @return array{ids: array<int, int>, snippets: array<int, string|null>}
+     */
+    private function searchArticlesByFts(string $query): array
+    {
+        $safe = preg_replace('/[^\w\s\-]/u', '', $query);
+        $safe = trim($safe ?? '');
+
+        if ($safe === '') {
+            return ['ids' => [], 'snippets' => []];
+        }
+
+        $terms = array_values(array_filter(
+            explode(' ', $safe),
+            fn (string $t): bool => $t !== '',
+        ));
+
+        if ($terms === []) {
+            return ['ids' => [], 'snippets' => []];
+        }
+
+        $ftsQuery = implode('* ', $terms) . '*';
+
+        $rows = $this->getDbConnection()->query(
+            "SELECT docid, snippet(articles_fts, '<mark>', '</mark>', '…', -1, 32) as snippet
+             FROM articles_fts
+             WHERE articles_fts MATCH ?
+             ORDER BY docid",
+            [$ftsQuery],
+        );
+
+        $ids = [];
+        $snippets = [];
+        foreach ($rows as $row) {
+            $id = (int) $row['docid'];
+            $ids[] = $id;
+            $raw = $row['snippet'] ?? null;
+            if ($raw !== null) {
+                // Escape all HTML, then restore only safe <mark> tags
+                $escaped = htmlspecialchars($raw, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $snippets[$id] = str_replace(
+                    ['&lt;mark&gt;', '&lt;/mark&gt;'],
+                    ['<mark>', '</mark>'],
+                    $escaped,
+                );
+            } else {
+                $snippets[$id] = null;
+            }
+        }
+
+        return ['ids' => $ids, 'snippets' => $snippets];
+    }
+
+    private function getDbConnection(): ConnectionInterface
+    {
+        return $this->blogConnection->getConnection();
     }
 }

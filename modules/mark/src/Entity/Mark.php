@@ -7,9 +7,10 @@ namespace Marko\Mark\Entity;
 use Marko\Database\Attributes\Column;
 use Marko\Database\Attributes\Table;
 use Marko\Database\Entity\Entity;
+use Marko\Notification\Contracts\NotifiableInterface;
 
 #[Table('mark_users')]
-class Mark extends Entity implements MarkInterface
+class Mark extends Entity implements MarkInterface, NotifiableInterface
 {
     #[Column(primaryKey: true, autoIncrement: true)]
     public ?int $id = null;
@@ -126,5 +127,28 @@ class Mark extends Entity implements MarkInterface
         string $slug,
     ): bool {
         return array_any($this->roles, fn ($role) => $role->getSlug() === $slug);
+    }
+
+    // ---- NotifiableInterface ----
+
+    public function routeNotificationFor(
+        string $channel,
+    ): mixed {
+        return match ($channel) {
+            'mail' => $this->email,
+            'name' => $this->name,
+            'database' => $this->id,
+            default => null,
+        };
+    }
+
+    public function getNotifiableId(): string|int
+    {
+        return $this->id ?? 0;
+    }
+
+    public function getNotifiableType(): string
+    {
+        return self::class;
     }
 }

@@ -25,9 +25,12 @@ Application skeleton for the Marko Framework, a PHP framework for building web a
 ├── bootstrap/                # Application bootstrap files
 ├── config/                   # Configuration files (database, logging, session, view)
 ├── database/                 # Database-related files
-│   └── migrations/           # Database migrations
+│   ├── init/                 # Dev init SQL scripts (cardboard.sql, articles.sql, portfolio.sql)
+│   ├── init.php              # CLI entry: php database/init.php [db] [--force] [--no-seed]
+│   └── migrations/           # Database migrations (removed — replaced by init/ in dev phase)
 ├── modules/                  # Third-party modules
-│   └── blog/                 # Example blog module
+│   ├── blog/                 # Example blog module
+│   ├── cardboard/            # Admin panel UI (login, dashboard, registration)
 ├── packages/                 # Marko framework packages (core components)
 │   ├── admin/                # Admin panel package
 │   ├── cli/                  # CLI commands package
@@ -38,16 +41,19 @@ Application skeleton for the Marko Framework, a PHP framework for building web a
 │   ├── cardboard-assets/     # Public assets
 │   └── index.php             # Web entry point
 ├── storage/                  # Storage for logs, cache, sessions, data
-│   ├── data/                 # SQLite database file
+│   ├── data/                 # SQLite databases (cardboard.db, articles.db, portfolio.db)
 │   └── framework/            # Framework storage (sessions, cache, views)
 ├── templates/                # Frontend templates and assets
 │   ├── app/                  # Application templates
 │   ├── blog/                 # Blog templates
+│   ├── pages/                # Page templates (auth, home, portfolio)
 │   └── static/               # Static assets
 ├── tests/                    # Test suites
 │   ├── Connection/           # Database connection tests
 │   ├── Diff/                 # Diff-related tests
-│   └── Introspection/        # Introspection tests
+│   ├── Introspection/        # Introspection tests
+│   ├── Unit/Auth/            # Auth flow tests (registration)
+│   └── Unit/Cardboard/       # Cardboard module tests
 ├── vendor/                   # Composer dependencies
 ├── .env                      # Environment variables (local)
 ├── .env.example              # Environment template
@@ -69,6 +75,8 @@ Application skeleton for the Marko Framework, a PHP framework for building web a
 | `bootstrap/app.php` | Application bootstrap and initialization |
 | `marko` | CLI executable for framework commands |
 | `app/src/HomeController.php` | Example controller (if exists) |
+| `modules/cardboard/src/Controller/RegisterController.php` | Registration controller (GET/POST /mark/register) |
+| `modules/cardboard/src/Controller/LoginController.php` | Login controller (GET/POST /mark/login) |
 
 ## Documentation
 | Document | Path | Description |

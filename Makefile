@@ -1,4 +1,4 @@
-.PHONY: install update sync-marko dev test analyse lint check build clean serve frontend-dev frontend-build help
+.PHONY: install update sync-marko dev test analyse lint check build clean serve frontend-dev frontend-build db-init db-reset db-init-no-seed db-init-cardboard db-init-articles db-init-portfolio help
 
 help:
 	@echo "Nativa Dev & Prod Circuits"
@@ -20,6 +20,14 @@ help:
 	@echo "Prod circuit:"
 	@echo "  build         Build production artifact to dist/"
 	@echo "  frontend-build Build frontend assets for production"
+	@echo ""
+	@echo "Database:"
+	@echo "  db-init           Init all databases (drop + recreate + seed)"
+	@echo "  db-reset          Alias for db-init"
+	@echo "  db-init-no-seed   Schema only, no seed data"
+	@echo "  db-init-cardboard Init cardboard.db only"
+	@echo "  db-init-articles  Init articles.db only"
+	@echo "  db-init-portfolio Init portfolio.db only"
 	@echo ""
 	@echo "Utility:"
 	@echo "  clean         Remove vendor/, dist/, node_modules"
@@ -91,9 +99,27 @@ check:
 build: frontend-build
 	php build.php
 
+
 # ──────────────────────────────────────────────
-# Utility
+# Database (Dev)
 # ──────────────────────────────────────────────
+
+db-init:
+	php database/init.php --force
+
+db-reset: db-init
+
+db-init-no-seed:
+	php database/init.php --force --no-seed
+
+db-init-cardboard:
+	php database/init.php cardboard --force
+
+db-init-articles:
+	php database/init.php articles --force
+
+db-init-portfolio:
+	php database/init.php portfolio --force
 
 clean:
 	rm -rf vendor dist

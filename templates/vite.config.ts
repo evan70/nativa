@@ -29,7 +29,7 @@ export default defineConfig(() => {
           'page-home': resolve(__dirname, 'src/pages/home/home.ts'),
           'page-portfolio': resolve(__dirname, 'src/pages/portfolio/portfolio.ts'),
           'page-articles': resolve(__dirname, 'src/pages/articles/articles.ts'),
-          'page-dash': resolve(__dirname, 'src/pages/dash/dash.ts'),
+          'page-mark': resolve(__dirname, 'src/pages/mark/mark.ts'),
           'page-auth': resolve(__dirname, 'src/pages/auth/auth.ts'),
           'page-errors': resolve(__dirname, 'src/pages/errors/errors.ts'),
           'page-fire-show-demo': resolve(__dirname, 'src/pages/fire-show-demo.ts'),

@@ -16,6 +16,7 @@ final class PageLayout
         'home'       => 'home',
         'portfolio'  => 'portfolio',
         'articles'   => 'articles',
+        'mark'       => 'mark',
         'dash'       => 'dash',
         'auth'       => 'auth',
         'errors'     => 'errors',
@@ -23,11 +24,12 @@ final class PageLayout
 
         // Backward compatibility (old template paths)
         'blog'       => 'articles',
-        'cardboard'  => 'dash',
-        'admin'      => 'dash',
+        'cardboard'  => 'mark',
+        'admin'      => 'mark',
     ];
 
     private const LAYOUT_MAP = [
+        'mark'   => 'layouts/mark',
         'dash'   => 'layouts/admin',
         'auth'   => 'layouts/auth',
     ];

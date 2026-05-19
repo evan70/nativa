@@ -8,6 +8,9 @@ use DateTimeImmutable;
 
 class ArticleDTO
 {
+    /**
+     * @param array<int, array{id: int, name: string, slug: string}> $tags
+     */
     public function __construct(
         public readonly ?int $id,
         public readonly string $title,
@@ -19,6 +22,8 @@ class ArticleDTO
         public readonly string $status,
         public readonly ?int $categoryId,
         public readonly ?DateTimeImmutable $createdAt,
+        public readonly array $tags = [],
+        public readonly ?string $snippet = null,
     ) {}
 
     public static function fromEntity(object $entity): self

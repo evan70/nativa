@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
     'driver' => 'sqlite',
-    'database' => dirname(__DIR__) . '/storage/data/nativa.db',
+    'database' => dirname(__DIR__) . '/storage/data/cardboard.db',
     
     // Mapovanie modulov na databázy
     // Kľúč = názov modulu (adresár v modules/)
@@ -12,9 +12,7 @@ return [
     'modules' => [
         'blog' => 'articles',
         'cardboard' => 'cardboard',
-        'mark' => 'nativa',
+        'mark' => 'cardboard',
         'portfolio' => 'portfolio',
-        'nativa' => 'nativa',
-        'database-modular' => 'database-modular',
     ],
 ];

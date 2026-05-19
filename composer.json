@@ -24,7 +24,7 @@
         "marko/env": "dev-main",
         "marko/log-file": "dev-main",
         "marko/notification-database": "dev-main",
-        "marko/session-database": "dev-main"
+        "marko/session-file": "dev-main"
     },
     "autoload": {
         "psr-4": {

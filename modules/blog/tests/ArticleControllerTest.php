@@ -6,10 +6,12 @@ namespace App\Blog\Tests;
 
 use PHPUnit\Framework\TestCase;
 use App\Blog\Controller\ArticleController;
+use App\Blog\Database\BlogConnection;
 use App\Blog\Service\ArticleService;
 use App\Blog\Repository\ArticleRepository;
 use App\Blog\DTO\ArticleDTO;
 use App\Blog\Entity\Article;
+use Marko\Database\Connection\ConnectionInterface;
 use Marko\View\ViewInterface;
 use Marko\Routing\Http\Request;
 use Marko\Routing\Http\Response;
@@ -19,6 +21,8 @@ class ArticleControllerTest extends TestCase
     private ArticleRepository $repository;
     private ArticleService $service;
     private ViewInterface $view;
+    private BlogConnection $blogConnection;
+    private ConnectionInterface $dbConnection;
 
     protected function setUp(): void
     {
@@ -28,6 +32,12 @@ class ArticleControllerTest extends TestCase
         $this->repository = $this->createMock(ArticleRepository::class);
         $this->service = new ArticleService($this->repository);
         $this->view = $this->createMock(ViewInterface::class);
+        $this->dbConnection = $this->createMock(ConnectionInterface::class);
+        $this->blogConnection = $this->createMock(BlogConnection::class);
+
+        $this->blogConnection
+            ->method('getConnection')
+            ->willReturn($this->dbConnection);
     }
 
     public function testIndexReturnsArticles(): void
@@ -76,6 +86,7 @@ class ArticleControllerTest extends TestCase
             $this->repository,
             $this->service,
             $this->view,
+            $this->blogConnection,
         );
 
         // Act
@@ -118,6 +129,7 @@ class ArticleControllerTest extends TestCase
             $this->repository,
             $this->service,
             $this->view,
+            $this->blogConnection,
         );
 
         // Act
@@ -145,6 +157,7 @@ class ArticleControllerTest extends TestCase
             $this->repository,
             $this->service,
             $this->view,
+            $this->blogConnection,
         );
 
         // Act

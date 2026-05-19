@@ -73,11 +73,6 @@ if (!is_dir($distDir . '/packages')) {
 // 5. Copy marko packages that still live only under vendor/marko into dist/packages
 copyVendorMarkoPackages($rootDir, $distDir);
 
-// 5.5. Create vendor/marko/* symlinks so ModuleDiscovery::discoverInVendor()
-// finds the flat packages/ structure.  In dev this is done by make install
-// (vendor/marko -> ../packages).  In dist we need vendor/marko/{package} -> ../../packages/{package}
-// because discoverInVendor() expects 2-level nesting (vendor/vendor-name/package-name/).
-createVendorSymlinks($distDir);
 
 if (is_file($rootDir . '/marko')) {
     echo "   Copying marko CLI binary...\n";
@@ -115,17 +110,13 @@ foreach ($storageDirs as $dir) {
         mkdir($path, 0755, true);
         echo "   Creating $dir/\n";
     }
-}
-
-// Initialize database (run migrations and seed)
-if (is_file($distDir . '/marko')) {
-    echo "   Running database migrations...\n";
-    chdir($distDir);
-    passthru('php marko db:migrate --no-interaction --no-generate', $exitCode);
-    echo "   Running database seeding...\n";
-    passthru('php marko db:seed --no-interaction', $exitCode);
-    chdir($rootDir);
-}
+}    // Initialize database (run init scripts)
+    if (is_dir($distDir . '/database/init')) {
+        echo "   Initializing databases...\n";
+        chdir($distDir);
+        passthru('php database/init.php --force --no-interaction', $exitCode);
+        chdir($rootDir);
+    }
 
 // Create a minimal .gitignore for dist
 file_put_contents($distDir . '/.gitignore', "*\n!.gitignore\n");
@@ -138,7 +129,7 @@ echo "The 'dist' folder contains:\n";
 echo "   - Bootstrap autoloader resolving packages/ directly\n";
 echo "   - Source code (app, modules, packages)\n";
 echo "   - All required marko/* runtime packages moved into packages/\n";
-echo "   - vendor/marko/* symlinks to ../../packages/* for ModuleDiscovery\n";
+
 echo "   - NO root composer.json / composer.lock\n";
 echo "   - Package composer.json files kept for ModuleDiscovery (modules/ + packages/)\n";
 echo "   - autoload.php updated for production (no vendor dependency)\n";
@@ -208,47 +199,6 @@ function writeRuntimeManifest(
     $manifestFile = $distDir . '/bootstrap/runtime-manifest.php';
     $export = var_export($manifest, true);
     file_put_contents($manifestFile, "<?php\n\ndeclare(strict_types=1);\n\nreturn $export;\n");
-}
-
-/**
- * Create vendor/marko/* -> ../../packages/* symlinks in dist.
- *
- * ModuleDiscovery::discoverInVendor() expects 2-level nesting:
- *   vendor/vendor-name/package-name/
- *
- * The flat packages/ directory (packages/core/, packages/session/, etc.)
- * does not satisfy this, so we bridge by creating vendor/marko/ with
- * symlinks to the actual package directories.
- */
-function createVendorSymlinks(string $distDir): void
-{
-    $vendorMarkoDir = $distDir . '/vendor/marko';
-    $packagesDir = $distDir . '/packages';
-
-    if (!is_dir($packagesDir)) {
-        return;
-    }
-
-    if (!is_dir($vendorMarkoDir)) {
-        mkdir($vendorMarkoDir, 0755, true);
-    }
-
-    foreach (scandir($packagesDir) ?: [] as $packageName) {
-        if ($packageName === '.' || $packageName === '..' || !is_dir($packagesDir . '/' . $packageName)) {
-            continue;
-        }
-
-        $target = $vendorMarkoDir . '/' . $packageName;
-
-        // Skip if already exists (e.g. manual setup, previous run)
-        if (file_exists($target)) {
-            continue;
-        }
-
-        $relativeTarget = '../../packages/' . $packageName;
-        symlink($relativeTarget, $target);
-        echo "   Symlink vendor/marko/$packageName -> $relativeTarget\n";
-    }
 }
 
 /**

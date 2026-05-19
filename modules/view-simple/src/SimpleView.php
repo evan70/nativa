@@ -83,6 +83,29 @@ class SimpleView implements ViewInterface
         return $this->sections[$name] ?? '';
     }
 
+    public function include(string $template, array $data = []): string
+    {
+        $path = $this->resolver->resolve($template);
+        if (!file_exists($path)) {
+            throw TemplateNotFoundException::forTemplate($template, [$path]);
+        }
+
+        // Merge layout data with partial-specific data (partial data wins)
+        $data = array_merge($this->layoutData, $data);
+
+        extract($data, EXTR_SKIP);
+
+        ob_start();
+        try {
+            include $path;
+            $content = ob_get_clean();
+            return $content !== false ? $content : '';
+        } catch (\Throwable $e) {
+            ob_end_clean();
+            throw $e;
+        }
+    }
+
     public function e(?string $value): string
     {
         return htmlspecialchars($value ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');

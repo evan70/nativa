@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use App\DatabaseModular\Contracts\ModuleDatabaseResolverInterface;
+use App\Portfolio\Admin\PortfolioAdminSection;
 use App\Portfolio\Database\PortfolioConnection;
 use App\Portfolio\Repository\PortfolioItemRepository;
+use Marko\Admin\Contracts\AdminSectionRegistryInterface;
 use Marko\Core\Container\ContainerInterface;
 use Marko\Database\Entity\EntityHydrator;
 use Marko\Database\Entity\EntityMetadataFactory;
@@ -25,4 +27,11 @@ return [
             );
         },
     ],
+
+    'boot' => function (ContainerInterface $container): void {
+        if ($container->has(AdminSectionRegistryInterface::class)) {
+            $registry = $container->get(AdminSectionRegistryInterface::class);
+            $registry->register(new PortfolioAdminSection());
+        }
+    },
 ];

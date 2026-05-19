@@ -1,13 +1,6 @@
 <div class="navbar" data-section="navbar">
-    <div class="navbar__container">
+    <div class="navbar__container container">
         <div class="navbar__left">
-            <button class="icon-btn navbar__toggle sidebar-toggle" aria-label="Toggle Sidebar">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="3" y1="12" x2="21" y2="12"></line>
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <line x1="3" y1="18" x2="21" y2="18"></line>
-                </svg>
-            </button>
             <a href="/mark" class="navbar__brand">
                 <svg class="navbar__logo" width="24" height="24" viewBox="0 0 24 24" fill="#ffffff">
                     <path d="M12 2L2 22h20L12 2z"/>
@@ -15,6 +8,17 @@
                 Marko Admin
             </a>
         </div>
+
+        <nav class="navbar__menu" data-nav-menu>
+            <?php if (!empty($menuItems)): ?>
+                <?php foreach ($menuItems as $item): ?>
+                    <a href="<?= $this->e($item['url']) ?>"
+                       class="navbar__link <?= !empty($item['active']) ? 'navbar__link--active' : '' ?>">
+                        <?= $this->e($item['label']) ?>
+                    </a>
+                <?php endforeach ?>
+            <?php endif ?>
+        </nav>
         
         <div class="navbar__actions">
             <button class="icon-btn navbar__dev-toggle" id="dev-theme-switcher" aria-label="Neon Theme">
@@ -60,6 +64,19 @@
                     </svg>
                 </a>
             <?php endif ?>
+
+            <!-- Mobile toggle (hamburger) for navbar menu -->
+            <button class="icon-btn navbar__toggle" aria-label="Toggle Menu">
+                <svg class="navbar__toggle-icon--meatball" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="5" r="2"></circle>
+                    <circle cx="12" cy="12" r="2"></circle>
+                    <circle cx="12" cy="19" r="2"></circle>
+                </svg>
+                <svg class="navbar__toggle-icon--close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
         </div>
     </div>
 </div>

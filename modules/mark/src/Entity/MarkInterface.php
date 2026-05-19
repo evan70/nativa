@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Marko\Mark\Entity;
 
 use Marko\Authentication\AuthenticatableInterface;
+use Marko\Notification\Contracts\NotifiableInterface;
 
-interface MarkInterface extends AuthenticatableInterface
+interface MarkInterface extends AuthenticatableInterface, NotifiableInterface
 {
     public function getEmail(): string;
 
