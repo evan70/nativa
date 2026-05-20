@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Init\Module;
 
-use App\Init\Container\Container;
+use Marko\Core\Container\Container;
 use Marko\Core\Module\ModuleManifest;
 use Marko\Core\Path\ProjectPaths;
 use Psr\Log\LoggerInterface;
@@ -254,9 +254,25 @@ class ModuleGroupManager implements ModuleGroupManagerInterface
         /** @var array<string, string> $bindings */
         $bindings = $manifest->bindings;
         foreach ($bindings as $interface => $implementation) {
-            $this->container->unbind($interface);
+            $this->unbind($interface);
         }
         unset($this->activeGroups[$groupName]);
+    }
+
+    private function unbind(string $interface): bool
+    {
+        $ref = new \ReflectionClass(Container::class);
+        $prop = $ref->getProperty('bindings');
+        /** @var array<string, mixed> $bindings */
+        $bindings = $prop->getValue($this->container);
+
+        if (isset($bindings[$interface])) {
+            unset($bindings[$interface]);
+            $prop->setValue($this->container, $bindings);
+            return true;
+        }
+
+        return false;
     }
 
     /**
