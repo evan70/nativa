@@ -49,6 +49,12 @@
             "pestphp/pest-plugin": true
         }
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/evan70/marko-core.git"
+        }
+    ],
     "scripts": {
         "test": "vendor/bin/pest --parallel --stop-on-failure",
         "analyse": "phpstan analyse --memory-limit=1G --error-format=table",
