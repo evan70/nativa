@@ -41,6 +41,9 @@ class PortfolioItem extends Entity
     #[Column]
     public string $image = '';
 
+    #[Column(type: 'TEXT')]
+    public string $tags = '';
+
     #[Column('display_order')]
     public int $displayOrder = 0;
 }

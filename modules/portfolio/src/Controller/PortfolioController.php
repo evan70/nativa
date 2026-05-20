@@ -25,6 +25,16 @@ readonly class PortfolioController
             $this->logDebug('PortfolioController::index called', ['path' => $request->path()]);
         }
 
+        /** @var string $category */
+        $category = $request->query('category', '');
+        /** @var string $tag */
+        $tag = $request->query('tag', '');
+
+        $allProjects = $this->loadProjects();
+        $projects = $this->filterProjects($allProjects, $category, $tag);
+        $categories = $this->extractCategories($allProjects);
+        $tags = $this->extractTags($allProjects);
+
         return $this->view
             ->render('pages/portfolio/index', [
                 'title' => 'Portfolio | Nativa',
@@ -32,7 +42,11 @@ readonly class PortfolioController
                 'eyebrow' => 'Our Work',
                 'heading' => 'Selected Projects',
                 'description' => 'A collection of projects built with vanilla performance and BEM architecture.',
-                'projects' => $this->loadProjects(),
+                'projects' => $projects,
+                'activeCategory' => $category,
+                'activeTag' => $tag,
+                'categories' => $categories,
+                'allTags' => $tags,
             ]);
     }
 
@@ -60,6 +74,61 @@ readonly class PortfolioController
         ]);
 
         return Response::html($html, $status);
+    }
+
+    /**
+     * @param array<int, PortfolioItem> $projects
+     * @return array<int, PortfolioItem>
+     */
+    private function filterProjects(array $projects, string $category, string $tag): array
+    {
+        if ($category === '' && $tag === '') {
+            return $projects;
+        }
+
+        return array_values(array_filter($projects, static function (PortfolioItem $item) use ($category, $tag): bool {
+            if ($category !== '' && $item->category !== $category) {
+                return false;
+            }
+            if ($tag !== '') {
+                $itemTags = array_map('trim', explode(',', $item->tags));
+                if (!in_array($tag, $itemTags, true)) {
+                    return false;
+                }
+            }
+            return true;
+        }));
+    }
+
+    /**
+     * @param array<int, PortfolioItem> $projects
+     * @return array<string>
+     */
+    private function extractCategories(array $projects): array
+    {
+        $categories = array_unique(array_map(static fn(PortfolioItem $item): string => $item->category, $projects));
+        sort($categories);
+        return $categories;
+    }
+
+    /**
+     * @param array<int, PortfolioItem> $projects
+     * @return array<string>
+     */
+    private function extractTags(array $projects): array
+    {
+        $tags = [];
+        foreach ($projects as $item) {
+            foreach (explode(',', $item->tags) as $t) {
+                $trimmed = trim($t);
+                if ($trimmed !== '') {
+                    $tags[$trimmed] = true;
+                }
+            }
+        }
+        $tags = array_keys($tags);
+        sort($tags);
+        return $tags;
     }
 
     /**
@@ -117,6 +186,7 @@ readonly class PortfolioController
                 'year' => '2026',
                 'stack' => 'TypeScript, Charts, API',
                 'image' => '/dist/assets/images/26d7d834d1eda62fc868808f37c9b157.webp',
+                'tags' => 'dashboard, analytics, typescript, data',
                 'displayOrder' => 10,
             ],
             [
@@ -129,6 +199,7 @@ readonly class PortfolioController
                 'year' => '2025',
                 'stack' => 'PHP, Marko, SQLite',
                 'image' => '/dist/assets/images/afe59aa58f41fc48817094cfe7519d0b.webp',
+                'tags' => 'commerce, api, php, backend',
                 'displayOrder' => 20,
             ],
             [
@@ -141,6 +212,7 @@ readonly class PortfolioController
                 'year' => '2025',
                 'stack' => 'React, Node.js, PostgreSQL',
                 'image' => '/dist/assets/images/c492faf34ca219cccefbde6eedaf2b6b.webp',
+                'tags' => 'cms, react, node, content',
                 'displayOrder' => 30,
             ],
             [
@@ -153,6 +225,7 @@ readonly class PortfolioController
                 'year' => '2026',
                 'stack' => 'Docker, GitHub Actions, Bash',
                 'image' => '/dist/assets/images/d1a18cb5ea2f538c0a8d06e4f6e74264.webp',
+                'tags' => 'devops, docker, ci-cd, automation',
                 'displayOrder' => 40,
             ],
             [
@@ -165,7 +238,34 @@ readonly class PortfolioController
                 'year' => '2026',
                 'stack' => 'Swift, Kotlin, React Native',
                 'image' => '/dist/assets/images/d76d493024744f5142823636a88bb4dd.webp',
+                'tags' => 'mobile, sdk, swift, kotlin, cross-platform',
                 'displayOrder' => 50,
+            ],
+            [
+                'title' => 'Design System',
+                'slug' => 'design-system',
+                'subtitle' => 'Unified component library',
+                'description' => 'Comprehensive design system with 50+ accessible components. Themeable architecture with design tokens and automated visual regression testing.',
+                'category' => 'Design',
+                'role' => 'Design engineer',
+                'year' => '2026',
+                'stack' => 'Storybook, CSS, Figma API',
+                'image' => '/dist/assets/images/26d7d834d1eda62fc868808f37c9b157.webp',
+                'tags' => 'design, storybook, css, design-tokens',
+                'displayOrder' => 60,
+            ],
+            [
+                'title' => 'Event Platform',
+                'slug' => 'event-platform',
+                'subtitle' => 'Virtual events infrastructure',
+                'description' => 'End-to-end platform for virtual conferences with live streaming, chat, ticketing, and analytics. Handled 50k+ concurrent attendees.',
+                'category' => 'Platform',
+                'role' => 'Tech lead',
+                'year' => '2025',
+                'stack' => 'WebRTC, Go, Redis, K8s',
+                'image' => '/dist/assets/images/d76d493024744f5142823636a88bb4dd.webp',
+                'tags' => 'events, webrtc, go, redis, streaming',
+                'displayOrder' => 70,
             ],
         ] as $data) {
             $item = new PortfolioItem();
@@ -178,6 +278,7 @@ readonly class PortfolioController
             $item->year = $data['year'];
             $item->stack = $data['stack'];
             $item->image = $data['image'];
+            $item->tags = $data['tags'];
             $item->displayOrder = $data['displayOrder'];
 
             $projects[] = $item;

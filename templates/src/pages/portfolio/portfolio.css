@@ -1,12 +1,223 @@
 /* === PORTFOLIO PAGE STYLES === */
 
-/* Tag — used in portfolio cards */
+/* ==============================================
+   Filter Bar
+   ============================================== */
+.filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  margin-bottom: var(--space-8);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--transition-fast);
+}
+
+.filter-bar:focus-within {
+  border-color: var(--brand-gold);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand-gold) 30%, transparent);
+}
+
+.filter-bar__group {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.filter-bar__label {
+  flex-shrink: 0;
+  min-width: 4.5rem;
+  padding-top: var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+.filter-bar__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* ==============================================
+   Pill — filter chip
+   ============================================== */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-text-muted);
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.pill:hover {
+  color: var(--color-text);
+  background: var(--color-bg-hover);
+  border-color: var(--color-text-muted);
+}
+
+.pill:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.pill--active {
+  color: #fff;
+  background: var(--brand-gold);
+  border-color: var(--brand-gold);
+}
+
+[data-theme="light"] .pill--active {
+  color: #fff;
+}
+
+.pill--active:hover {
+  color: #fff;
+  background: var(--brand-gold-dark);
+  border-color: var(--brand-gold-dark);
+}
+
+.pill--tag {
+  font-size: var(--text-xs);
+}
+
+.pill--tag::before {
+  content: "#";
+  opacity: 0.5;
+}
+
+/* ==============================================
+   Tags inside portfolio cards
+   ============================================== */
+.card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
 .tag {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   padding: var(--space-1) var(--space-2);
   font-size: var(--text-xs);
   font-weight: var(--font-medium);
   color: var(--color-text-muted);
   background: var(--color-bg-alt);
   border-radius: var(--radius-sm);
+  line-height: 1.2;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.tag--link {
+  text-decoration: none;
+  cursor: pointer;
+  color: var(--brand-gold);
+  background: color-mix(in srgb, var(--brand-gold) 10%, var(--color-bg-alt));
+}
+
+.tag--link:hover {
+  color: var(--brand-gold-light);
+  background: color-mix(in srgb, var(--brand-gold) 20%, var(--color-bg-alt));
+}
+
+.tag--stack {
+  font-size: calc(var(--text-xs) * 0.85);
+  color: var(--color-text-muted);
+  opacity: 0.75;
+}
+
+/* ==============================================
+   Card meta — details row
+   ============================================== */
+.card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-4);
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.card__meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.card__meta-label {
+  font-weight: var(--font-semibold);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  opacity: 0.7;
+}
+
+.card__category-link {
+  color: var(--brand-gold);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.card__category-link:hover {
+  color: var(--brand-gold-light);
+  text-decoration: underline;
+}
+
+/* ==============================================
+   Empty state — no matching projects
+   ============================================== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-12) var(--space-6);
+  text-align: center;
+  color: var(--color-text-muted);
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+/* ==============================================
+   Responsive
+   ============================================== */
+@media (max-width: 640px) {
+  .filter-bar {
+    padding: var(--space-3) var(--space-4);
+    gap: var(--space-3);
+  }
+
+  .filter-bar__group {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .filter-bar__pills {
+    gap: var(--space-1);
+  }
+
+  .pill {
+    font-size: var(--text-xs);
+    padding: var(--space-0) var(--space-2);
+  }
+
+  .card__meta {
+    flex-direction: column;
+    gap: var(--space-1);
+  }
 }

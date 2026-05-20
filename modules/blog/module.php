@@ -17,34 +17,39 @@ use Marko\Log\Contracts\LoggerInterface;
 return [
     'bindings' => [
         BlogConnection::class => function (ContainerInterface $container): BlogConnection {
-            return new BlogConnection(
-                $container->get(\App\DatabaseModular\Contracts\ModuleDatabaseResolverInterface::class)
-            );
+            /** @var \App\DatabaseModular\Contracts\ModuleDatabaseResolverInterface $resolver */
+            $resolver = $container->get(\App\DatabaseModular\Contracts\ModuleDatabaseResolverInterface::class);
+            return new BlogConnection($resolver);
         },
-        
+
         ArticleRepository::class => function (ContainerInterface $container): ArticleRepository {
+            /** @var BlogConnection $blogConnection */
+            $blogConnection = $container->get(BlogConnection::class);
             return new ArticleRepository(
-                $container->get(BlogConnection::class)->getConnection(),
+                $blogConnection->getConnection(),
                 new EntityMetadataFactory(),
                 new EntityHydrator(),
             );
         },
         ArticleServiceInterface::class => function (ContainerInterface $container): ArticleServiceInterface {
+            /** @var ArticleRepository $repository */
             $repository = $container->get(ArticleRepository::class);
-            
+
             // Optional logger - won't fail if not bound
             $logger = null;
             if ($container->has(LoggerInterface::class)) {
+                /** @var \Marko\Log\Contracts\LoggerInterface $logger */
                 $logger = $container->get(LoggerInterface::class);
             }
-            
+
             return new ArticleService($repository, $logger);
         },
     ],
-    
+
     'boot' => function (ContainerInterface $container): void {
         // Register admin section
         if ($container->has(AdminSectionRegistryInterface::class)) {
+            /** @var AdminSectionRegistryInterface $registry */
             $registry = $container->get(AdminSectionRegistryInterface::class);
             $registry->register(new BlogAdminSection());
         }

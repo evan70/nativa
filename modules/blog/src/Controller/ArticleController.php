@@ -38,23 +38,31 @@ class ArticleController
         $searchQuery = trim(is_string($q) ? $q : '');
         $tag = $_GET['tag'] ?? '';
         $tagSlug = trim(is_string($tag) ? $tag : '');
+        $cat = $_GET['category'] ?? '';
+        $categoryName = trim(is_string($cat) ? $cat : '');
 
         // If HTMX swap request targeting article-list, return partial
         if ($htmx !== null && $htmx->target() === 'article-list') {
-            return $this->renderPartial($page, $searchQuery, $tagSlug);
+            return $this->renderPartial($page, $searchQuery, $tagSlug, $categoryName);
         }
 
         // Handle FTS search
         if ($searchQuery !== '') {
-            return $this->renderSearchResults($searchQuery, $tagSlug, $page);
+            return $this->renderSearchResults($searchQuery, $tagSlug, $page, $categoryName);
         }
 
         // Handle tag filter
         if ($tagSlug !== '') {
-            return $this->filterByTag($tagSlug, $page);
+            return $this->filterByTag($tagSlug, $page, $categoryName);
+        }
+
+        // Handle category filter
+        if ($categoryName !== '') {
+            return $this->filterByCategory($categoryName, $page);
         }
 
         $allTags = $this->fetchAllTags();
+        $allCategories = $this->fetchAllCategories();
 
         $articleEntities = $this->service->findPublished(
             limit: self::PER_PAGE,
@@ -80,7 +88,9 @@ class ArticleController
             'articles' => $articles,
             'searchQuery' => '',
             'tagSlug' => $tagSlug,
+            'categoryName' => $categoryName,
             'allTags' => $allTags,
+            'allCategories' => $allCategories,
             'pagination' => [
                 'limit' => self::PER_PAGE,
                 'page' => $page,
@@ -93,7 +103,7 @@ class ArticleController
     /**
      * Render FTS search results with snippet highlighting.
      */
-    private function renderSearchResults(string $searchQuery, string $tagSlug, int $page): Response
+    private function renderSearchResults(string $searchQuery, string $tagSlug, int $page, string $categoryName = ''): Response
     {
         $ftsResults = $this->searchArticlesByFts($searchQuery);
         $matchedIds = $ftsResults['ids'];
@@ -103,6 +113,17 @@ class ArticleController
         if ($tagSlug !== '') {
             $taggedIds = $this->getArticleIdsByTagSlug($tagSlug);
             $matchedIds = array_values(array_intersect($matchedIds, $taggedIds));
+        }
+
+        // If category filter is also active, intersect with category-matched IDs
+        if ($categoryName !== '') {
+            $catId = $this->findCategoryId($categoryName);
+            if ($catId !== null) {
+                $catIds = $this->getArticleIdsByCategoryId($catId);
+                $matchedIds = array_values(array_intersect($matchedIds, $catIds));
+            } else {
+                $matchedIds = [];
+            }
         }
 
         $total = count($matchedIds);
@@ -131,6 +152,7 @@ class ArticleController
                 status: $dto->status,
                 categoryId: $dto->categoryId,
                 createdAt: $dto->createdAt,
+                categoryName: $dto->categoryName,
                 tags: $dto->tags,
                 snippet: $snippet,
             );
@@ -150,7 +172,9 @@ class ArticleController
             'articles' => $articles,
             'searchQuery' => $searchQuery,
             'tagSlug' => $tagSlug,
+            'categoryName' => $categoryName,
             'allTags' => $this->fetchAllTags(),
+            'allCategories' => $this->fetchAllCategories(),
             'pagination' => [
                 'limit' => self::PER_PAGE,
                 'page' => $page,
@@ -175,7 +199,7 @@ class ArticleController
     }
 
     /**
-     * Load more articles via HTMX (supports search + tag params).
+     * Load more articles via HTMX (supports search + tag + category params).
      */
     #[Get('/articles/load')]
     public function loadMore(): Response
@@ -188,8 +212,10 @@ class ArticleController
         $searchQuery = trim(is_string($q) ? $q : '');
         $tag = $_GET['tag'] ?? '';
         $tagSlug = trim(is_string($tag) ? $tag : '');
+        $cat = $_GET['category'] ?? '';
+        $categoryName = trim(is_string($cat) ? $cat : '');
 
-        return $this->renderPartial($page, $searchQuery, $tagSlug);
+        return $this->renderPartial($page, $searchQuery, $tagSlug, $categoryName);
     }
 
     #[Get('/articles/{slug}')]
@@ -227,7 +253,7 @@ class ArticleController
         ]);
     }
 
-    private function renderPartial(int $page, string $searchQuery = '', string $tagSlug = ''): Response
+    private function renderPartial(int $page, string $searchQuery = '', string $tagSlug = '', string $categoryName = ''): Response
     {
         if ($searchQuery !== '') {
             $ftsResults = $this->searchArticlesByFts($searchQuery);
@@ -237,6 +263,16 @@ class ArticleController
             if ($tagSlug !== '') {
                 $taggedIds = $this->getArticleIdsByTagSlug($tagSlug);
                 $matchedIds = array_values(array_intersect($matchedIds, $taggedIds));
+            }
+
+            if ($categoryName !== '') {
+                $catId = $this->findCategoryId($categoryName);
+                if ($catId !== null) {
+                    $catIds = $this->getArticleIdsByCategoryId($catId);
+                    $matchedIds = array_values(array_intersect($matchedIds, $catIds));
+                } else {
+                    $matchedIds = [];
+                }
             }
 
             $pageIds = array_slice($matchedIds, ($page - 1) * self::PER_PAGE, self::PER_PAGE);
@@ -260,16 +296,18 @@ class ArticleController
                     status: $dto->status,
                     categoryId: $dto->categoryId,
                     createdAt: $dto->createdAt,
+                    categoryName: $dto->categoryName,
                     tags: $dto->tags,
                     snippet: $snippets[$id] ?? null,
                 );
             }
 
+
             if ($articles === []) {
                 return Response::html('');
             }
 
-            $html = $this->renderArticlesHtml($articles, $page, $searchQuery, $tagSlug);
+            $html = $this->renderArticlesHtml($articles, $page, $searchQuery, $tagSlug, $categoryName);
             return Response::html($html);
         }
 
@@ -285,11 +323,45 @@ class ArticleController
                     }
                 }
             }
+
+            if ($categoryName !== '' && $filtered !== []) {
+                $catId = $this->findCategoryId($categoryName);
+                if ($catId !== null) {
+                    $filtered = array_values(array_filter(
+                        $filtered,
+                        fn (ArticleDTO $a): bool => $a->categoryId === $catId,
+                    ));
+                } else {
+                    $filtered = [];
+                }
+            }
+
             $pageArticles = array_slice($filtered, ($page - 1) * self::PER_PAGE, self::PER_PAGE);
             if ($pageArticles === []) {
                 return Response::html('');
             }
-            return Response::html($this->renderArticlesHtml($pageArticles, $page, '', $tagSlug));
+            return Response::html($this->renderArticlesHtml($pageArticles, $page, '', $tagSlug, $categoryName));
+        }
+
+        if ($categoryName !== '') {
+            $catId = $this->findCategoryId($categoryName);
+            if ($catId === null) {
+                return Response::html('');
+            }
+            $allPublished = $this->service->findPublished(limit: 100, offset: 0);
+            $filtered = array_values(array_filter(
+                $allPublished,
+                fn (object $a): bool => $a->categoryId === $catId,
+            ));
+            $dtoArticles = array_map(
+                fn (object $a): ArticleDTO => $this->attachTagsToDto(ArticleDTO::fromEntity($a)),
+                $filtered
+            );
+            $pageArticles = array_slice($dtoArticles, ($page - 1) * self::PER_PAGE, self::PER_PAGE);
+            if ($pageArticles === []) {
+                return Response::html('');
+            }
+            return Response::html($this->renderArticlesHtml($pageArticles, $page, '', '', $categoryName));
         }
 
         $articleEntities = $this->service->findPublished(
@@ -308,7 +380,7 @@ class ArticleController
     /**
      * @param array<int, ArticleDTO> $articles
      */
-    private function renderArticlesHtml(array $articles, int $page, string $searchQuery = '', string $tagSlug = ''): string
+    private function renderArticlesHtml(array $articles, int $page, string $searchQuery = '', string $tagSlug = '', string $categoryName = ''): string
     {
         $items = '';
         foreach ($articles as $dto) {
@@ -349,30 +421,21 @@ class ArticleController
             HTML;
         }
 
-        // Determine total for pagination
-        $total = $this->service->countPublished();
+        // Determine total for pagination — compute intersection of all active filters
+        $allIds = null;
         if ($searchQuery !== '') {
-            $total = count($this->searchArticlesByFts($searchQuery)['ids']);
+            $allIds = $this->searchArticlesByFts($searchQuery)['ids'];
         }
-        if ($tagSlug !== '' && $searchQuery === '') {
-            $allPublished = $this->service->findPublished(limit: 100, offset: 0);
-            $total = 0;
-            foreach ($allPublished as $article) {
-                $dto = $this->attachTagsToDto(ArticleDTO::fromEntity($article));
-                foreach ($dto->tags as $tag) {
-                    if ($tag['slug'] === $tagSlug) {
-                        $total++;
-                        break;
-                    }
-                }
-            }
+        if ($tagSlug !== '') {
+            $tagIds = $this->getArticleIdsByTagSlug($tagSlug);
+            $allIds = $allIds !== null ? array_values(array_intersect($allIds, $tagIds)) : $tagIds;
         }
-        if ($searchQuery !== '' && $tagSlug !== '') {
-            $ftsResults = $this->searchArticlesByFts($searchQuery);
-            $matchedIds = $ftsResults['ids'];
-            $taggedIds = $this->getArticleIdsByTagSlug($tagSlug);
-            $total = count(array_intersect($matchedIds, $taggedIds));
+        if ($categoryName !== '') {
+            $catId = $this->findCategoryId($categoryName);
+            $catIds = $catId !== null ? $this->getArticleIdsByCategoryId($catId) : [];
+            $allIds = $allIds !== null ? array_values(array_intersect($allIds, $catIds)) : $catIds;
         }
+        $total = $allIds !== null ? count($allIds) : $this->service->countPublished();
 
         $hasMore = ($page * self::PER_PAGE) < $total;
 
@@ -385,6 +448,9 @@ class ArticleController
             }
             if ($tagSlug !== '') {
                 $queryParams .= '&tag=' . urlencode($tagSlug);
+            }
+            if ($categoryName !== '') {
+                $queryParams .= '&category=' . urlencode($categoryName);
             }
             $loadMore = <<<HTML
                 <div class="load-more-container">
@@ -483,7 +549,7 @@ class ArticleController
     /**
      * Filter articles by tag slug.
      */
-    private function filterByTag(string $tagSlug, int $page): Response
+    private function filterByTag(string $tagSlug, int $page, string $categoryName = ''): Response
     {
         $allPublished = $this->service->findPublished(limit: 100, offset: 0);
 
@@ -498,6 +564,19 @@ class ArticleController
             }
         }
 
+        // If category filter is also active, narrow to category
+        if ($categoryName !== '' && $filtered !== []) {
+            $catId = $this->findCategoryId($categoryName);
+            if ($catId !== null) {
+                $filtered = array_values(array_filter(
+                    $filtered,
+                    fn (ArticleDTO $a): bool => $a->categoryId === $catId,
+                ));
+            } else {
+                $filtered = [];
+            }
+        }
+
         $articles = array_slice($filtered, ($page - 1) * self::PER_PAGE, self::PER_PAGE);
         $total = count($filtered);
         $hasMore = ($page * self::PER_PAGE) < $total;
@@ -509,7 +588,9 @@ class ArticleController
             'articles' => $articles,
             'searchQuery' => '',
             'tagSlug' => $tagSlug,
+            'categoryName' => $categoryName,
             'allTags' => $this->fetchAllTags(),
+            'allCategories' => $this->fetchAllCategories(),
             'pagination' => [
                 'limit' => self::PER_PAGE,
                 'page' => $page,
@@ -517,6 +598,101 @@ class ArticleController
                 'total' => $total,
             ],
         ]);
+    }
+
+    /**
+     * Filter articles by category name.
+     */
+    private function filterByCategory(string $categoryName, int $page): Response
+    {
+        $catId = $this->findCategoryId($categoryName);
+
+        if ($catId === null) {
+            return $this->view->render('pages/articles/index', [
+                'title' => 'Category not found',
+                'currentPage' => 'articles',
+                'message' => 'No articles found in category: ' . $categoryName,
+                'articles' => [],
+                'searchQuery' => '',
+                'tagSlug' => '',
+                'categoryName' => $categoryName,
+                'allTags' => $this->fetchAllTags(),
+                'allCategories' => $this->fetchAllCategories(),
+                'pagination' => [
+                    'limit' => self::PER_PAGE,
+                    'page' => $page,
+                    'has_more' => false,
+                    'total' => 0,
+                ],
+            ]);
+        }
+
+        $allPublished = $this->service->findPublished(limit: 100, offset: 0);
+
+        $filtered = array_values(array_filter(
+            $allPublished,
+            fn (object $a): bool => $a->categoryId === $catId,
+        ));
+
+        $dtoArticles = array_map(
+            fn (object $a): ArticleDTO => $this->attachTagsToDto(ArticleDTO::fromEntity($a)),
+            $filtered
+        );
+
+        $articles = array_slice($dtoArticles, ($page - 1) * self::PER_PAGE, self::PER_PAGE);
+        $total = count($dtoArticles);
+        $hasMore = ($page * self::PER_PAGE) < $total;
+
+        return $this->view->render('pages/articles/index', [
+            'title' => $categoryName,
+            'currentPage' => 'articles',
+            'message' => 'Articles in category: ' . $categoryName,
+            'articles' => $articles,
+            'searchQuery' => '',
+            'tagSlug' => '',
+            'categoryName' => $categoryName,
+            'allTags' => $this->fetchAllTags(),
+            'allCategories' => $this->fetchAllCategories(),
+            'pagination' => [
+                'limit' => self::PER_PAGE,
+                'page' => $page,
+                'has_more' => $hasMore,
+                'total' => $total,
+            ],
+        ]);
+    }
+
+    // ---- Category helpers ----
+
+    /**
+     * Find category ID by category name.
+     */
+    private function findCategoryId(string $categoryName): ?int
+    {
+        $rows = $this->getDbConnection()->query(
+            'SELECT id FROM "categories" WHERE name = ?',
+            [$categoryName],
+        );
+
+        if ($rows === [] || !isset($rows[0]['id']) || !is_numeric($rows[0]['id'])) {
+            return null;
+        }
+
+        return (int) $rows[0]['id'];
+    }
+
+    /**
+     * Get article IDs that belong to a category.
+     *
+     * @return array<int>
+     */
+    private function getArticleIdsByCategoryId(int $categoryId): array
+    {
+        $rows = $this->getDbConnection()->query(
+            'SELECT id FROM "articles" WHERE "category_id" = ?',
+            [$categoryId],
+        );
+        return array_map(fn (array $row): int => is_numeric($row['id'] ?? null) ? (int) $row['id'] : 0, $rows);
     }
 
     // ---- Tag helpers ----
@@ -536,6 +712,20 @@ class ArticleController
     }
 
     /**
+     * Fetch all categories with article count (for category cloud).
+     *
+     * @return array<int, array{id: int, name: string, slug: string, article_count: int}>
+     */
+    private function fetchAllCategories(): array
+    {
+        /** @var array<int, array{id: int, name: string, slug: string, article_count: int}> $results */
+        $results = $this->getDbConnection()->query(
+            'SELECT c.*, (SELECT COUNT(*) FROM articles WHERE category_id = c.id AND published = \'1\') as article_count FROM "categories" c ORDER BY "article_count" DESC, "name" ASC'
+        );
+        return $results;
+    }
+
+    /**
      * Fetch tags for an article and attach them to the DTO via constructor copy.
      */
     private function attachTagsToDto(ArticleDTO $dto): ArticleDTO
@@ -545,6 +735,7 @@ class ArticleController
         }
 
         $tags = $this->fetchTagsForArticle($dto->id);
+        $categoryName = $this->fetchCategoryName($dto->categoryId);
 
         return new ArticleDTO(
             id: $dto->id,
@@ -557,8 +748,30 @@ class ArticleController
             status: $dto->status,
             categoryId: $dto->categoryId,
             createdAt: $dto->createdAt,
+            categoryName: $categoryName,
             tags: $tags,
         );
+    }
+
+    /**
+     * Fetch category name by category ID.
+     */
+    private function fetchCategoryName(?int $categoryId): ?string
+    {
+        if ($categoryId === null) {
+            return null;
+        }
+
+        $rows = $this->getDbConnection()->query(
+            'SELECT name FROM "categories" WHERE id = ?',
+            [$categoryId],
+        );
+
+        if ($rows === [] || !isset($rows[0]['name']) || !is_string($rows[0]['name'])) {
+            return null;
+        }
+
+        return $rows[0]['name'];
     }
 
     /**

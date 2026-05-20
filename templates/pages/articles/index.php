@@ -10,6 +10,7 @@ $formatDate = static function (?\DateTimeInterface $value): ?string {
 $searchQuery = $this->e($searchQuery ?? '');
 $tagSlug = $tagSlug ?? '';
 $isSearch = $searchQuery !== '';
+$categoryName_clean = $categoryName ?? '';
 ?>
 
 <?php $this->section('content') ?>
@@ -39,6 +40,28 @@ $isSearch = $searchQuery !== '';
                         ?>
                             <a href="<?= $href ?>" class="<?= $cls ?>">
                                 <?= $this->e($tag['name']) ?>
+                                <span class="tag-cloud__count"><?= $count ?></span>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- Category Cloud -->
+            <?php if (!empty($allCategories)): ?>
+                <div class="tag-cloud">
+                    <span class="tag-cloud__label">Categories:</span>
+                    <div class="tag-cloud__items">
+                        <?php foreach ($allCategories as $cat):
+                            $active = $cat['name'] === $categoryName_clean;
+                            $count = (int) ($cat['article_count'] ?? 0);
+                            $href = $active ? '/articles' : '/articles?category=' . $this->e(urlencode($cat['name']));
+                            $cls = 'tag-cloud__item';
+                            if ($active) $cls .= ' tag-cloud__item--active';
+                            if ($count === 0) $cls .= ' tag-cloud__item--empty';
+                        ?>
+                            <a href="<?= $href ?>" class="<?= $cls ?>">
+                                <?= $this->e($cat['name']) ?>
                                 <span class="tag-cloud__count"><?= $count ?></span>
                             </a>
                         <?php endforeach; ?>
@@ -96,12 +119,14 @@ $isSearch = $searchQuery !== '';
                             if (!empty($article->status)) {
                                 $meta[] = ucfirst($article->status);
                             }
-                            if (!empty($article->categoryId)) {
+                            if (!empty($article->categoryName)) {
+                                $meta[] = '<a href="/articles?category=' . $this->e(urlencode($article->categoryName)) . '" class="article-category">' . $this->e($article->categoryName) . '</a>';
+                            } elseif (!empty($article->categoryId)) {
                                 $meta[] = 'Category #' . $article->categoryId;
                             }
                             ?>
                             <?php if ($meta): ?>
-                                <p class="card__subtitle"><?= $this->e(implode(' · ', $meta)) ?></p>
+                                <p class="card__subtitle"><?= implode(' · ', $meta) ?></p>
                             <?php endif; ?>
 
                             <?php if (!empty($article->tags)): ?>
@@ -121,7 +146,7 @@ $isSearch = $searchQuery !== '';
                             <?php endif; ?>
                         </div>
                         <footer class="card__footer">
-                            <a href="/articles/<?= $this->e($article->slug) ?>" 
+                            <a href="/articles/<?= $this->e($article->slug) ?>"
                                class="btn btn--secondary btn--sm"
                                aria-label="Read more about <?= $this->e($article->title) ?>">Read More</a>
                         </footer>
@@ -138,6 +163,9 @@ $isSearch = $searchQuery !== '';
                 }
                 if ($tagSlug !== '') {
                     $loadMoreUrl .= '&tag=' . urlencode($tagSlug);
+                }
+                if ($categoryName_clean !== '') {
+                    $loadMoreUrl .= '&category=' . urlencode($categoryName_clean);
                 }
             ?>
                 <div class="load-more-section" id="load-more-section">

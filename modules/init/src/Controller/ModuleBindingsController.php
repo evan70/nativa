@@ -4,25 +4,38 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Init\Container\Container;
 use App\Init\Module\ModuleGroupManagerInterface;
 use Marko\Core\Attributes\Command;
 use Marko\Core\Command\CommandInterface;
 use Marko\Core\Command\Input;
 use Marko\Core\Command\Output;
+use Marko\Core\Container\Container;
+use Marko\Core\Container\ContainerInterface;
+use ReflectionClass;
 
 #[Command(name: 'module:bindings', description: 'Show module bindings and groups')]
 readonly class ModuleBindingsCommand implements CommandInterface
 {
     public function __construct(
-        private Container $container,
+        private ContainerInterface $container,
     ) {}
 
     public function execute(Input $input, Output $output): int
     {
-        // Get all bindings
-        $bindings = $this->container->getBindings();
-        $singletons = $this->container->getSingletons();
+        // Use reflection to read private properties from the real app container.
+        // The Application registers Marko\Core\Container\ContainerInterface as an instance,
+        // so $this->container is the actual populated container — not a fresh autowired one.
+        $ref = new ReflectionClass(Container::class);
+
+        $bindingsProp = $ref->getProperty('bindings');
+        $bindingsProp->setAccessible(true);
+        /** @var array<string, string|\Closure> $bindings */
+        $bindings = $bindingsProp->getValue($this->container);
+
+        $sharedProp = $ref->getProperty('shared');
+        $sharedProp->setAccessible(true);
+        /** @var array<string, bool> $singletons */
+        $singletons = $sharedProp->getValue($this->container);
 
         $output->writeLine('=== Container Bindings ===');
         $output->writeLine('Total: ' . count($bindings));

@@ -7,6 +7,7 @@
 DROP TABLE IF EXISTS "cardboard_audit_log";
 DROP TABLE IF EXISTS "cardboard_settings";
 DROP TABLE IF EXISTS "notifications";
+DROP TABLE IF EXISTS "password_resets";
 DROP TABLE IF EXISTS "sessions";
 DROP TABLE IF EXISTS "migrations";
 DROP TABLE IF EXISTS "mark_roles";
@@ -91,8 +92,7 @@ CREATE TABLE "sessions" (
 -- System: migrations (tracking)
 -- ======================================================
 CREATE TABLE "migrations" (
-    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-    "migration" TEXT NOT NULL,
+    "name" VARCHAR(255) NOT NULL PRIMARY KEY,
     "batch" INTEGER NOT NULL
 );
 

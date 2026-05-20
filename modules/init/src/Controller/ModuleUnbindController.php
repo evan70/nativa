@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Init\Container\Container;
 use App\Init\Module\ModuleGroupManagerInterface;
+use Marko\Core\Container\ContainerInterface;
 use Marko\Core\Attributes\Command;
 use Marko\Core\Command\CommandInterface;
 use Marko\Core\Command\Input;
@@ -15,7 +15,7 @@ use Marko\Core\Command\Output;
 readonly class ModuleUnbindCommand implements CommandInterface
 {
     public function __construct(
-        private Container $container,
+        private ContainerInterface $container,
     ) {}
 
     public function execute(Input $input, Output $output): int

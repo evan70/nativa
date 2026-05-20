@@ -6,8 +6,6 @@ use App\AppTemplateResolver;
 use App\Contracts\AssetAwareViewInterface;
 use App\ViewAdapter;
 use App\ViewSimple\SimpleView;
-use Marko\Authentication\Contracts\UserProviderInterface;
-use Marko\Authentication\DefaultUserProvider;
 use Marko\Core\Container\ContainerInterface;
 use Marko\Errors\Contracts\ErrorHandlerInterface;
 use Marko\ErrorsAdvanced\AdvancedErrorHandler;
@@ -31,16 +29,17 @@ return [
             return new ViewAdapter($view);
         },
             // Mail: LogMailer for development (writes to storage/logs/mail.log)
-        MailerInterface::class => fn (ContainerInterface $container): MailerInterface => new LogMailer(
-            (\class_exists(\Marko\Mail\Config\MailConfig::class) && $container->has(\Marko\Config\ConfigRepositoryInterface::class))
-                ? $container->get(\Marko\Mail\Config\MailConfig::class)->driverConfig('log')
-                : [],
-        ),
+        MailerInterface::class => function (ContainerInterface $container): MailerInterface {
+            $config = [];
+            if (\class_exists(\Marko\Mail\Config\MailConfig::class) && $container->has(\Marko\Config\ConfigRepositoryInterface::class)) {
+                /** @var \Marko\Mail\Config\MailConfig $mailConfig */
+                $mailConfig = $container->get(\Marko\Mail\Config\MailConfig::class);
+                $config = $mailConfig->driverConfig('log');
+            }
+            return new LogMailer($config);
+        },
     ],
     'sequence' => [
         'after' => ['app/view-simple', 'app/init'],
-    ],
-    'preferences' => [
-        UserProviderInterface::class => DefaultUserProvider::class,
     ],
 ];

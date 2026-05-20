@@ -22,6 +22,7 @@ class ArticleDTO
         public readonly string $status,
         public readonly ?int $categoryId,
         public readonly ?DateTimeImmutable $createdAt,
+        public readonly ?string $categoryName = null,
         public readonly array $tags = [],
         public readonly ?string $snippet = null,
     ) {}
@@ -86,6 +87,11 @@ class ArticleDTO
             $createdAt = new DateTimeImmutable($entity->createdAt);
         }
 
+        $categoryName = null;
+        if (isset($entity->categoryName) && is_string($entity->categoryName)) {
+            $categoryName = $entity->categoryName;
+        }
+
         return new self(
             id: $id,
             title: $title,
@@ -97,6 +103,7 @@ class ArticleDTO
             status: $status,
             categoryId: $categoryId,
             createdAt: $createdAt,
+            categoryName: $categoryName,
         );
     }
 

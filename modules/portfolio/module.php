@@ -14,14 +14,16 @@ use Marko\Database\Entity\EntityMetadataFactory;
 return [
     'bindings' => [
         PortfolioConnection::class => function (ContainerInterface $container): PortfolioConnection {
-            return new PortfolioConnection(
-                $container->get(ModuleDatabaseResolverInterface::class),
-            );
+            /** @var ModuleDatabaseResolverInterface $resolver */
+            $resolver = $container->get(ModuleDatabaseResolverInterface::class);
+            return new PortfolioConnection($resolver);
         },
 
         PortfolioItemRepository::class => function (ContainerInterface $container): PortfolioItemRepository {
+            /** @var PortfolioConnection $portfolioConnection */
+            $portfolioConnection = $container->get(PortfolioConnection::class);
             return new PortfolioItemRepository(
-                $container->get(PortfolioConnection::class)->getConnection(),
+                $portfolioConnection->getConnection(),
                 new EntityMetadataFactory(),
                 new EntityHydrator(),
             );
@@ -30,6 +32,7 @@ return [
 
     'boot' => function (ContainerInterface $container): void {
         if ($container->has(AdminSectionRegistryInterface::class)) {
+            /** @var AdminSectionRegistryInterface $registry */
             $registry = $container->get(AdminSectionRegistryInterface::class);
             $registry->register(new PortfolioAdminSection());
         }

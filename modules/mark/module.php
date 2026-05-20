@@ -25,10 +25,16 @@ return [
         PermissionRepositoryInterface::class => PermissionRepository::class,
         PermissionRegistryInterface::class => PermissionRegistry::class,
         UserProviderInterface::class => function (ContainerInterface $container): UserProviderInterface {
+            /** @var MarkRepositoryInterface<\Marko\Mark\Entity\Mark> $userRepository */
+            $userRepository = $container->get(MarkRepositoryInterface::class);
+            /** @var RoleRepositoryInterface<\Marko\Mark\Entity\Role> $roleRepository */
+            $roleRepository = $container->get(RoleRepositoryInterface::class);
+            /** @var PasswordHasherInterface $passwordHasher */
+            $passwordHasher = $container->get(PasswordHasherInterface::class);
             return new MarkProvider(
-                userRepository: $container->get(MarkRepositoryInterface::class),
-                roleRepository: $container->get(RoleRepositoryInterface::class),
-                passwordHasher: $container->get(PasswordHasherInterface::class),
+                userRepository: $userRepository,
+                roleRepository: $roleRepository,
+                passwordHasher: $passwordHasher,
             );
         },
     ],

@@ -15,6 +15,7 @@ return [
             $config = $container->get(\Marko\Config\ConfigRepositoryInterface::class);
 
             // Module mapping - maps module name to database name
+            /** @var array<string, string> $mapping */
             $mapping = $config->getArray('database.modules');
             $storagePath = dirname(__DIR__, 2) . '/storage/data';
 
@@ -29,6 +30,7 @@ return [
             AppLogger::debug('[DatabaseModular] Binding CardboardConnection (singleton)');
 
             // Get already-initialized singleton resolver
+            /** @var ModuleDatabaseResolverInterface $resolver */
             $resolver = $container->get(ModuleDatabaseResolverInterface::class);
 
             return new CardboardConnection($resolver);

@@ -13,14 +13,14 @@ final class View
 
     public static ?string $lcpImage = null;
 
-    /** @var array<string, array{name: string, file: string, css?: array<int, string>, assets?: array<int, string>}>|null */
+    /** @var array<string, array{name?: string, file: string, css?: array<int, string>, assets?: array<int, string>}>|null */
     private static ?array $manifest = null;
 
     public static ?string $currentTemplate = null;
     public static ?string $currentPage = null;
 
     /**
-     * @return array<string, array{name: string, file: string, css?: array<int, string>, assets?: array<int, string>}>|null
+     * @return array<string, array{name?: string, file: string, css?: array<int, string>, assets?: array<int, string>}>|null
      */
     private static function ensureManifestLoaded(): ?array
     {
@@ -30,7 +30,7 @@ final class View
             if (is_string($content)) {
                 /** @var mixed $decoded */
                 $decoded = json_decode($content, true);
-                /** @var array<string, array{name: string, file: string, css?: array<int, string>, assets?: array<int, string>}>|false $parsed */
+                /** @var array<string, array{name?: string, file: string, css?: array<int, string>, assets?: array<int, string>}>|false $parsed */
                 $parsed = is_array($decoded) ? $decoded : false;
                 if ($parsed !== false) {
                     self::$manifest = $parsed;
@@ -41,16 +41,16 @@ final class View
     }
 
     /**
-     * @param array<string, array{name: string, file: string, css?: array<int, string>, assets?: array<int, string>}>|null $manifest
-     * @return array{name: string, file: string, css?: array<int, string>, assets?: array<int, string>}|null
+     * @param array<string, array{name?: string, file: string, css?: array<int, string>, assets?: array<int, string>}>|null $manifest
+     * @return array{name?: string, file: string, css?: array<int, string>, assets?: array<int, string>}|null
      */
     private static function findByName(?array $manifest, string $name): ?array
     {
         if (!$manifest) return null;
 
         foreach ($manifest as $entry) {
-            if ($entry['name'] === $name) {
-                /** @var array{name: string, file: string, css?: array<int, string>, assets?: array<int, string>} $entry */
+            if (($entry['name'] ?? null) === $name) {
+                /** @var array{name?: string, file: string, css?: array<int, string>, assets?: array<int, string>} $entry */
                 return $entry;
             }
         }
