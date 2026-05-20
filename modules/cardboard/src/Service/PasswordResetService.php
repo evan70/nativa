@@ -57,7 +57,8 @@ readonly class PasswordResetService
         }
 
         // Check expiry (60 minutes)
-        $createdAt = strtotime($row['createdAt']);
+        $createdAtVal = is_array($row) ? ($row['createdAt'] ?? null) : null;
+        $createdAt = is_string($createdAtVal) ? strtotime($createdAtVal) : false;
         if ($createdAt === false || (time() - $createdAt) > self::TOKEN_TTL) {
             error_log('[PasswordReset] Token expired for email=' . $email);
             return false;

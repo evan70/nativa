@@ -16,8 +16,6 @@ use Marko\Mail\Message;
  *   'log' => [
  *       'path' => 'storage/logs/mail.log',
  *   ],
- *
- * @readonly
  */
 class LogMailer implements MailerInterface
 {
@@ -163,6 +161,10 @@ class LogMailer implements MailerInterface
     private function resolveLogDir(): string
     {
         $path = $this->config['path'] ?? self::DEFAULT_LOG_PATH;
+
+        if (!is_string($path)) {
+            return dirname(__DIR__, 4) . '/storage/logs';
+        }
 
         // If relative, resolve from project root (vendor/marko/../.. = project root)
         if (!str_starts_with($path, '/')) {

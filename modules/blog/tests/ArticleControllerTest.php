@@ -11,6 +11,7 @@ use App\Blog\Service\ArticleService;
 use App\Blog\Repository\ArticleRepository;
 use App\Blog\DTO\ArticleDTO;
 use App\Blog\Entity\Article;
+use Marko\Database\Entity\EntityCollection;
 use Marko\Database\Connection\ConnectionInterface;
 use Marko\View\ViewInterface;
 use Marko\Routing\Http\Request;
@@ -71,7 +72,7 @@ class ArticleControllerTest extends TestCase
         // and then filter/paginate, so we need to expect findAll() to be called
         $this->repository->expects($this->exactly(2)) // Called once in findPublished, once in countPublished
             ->method('findAll')
-            ->willReturn([$article1, $article2]);
+            ->willReturn(new EntityCollection([$article1, $article2]));
 
         $this->view->expects($this->once())
             ->method('render')
@@ -148,10 +149,9 @@ class ArticleControllerTest extends TestCase
             ->willReturn(null);
 
         $this->view->expects($this->once())
-            ->method('render')
-            ->willReturnCallback(function ($template, $data) {
-                return (new Response('Not Found'))->withStatus(404);
-            });
+            ->method('renderToString')
+            ->with('pages/articles/not-found', $this->isArray())
+            ->willReturn('Not Found');
 
         $controller = new ArticleController(
             $this->repository,

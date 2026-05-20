@@ -28,6 +28,7 @@ readonly class ModuleActivateCommand implements CommandInterface
             $output->writeLine('Available groups:');
             
             if ($this->container->has(ModuleGroupManagerInterface::class)) {
+                /** @var ModuleGroupManagerInterface $manager */
                 $manager = $this->container->get(ModuleGroupManagerInterface::class);
                 foreach ($manager->getGroups() as $name => $group) {
                     if ($group->routes) {
@@ -44,6 +45,7 @@ readonly class ModuleActivateCommand implements CommandInterface
             return 1;
         }
 
+        /** @var ModuleGroupManagerInterface $manager */
         $manager = $this->container->get(ModuleGroupManagerInterface::class);
         $group = $manager->getGroup($groupName);
 
@@ -60,7 +62,7 @@ readonly class ModuleActivateCommand implements CommandInterface
         $manager->activateGroup($groupName);
         
         $output->writeLine("OK: Activated group '$groupName'");
-        $output->writeLine("  routes: " . ($group->routes ? implode(', ', $group->routes) : 'none'));
+        $output->writeLine("  routes: " . ($group->routes !== [] ? implode(', ', $group->routes) : 'none'));
 
         return 0;
     }

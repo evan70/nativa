@@ -37,7 +37,6 @@ class ModuleConnectionCacheTest extends TestCase
         // Test that file cache is initialized
         $reflection = new \ReflectionClass($connection);
         $cacheDriverProperty = $reflection->getProperty('cacheDriver');
-        $cacheDriverProperty->setAccessible(true);
         $cacheDriver = $cacheDriverProperty->getValue();
         
         $this->assertEquals('file', $cacheDriver);
@@ -69,7 +68,6 @@ class ModuleConnectionCacheTest extends TestCase
         // it should fall back to file cache
         $reflection = new \ReflectionClass($connection);
         $cacheDriverProperty = $reflection->getProperty('cacheDriver');
-        $cacheDriverProperty->setAccessible(true);
         $cacheDriver = $cacheDriverProperty->getValue();
         
         $this->assertEquals('file', $cacheDriver);

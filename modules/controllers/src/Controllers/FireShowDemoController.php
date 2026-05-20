@@ -10,10 +10,10 @@ use Marko\View\ViewInterface;
 
 class FireShowDemoController
 {
-    public function __construct(private readonly AssetAwareViewInterface $view) {}
+    public function __construct(private readonly ViewInterface $view) {}
 
     #[Get(path: '/fire-show-demo')]
-    public function index(Request $request): Response
+    public function index(): Response
     {
         return $this->view
             ->render('pages/fire-show-demo/template', [

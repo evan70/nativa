@@ -15,6 +15,7 @@ use Marko\Database\Repository\Repository;
 
 /**
  * @extends Repository<Mark>
+ * @implements MarkRepositoryInterface<Mark>
  */
 class MarkRepository extends Repository implements MarkRepositoryInterface
 {

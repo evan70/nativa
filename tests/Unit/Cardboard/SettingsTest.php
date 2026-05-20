@@ -63,7 +63,7 @@ class SettingsTest extends TestCase
         $this->view
             ->expects($this->once())
             ->method('render')
-            ->with('pages/mark/admin-settings', $this->isType('array'))
+            ->with('pages/mark/admin-settings', $this->isArray())
             ->willReturn(new Response(body: 'settings'));
 
         $response = $this->controller->index();
@@ -76,7 +76,7 @@ class SettingsTest extends TestCase
         $this->view
             ->expects($this->once())
             ->method('render')
-            ->with('pages/mark/settings-form', $this->isType('array'))
+            ->with('pages/mark/settings-form', $this->isArray())
             ->willReturn(new Response(body: 'form'));
 
         $response = $this->controller->create();
@@ -98,7 +98,7 @@ class SettingsTest extends TestCase
         $this->view
             ->expects($this->once())
             ->method('renderToString')
-            ->with('pages/errors/404', $this->isType('array'))
+            ->with('pages/errors/404', $this->isArray())
             ->willReturn('404');
 
         $response = $this->controller->edit(99999);

@@ -9,11 +9,40 @@ use App\Init\Module\ModuleGroupManager;
 use App\Init\Module\ModuleGroupManagerInterface;
 use Marko\Core\Module\ModuleManifest as Manifest;
 use PHPUnit\Framework\TestCase;
+use Marko\Core\Path\ProjectPaths;
 
 beforeEach(function (): void {
-    $this->container = new \Marko\Core\Container\Container();
+    $this->container = new \App\Init\Container\Container();
+    
+    // Mock ProjectPaths for state file
+    $paths = new ProjectPaths(basePath: sys_get_temp_dir());
+    $this->container->instance(ProjectPaths::class, $paths);
+    
     $this->manager = new ModuleGroupManager($this->container);
+    $this->tempDir = sys_get_temp_dir() . '/marko_test_' . uniqid();
+    mkdir($this->tempDir, 0755, true);
 });
+
+afterEach(function (): void {
+    if (isset($this->tempDir) && is_dir($this->tempDir)) {
+        removeDir($this->tempDir);
+    }
+});
+
+function createModuleJson(string $path, array $marko): void {
+    file_put_contents($path . '/composer.json', json_encode([
+        'extra' => ['marko' => $marko]
+    ]));
+}
+
+function removeDir(string $dir): void {
+    if (!is_dir($dir)) return;
+    $files = array_diff(scandir($dir), ['.', '..']);
+    foreach ($files as $file) {
+        (is_dir("$dir/$file")) ? removeDir("$dir/$file") : unlink("$dir/$file");
+    }
+    rmdir($dir);
+}
 
 describe('ModuleGroup', function (): void {
     it('creates with default values', function (): void {
@@ -80,7 +109,7 @@ describe('ModuleGroup', function (): void {
         );
 
         expect($group->getEffectiveTimeout('5m'))->toBe('10m');
-        expect($group->getEffectiveTimeout(null))->toBe('10m');
+        expect($group->getEffectiveTimeout())->toBe('10m');
     });
 
     it('falls back to default when no timeout set', function (): void {
@@ -95,13 +124,17 @@ describe('ModuleGroup', function (): void {
 
 describe('ModuleGroupManager', function (): void {
     it('registers a group from manifest', function (): void {
+        createModuleJson($this->tempDir, [
+            'group' => 'admin',
+            'routes' => ['/admin/*'],
+            'idleTimeout' => '5m',
+            'isCore' => false,
+        ]);
+
         $manifest = new Manifest(
             name: 'marko/admin',
             version: '1.0.0',
-            group: 'admin',
-            routes: ['/admin/*'],
-            idleTimeout: '5m',
-            isCore: false,
+            path: $this->tempDir,
         );
 
         $this->manager->registerGroup($manifest);
@@ -114,9 +147,12 @@ describe('ModuleGroupManager', function (): void {
     });
 
     it('skips registration when no group defined', function (): void {
+        createModuleJson($this->tempDir, []);
+
         $manifest = new Manifest(
             name: 'marko/test',
             version: '1.0.0',
+            path: $this->tempDir,
         );
 
         $this->manager->registerGroup($manifest);
@@ -125,11 +161,15 @@ describe('ModuleGroupManager', function (): void {
     });
 
     it('marks core groups as active by default', function (): void {
+        createModuleJson($this->tempDir, [
+            'group' => 'core',
+            'isCore' => true,
+        ]);
+
         $manifest = new Manifest(
             name: 'marko/core',
             version: '1.0.0',
-            group: 'core',
-            isCore: true,
+            path: $this->tempDir,
         );
 
         $this->manager->registerGroup($manifest);
@@ -139,12 +179,16 @@ describe('ModuleGroupManager', function (): void {
     });
 
     it('finds group for route path', function (): void {
+        createModuleJson($this->tempDir, [
+            'group' => 'admin',
+            'routes' => ['/admin/*'],
+            'isCore' => false,
+        ]);
+
         $manifest = new Manifest(
             name: 'marko/admin',
             version: '1.0.0',
-            group: 'admin',
-            routes: ['/admin/*'],
-            isCore: false,
+            path: $this->tempDir,
         );
 
         $this->manager->registerGroup($manifest);
@@ -155,12 +199,16 @@ describe('ModuleGroupManager', function (): void {
     });
 
     it('supports fnmatch patterns', function (): void {
+        createModuleJson($this->tempDir, [
+            'group' => 'api',
+            'routes' => ['/api/*', '/api/v1/*'],
+            'isCore' => false,
+        ]);
+
         $manifest = new Manifest(
             name: 'marko/api',
             version: '1.0.0',
-            group: 'api',
-            routes: ['/api/*', '/api/v1/*'],
-            isCore: false,
+            path: $this->tempDir,
         );
 
         $this->manager->registerGroup($manifest);
@@ -170,18 +218,31 @@ describe('ModuleGroupManager', function (): void {
     });
 
     it('checks if group is core', function (): void {
+        $coreDir = $this->tempDir . '/core';
+        $adminDir = $this->tempDir . '/admin';
+        mkdir($coreDir);
+        mkdir($adminDir);
+
+        createModuleJson($coreDir, [
+            'group' => 'core',
+            'isCore' => true,
+        ]);
+        
+        createModuleJson($adminDir, [
+            'group' => 'admin',
+            'isCore' => false,
+        ]);
+
         $coreManifest = new Manifest(
             name: 'marko/core',
             version: '1.0.0',
-            group: 'core',
-            isCore: true,
+            path: $coreDir,
         );
         
         $nonCoreManifest = new Manifest(
             name: 'marko/admin',
             version: '1.0.0',
-            group: 'admin',
-            isCore: false,
+            path: $adminDir,
         );
 
         $this->manager->registerGroup($coreManifest);
@@ -194,14 +255,17 @@ describe('ModuleGroupManager', function (): void {
 
 describe('ModuleGroupManager eviction', function (): void {
     it('evicts idle non-core groups', function (): void {
-        // Register non-core group
+        createModuleJson($this->tempDir, [
+            'group' => 'admin',
+            'routes' => ['/admin/*'],
+            'idleTimeout' => '1m',
+            'isCore' => false,
+        ]);
+
         $manifest = new Manifest(
             name: 'marko/admin',
             version: '1.0.0',
-            group: 'admin',
-            routes: ['/admin/*'],
-            idleTimeout: '1m', // 1 minute
-            isCore: false,
+            path: $this->tempDir,
         );
 
         $this->manager->registerGroup($manifest);
@@ -212,7 +276,6 @@ describe('ModuleGroupManager eviction', function (): void {
         // Use reflection to set lastUsed directly
         $ref = new \ReflectionClass($this->manager);
         $prop = $ref->getProperty('groups');
-        $prop->setAccessible(true);
         $groups = $prop->getValue($this->manager);
         $groups['admin'] = new ModuleGroup(
             name: 'admin',
@@ -224,17 +287,28 @@ describe('ModuleGroupManager eviction', function (): void {
         );
         $prop->setValue($this->manager, $groups);
 
+        // Also need to set manifests property via reflection because registerGroup sets it
+        // but we are overriding groups. Actually registerGroup already set manifests.
+
+        // And we need to mark it as active to be eligible for eviction
+        $activeProp = $ref->getProperty('activeGroups');
+        $activeProp->setValue($this->manager, ['admin' => true]);
+
         $evicted = $this->manager->evictIfIdle('admin', '5m');
 
         expect($evicted)->toBe(true);
     });
 
     it('skips eviction of core groups', function (): void {
+        createModuleJson($this->tempDir, [
+            'group' => 'core',
+            'isCore' => true,
+        ]);
+
         $manifest = new Manifest(
             name: 'marko/core',
             version: '1.0.0',
-            group: 'core',
-            isCore: true,
+            path: $this->tempDir,
         );
 
         $this->manager->registerGroup($manifest);
@@ -246,48 +320,54 @@ describe('ModuleGroupManager eviction', function (): void {
     });
 
     it('evicts all idle groups at once', function (): void {
-        // Create old non-core groups
-        $oldTime = new \DateTimeImmutable('-10 minutes');
+        $adminDir = $this->tempDir . '/admin';
+        $authDir = $this->tempDir . '/auth';
+        $coreDir = $this->tempDir . '/core';
+        mkdir($adminDir);
+        mkdir($authDir);
+        mkdir($coreDir);
 
-        $adminManifest = new Manifest(
-            name: 'marko/admin',
-            version: '1.0.0',
-            group: 'admin',
-            routes: ['/admin/*'],
-            idleTimeout: '1m',
-            isCore: false,
-        );
+        createModuleJson($adminDir, [
+            'group' => 'admin',
+            'routes' => ['/admin/*'],
+            'idleTimeout' => '1m',
+            'isCore' => false,
+        ]);
         
-        $authManifest = new Manifest(
-            name: 'marko/auth',
-            version: '1.0.0',
-            group: 'auth',
-            routes: ['/login'],
-            idleTimeout: '1m',
-            isCore: false,
-        );
+        createModuleJson($authDir, [
+            'group' => 'auth',
+            'routes' => ['/login'],
+            'idleTimeout' => '1m',
+            'isCore' => false,
+        ]);
 
-        $coreManifest = new Manifest(
-            name: 'marko/core',
-            version: '1.0.0',
-            group: 'core',
-            isCore: true,
-        );
+        createModuleJson($coreDir, [
+            'group' => 'core',
+            'isCore' => true,
+        ]);
+
+        $adminManifest = new Manifest(name: 'marko/admin', version: '1.0.0', path: $adminDir);
+        $authManifest = new Manifest(name: 'marko/auth', version: '1.0.0', path: $authDir);
+        $coreManifest = new Manifest(name: 'marko/core', version: '1.0.0', path: $coreDir);
 
         $this->manager->registerGroup($adminManifest);
         $this->manager->registerGroup($authManifest);
         $this->manager->registerGroup($coreManifest);
 
         // Override lastUsed for non-core groups via reflection
+        $oldTime = new \DateTimeImmutable('-10 minutes');
         $ref = new \ReflectionClass($this->manager);
         $prop = $ref->getProperty('groups');
-        $prop->setAccessible(true);
         $groups = [
             'admin' => new ModuleGroup('admin', 'marko/admin', ['/admin/*'], '1m', false, $oldTime),
             'auth' => new ModuleGroup('auth', 'marko/auth', ['/login'], '1m', false, $oldTime),
             'core' => new ModuleGroup('core', 'marko/core', [], null, true),
         ];
         $prop->setValue($this->manager, $groups);
+
+        // Mark them active
+        $activeProp = $ref->getProperty('activeGroups');
+        $activeProp->setValue($this->manager, ['admin' => true, 'auth' => true, 'core' => true]);
 
         $evicted = $this->manager->evictAllIdle('5m');
 

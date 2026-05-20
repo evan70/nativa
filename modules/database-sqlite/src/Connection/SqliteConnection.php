@@ -50,18 +50,25 @@ class SqliteConnection implements ConnectionInterface, TransactionInterface
         return $this->pdo !== null;
     }
 
+    /**
+     * @param array<string, mixed> $bindings
+     * @return list<array<string, mixed>>
+     */
     public function query(
         string $sql,
         array $bindings = [],
     ): array {
         $this->connect();
+        \assert($this->pdo !== null);
 
         try {
             /** @var PDOStatement $stmt */
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($bindings);
 
-            return $stmt->fetchAll() ?: [];
+            /** @var list<array<string, mixed>> $result */
+            $result = $stmt->fetchAll() ?: [];
+            return $result;
         } catch (PDOException $e) {
             throw new SqliteException(
                 message: "Query failed: {$sql}",
@@ -70,11 +77,15 @@ class SqliteConnection implements ConnectionInterface, TransactionInterface
         }
     }
 
+    /**
+     * @param array<string, mixed> $bindings
+     */
     public function execute(
         string $sql,
         array $bindings = [],
     ): int {
         $this->connect();
+        \assert($this->pdo !== null);
 
         try {
             /** @var PDOStatement $stmt */
@@ -93,6 +104,7 @@ class SqliteConnection implements ConnectionInterface, TransactionInterface
     public function prepare(string $sql): StatementInterface
     {
         $this->connect();
+        \assert($this->pdo !== null);
 
         return new SqliteStatement($this->pdo->prepare($sql));
     }
@@ -100,6 +112,7 @@ class SqliteConnection implements ConnectionInterface, TransactionInterface
     public function lastInsertId(): int
     {
         $this->connect();
+        \assert($this->pdo !== null);
 
         return (int) $this->pdo->lastInsertId();
     }
@@ -107,6 +120,7 @@ class SqliteConnection implements ConnectionInterface, TransactionInterface
     public function beginTransaction(): void
     {
         $this->connect();
+        \assert($this->pdo !== null);
         $this->pdo->beginTransaction();
         $this->inTransaction = true;
     }
@@ -117,6 +131,7 @@ class SqliteConnection implements ConnectionInterface, TransactionInterface
             throw new SqliteException('No active transaction to commit');
         }
 
+        \assert($this->pdo !== null);
         $this->pdo->commit();
         $this->inTransaction = false;
     }
@@ -127,6 +142,7 @@ class SqliteConnection implements ConnectionInterface, TransactionInterface
             throw new SqliteException('No active transaction to rollback');
         }
 
+        \assert($this->pdo !== null);
         $this->pdo->rollBack();
         $this->inTransaction = false;
     }

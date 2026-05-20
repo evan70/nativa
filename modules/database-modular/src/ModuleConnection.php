@@ -38,7 +38,7 @@ class ModuleConnection implements ConnectionInterface
 
         // Get cache driver from environment
         $cacheDriver = \env('CACHE_DRIVER', 'memcached');
-        self::$cacheDriver = $cacheDriver;
+        self::$cacheDriver = is_string($cacheDriver) ? $cacheDriver : 'memcached';
 
         // Check if caching is enabled via environment variable
         $cacheEnabled = \env('CACHE_ENABLED', true);
@@ -51,7 +51,7 @@ class ModuleConnection implements ConnectionInterface
 
         // Get TTL from environment (default 5 minutes)
         $envTtl = \env('CACHE_TTL', 300);
-        self::$cacheTtl = (int)$envTtl;
+        self::$cacheTtl = is_numeric($envTtl) ? (int) $envTtl : 300;
 
         // Initialize based on driver
         if ($cacheDriver === 'file') {
@@ -75,9 +75,12 @@ class ModuleConnection implements ConnectionInterface
             return;
         }
 
-        $host = \env('MEMCACHED_HOST', 'localhost');
-        $port = (int)\env('MEMCACHED_PORT', 11211);
-        $prefix = \env('MEMCACHED_PREFIX', 'nativa_db_');
+        $hostEnv = \env('MEMCACHED_HOST', 'localhost');
+        $host = is_string($hostEnv) ? $hostEnv : 'localhost';
+        $portEnv = \env('MEMCACHED_PORT', 11211);
+        $port = is_numeric($portEnv) ? (int) $portEnv : 11211;
+        $prefixEnv = \env('MEMCACHED_PREFIX', 'nativa_db_');
+        $prefix = is_string($prefixEnv) ? $prefixEnv : 'nativa_db_';
 
         try {
             self::$sharedMemcached = new Memcached();
@@ -99,7 +102,8 @@ class ModuleConnection implements ConnectionInterface
      */
     private function initFileCache(): void
     {
-        $cacheDir = \env('CACHE_FILE_PATH', 'storage/cache');
+        $cacheDirEnv = \env('CACHE_FILE_PATH', 'storage/cache');
+        $cacheDir = is_string($cacheDirEnv) ? $cacheDirEnv : 'storage/cache';
         
         // If it's a relative path, make it absolute relative to project root
         if (!str_starts_with($cacheDir, '/') && !preg_match('/^[a-zA-Z]:\\\\/', $cacheDir)) {
@@ -122,28 +126,10 @@ class ModuleConnection implements ConnectionInterface
         }
     }
 
-    private function getMemcached(): ?Memcached
-    {
-        return self::$sharedMemcached;
-    }
-
-    private function getFileCache(): ?FileCache
-    {
-        return self::$sharedFileCache;
-    }
-
-    private function isCacheEnabled(): bool
-    {
-        return self::$cacheEnabled;
-    }
-
-    private function getCacheTtl(): int
-    {
-        return self::$cacheTtl;
-    }
-
     /**
      * Generate cache key from SQL and params
+     * 
+     * @param array<mixed> $params
      */
     private function getCacheKey(string $sql, array $params): string
     {
@@ -152,6 +138,8 @@ class ModuleConnection implements ConnectionInterface
 
     /**
      * Get cached result if available
+     * 
+     * @return array<mixed>|null
      */
     private function getCached(string $key): ?array
     {
@@ -163,13 +151,13 @@ class ModuleConnection implements ConnectionInterface
             $result = self::$sharedFileCache->get($key);
             if ($result !== null) {
                 AppLogger::debug('[ModuleConnection] Cache HIT (file): ' . $key);
-                return $result;
+                return (array) $result;
             }
         } elseif (self::$sharedMemcached) {
             $result = self::$sharedMemcached->get($key);
             if (self::$sharedMemcached->getResultCode() === Memcached::RES_SUCCESS) {
                 AppLogger::debug('[ModuleConnection] Cache HIT (memcached): ' . $key);
-                return $result;
+                return (array) $result;
             }
         }
         
@@ -179,6 +167,8 @@ class ModuleConnection implements ConnectionInterface
 
     /**
      * Store result in cache
+     * 
+     * @param array<mixed> $data
      */
     private function setCached(string $key, array $data, ?int $ttl = null): void
     {
@@ -198,9 +188,11 @@ class ModuleConnection implements ConnectionInterface
     }
 
     /**
-     * Invalidate cache for a specific key
+     * Invalidate cache for a specific query
+     * 
+     * @param array<mixed> $params
      */
-    public function invalidateCache(string $sql, array $params = []): void
+    public function invalidateCache(string $sql, array $params): void
     {
         $key = $this->getCacheKey($sql, $params);
         
@@ -229,38 +221,36 @@ class ModuleConnection implements ConnectionInterface
     }
     
     /**
-     * @param array<string, mixed> $params
+     * Execute query and return results
+     * 
+     * @param array<mixed> $params
      * @return array<array<string, mixed>>
      */
     public function query(string $sql, array $params = []): array
     {
-        // Try cache first for SELECT queries
-        if (stripos(trim($sql), 'SELECT') === 0) {
-            $cacheKey = $this->getCacheKey($sql, $params);
-            $cached = $this->getCached($cacheKey);
-            if ($cached !== null) {
-                return $cached;
-            }
+        if ($this->pdo === null) {
+            return [];
         }
 
-        /** @var PDO $pdo */
-        $pdo = $this->pdo;
-        $stmt = $pdo->prepare($sql);
+        $key = $this->getCacheKey($sql, $params);
+        $cached = $this->getCached($key);
+        if ($cached !== null) {
+            /** @var array<array<string, mixed>> $cached */
+            return $cached;
+        }
+
+        $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
-        /** @var array<array<string, mixed>> $result */
-        $result = $stmt->fetchAll();
-
-        // Cache SELECT results
-        if (stripos(trim($sql), 'SELECT') === 0) {
-            $cacheKey = $this->getCacheKey($sql, $params);
-            $this->setCached($cacheKey, $result);
-        }
-
-        return $result;
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        
+        $this->setCached($key, (array) $results);
+        
+        /** @var array<array<string, mixed>> $results */
+        return (array) $results;
     }
     
     /**
-     * @param array<string, mixed> $params
+     * @param array<mixed> $params
      */
     public function execute(string $sql, array $params = []): int
     {

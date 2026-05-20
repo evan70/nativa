@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Init\Container\Tests;
 
 use App\Init\Container\Container;
-use App\Init\Container\ContainerInterface;
+use Marko\Core\Container\ContainerInterface;
 use PHPUnit\Framework\TestCase;
 
 describe('Container unbind methods', function (): void {

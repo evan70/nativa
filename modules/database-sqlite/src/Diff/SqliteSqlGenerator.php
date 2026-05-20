@@ -180,7 +180,11 @@ class SqliteSqlGenerator implements SqlGeneratorInterface
             return (string) $default;
         }
 
-        return "'" . $default . "'";
+        if (is_string($default)) {
+            return "'" . $default . "'";
+        }
+
+        return 'NULL';
     }
 
     private function quote(string $identifier): string

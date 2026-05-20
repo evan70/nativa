@@ -49,7 +49,7 @@ final class View
         if (!$manifest) return null;
 
         foreach ($manifest as $entry) {
-            if (isset($entry['name']) && $entry['name'] === $name) {
+            if ($entry['name'] === $name) {
                 /** @var array{name: string, file: string, css?: array<int, string>, assets?: array<int, string>} $entry */
                 return $entry;
             }
@@ -149,7 +149,7 @@ final class View
         $match = self::findByName($manifest, $entry);
         $html = '';
 
-        if ($match && isset($match['css'])) {
+        if ($match !== null && isset($match['css'])) {
             foreach ($match['css'] as $css) {
                 $url = $basePath . $css;
                 $html .= '<link rel="stylesheet" href="' . $url . '" fetchpriority="high">' . "\n";
@@ -177,7 +177,7 @@ final class View
         $deferAttr = $defer ? ' defer' : '';
         $crossorigin = $entry === 'init' ? ' crossorigin="anonymous"' : '';
 
-        if ($match && isset($match['file'])) {
+        if ($match !== null) {
             $file = $match['file'];
             if (str_ends_with($file, '.js')) {
                 // Do not preload scripts that are already included in the head to avoid double download warnings in some browsers
@@ -229,7 +229,7 @@ final class View
         $manifest = self::ensureManifestLoaded();
         if ($manifest) {
             foreach ($manifest as $entry) {
-                if (isset($entry['file']) && str_contains($entry['file'], $name)) {
+                if (str_contains($entry['file'], $name)) {
                     return '/dist/' . $entry['file'];
                 }
             }

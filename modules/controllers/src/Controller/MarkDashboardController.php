@@ -37,7 +37,7 @@ class MarkDashboardController
     {
         $items = [];
         foreach ($this->sectionRegistry->all() as $section) {
-            $slug = $section->getSlug();
+            $slug = $section->getId();
             $items[] = [
                 'url' => '/mark' . ($slug !== 'dashboard' ? '/' . $slug : ''),
                 'label' => $section->getLabel(),
@@ -58,9 +58,15 @@ class MarkDashboardController
         $portfolioDb = $this->portfolioConnection->getConnection();
 
         // Real data from database
-        $userCount = (int) ($cardboardDb->query('SELECT COUNT(*) as count FROM mark_users')[0]['count'] ?? 0);
-        $articleCount = (int) ($articlesDb->query('SELECT COUNT(*) as count FROM articles')[0]['count'] ?? 0);
-        $portfolioCount = (int) ($portfolioDb->query('SELECT COUNT(*) as count FROM portfolio_items')[0]['count'] ?? 0);
+        $userCountRows = $cardboardDb->query('SELECT COUNT(*) as count FROM mark_users');
+        $userCountVal = $userCountRows[0]['count'] ?? null;
+        $userCount = is_numeric($userCountVal) ? (int) $userCountVal : 0;
+        $articleCountRows = $articlesDb->query('SELECT COUNT(*) as count FROM articles');
+        $articleCountVal = $articleCountRows[0]['count'] ?? null;
+        $articleCount = is_numeric($articleCountVal) ? (int) $articleCountVal : 0;
+        $portfolioCountRows = $portfolioDb->query('SELECT COUNT(*) as count FROM portfolio_items');
+        $portfolioCountVal = $portfolioCountRows[0]['count'] ?? null;
+        $portfolioCount = is_numeric($portfolioCountVal) ? (int) $portfolioCountVal : 0;
         $recentUsers = $cardboardDb->query(
             'SELECT id, email, name, "createdAt" FROM mark_users ORDER BY "createdAt" DESC LIMIT 3'
         );

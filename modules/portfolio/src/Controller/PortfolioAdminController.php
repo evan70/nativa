@@ -106,16 +106,27 @@ class PortfolioAdminController
     #[Post(path: '/admin/portfolio/items')]
     public function store(Request $request): Response
     {
-        $title = trim((string) $request->post('title', ''));
-        $slug = trim((string) $request->post('slug', ''));
-        $subtitle = trim((string) $request->post('subtitle', ''));
-        $description = trim((string) $request->post('description', ''));
-        $category = trim((string) $request->post('category', ''));
-        $role = trim((string) $request->post('role', ''));
-        $year = trim((string) $request->post('year', ''));
-        $stack = trim((string) $request->post('stack', ''));
-        $image = trim((string) $request->post('image', ''));
-        $displayOrder = (int) $request->post('display_order', '0');
+        $titleRaw = $request->post('title', '');
+        $slugRaw = $request->post('slug', '');
+        $subtitleRaw = $request->post('subtitle', '');
+        $descriptionRaw = $request->post('description', '');
+        $categoryRaw = $request->post('category', '');
+        $roleRaw = $request->post('role', '');
+        $yearRaw = $request->post('year', '');
+        $stackRaw = $request->post('stack', '');
+        $imageRaw = $request->post('image', '');
+        $displayOrderRaw = $request->post('display_order', '0');
+
+        $title = is_string($titleRaw) ? trim($titleRaw) : '';
+        $slug = is_string($slugRaw) ? trim($slugRaw) : '';
+        $subtitle = is_string($subtitleRaw) ? trim($subtitleRaw) : '';
+        $description = is_string($descriptionRaw) ? trim($descriptionRaw) : '';
+        $category = is_string($categoryRaw) ? trim($categoryRaw) : '';
+        $role = is_string($roleRaw) ? trim($roleRaw) : '';
+        $year = is_string($yearRaw) ? trim($yearRaw) : '';
+        $stack = is_string($stackRaw) ? trim($stackRaw) : '';
+        $image = is_string($imageRaw) ? trim($imageRaw) : '';
+        $displayOrder = is_numeric($displayOrderRaw) ? (int) $displayOrderRaw : 0;
 
         // Validation
         $this->errors = [];
@@ -171,16 +182,27 @@ class PortfolioAdminController
             return new Response('Item not found', 404);
         }
 
-        $title = trim((string) $request->post('title', ''));
-        $slug = trim((string) $request->post('slug', ''));
-        $subtitle = trim((string) $request->post('subtitle', ''));
-        $description = trim((string) $request->post('description', ''));
-        $category = trim((string) $request->post('category', ''));
-        $role = trim((string) $request->post('role', ''));
-        $year = trim((string) $request->post('year', ''));
-        $stack = trim((string) $request->post('stack', ''));
-        $image = trim((string) $request->post('image', ''));
-        $displayOrder = (int) $request->post('display_order', '0');
+        $titleRaw = $request->post('title', '');
+        $slugRaw = $request->post('slug', '');
+        $subtitleRaw = $request->post('subtitle', '');
+        $descriptionRaw = $request->post('description', '');
+        $categoryRaw = $request->post('category', '');
+        $roleRaw = $request->post('role', '');
+        $yearRaw = $request->post('year', '');
+        $stackRaw = $request->post('stack', '');
+        $imageRaw = $request->post('image', '');
+        $displayOrderRaw = $request->post('display_order', '0');
+
+        $title = is_string($titleRaw) ? trim($titleRaw) : '';
+        $slug = is_string($slugRaw) ? trim($slugRaw) : '';
+        $subtitle = is_string($subtitleRaw) ? trim($subtitleRaw) : '';
+        $description = is_string($descriptionRaw) ? trim($descriptionRaw) : '';
+        $category = is_string($categoryRaw) ? trim($categoryRaw) : '';
+        $role = is_string($roleRaw) ? trim($roleRaw) : '';
+        $year = is_string($yearRaw) ? trim($yearRaw) : '';
+        $stack = is_string($stackRaw) ? trim($stackRaw) : '';
+        $image = is_string($imageRaw) ? trim($imageRaw) : '';
+        $displayOrder = is_numeric($displayOrderRaw) ? (int) $displayOrderRaw : 0;
 
         // Validation
         $this->errors = [];
@@ -255,9 +277,11 @@ class PortfolioAdminController
      */
     private function fetchAllItems(): array
     {
-        return $this->getConnection()->query(
+        /** @var array<array{id: int, title: string, slug: string, subtitle: string, description: string, category: string, role: string, year: string, stack: string, image: string, display_order: int}> $results */
+        $results = $this->getConnection()->query(
             'SELECT * FROM "portfolio_items" ORDER BY "display_order", "title"',
         );
+        return $results;
     }
 
     /**
@@ -267,6 +291,7 @@ class PortfolioAdminController
      */
     private function findItem(int $id): ?array
     {
+        /** @var array<array{id: int, title: string, slug: string, subtitle: string, description: string, category: string, role: string, year: string, stack: string, image: string, display_order: int}> $results */
         $results = $this->getConnection()->query(
             'SELECT * FROM "portfolio_items" WHERE "id" = ?',
             [$id],
@@ -309,7 +334,7 @@ class PortfolioAdminController
     {
         $items = [];
         foreach ($this->sectionRegistry->all() as $section) {
-            $slug = $section->getSlug();
+            $slug = $section->getId();
             $items[] = [
                 'url' => '/mark' . ($slug !== 'dashboard' ? '/' . $slug : ''),
                 'label' => $section->getLabel(),
@@ -320,7 +345,7 @@ class PortfolioAdminController
         return $items;
     }
 
-    private function getCurrentUser(): ?\Marko\Authentication\UserInterface
+    private function getCurrentUser(): ?\Marko\Authentication\AuthenticatableInterface
     {
         return $this->guard->user();
     }

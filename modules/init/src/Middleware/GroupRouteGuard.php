@@ -26,7 +26,7 @@ readonly class GroupRouteGuard implements MiddlewareInterface
             return $next($request);
         }
 
-        $path = $request->getPath();
+        $path = $request->path();
         $groupName = $this->groupManager->getGroupForRoute($path);
 
         // No group for this route - allow

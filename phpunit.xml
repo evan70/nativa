@@ -6,8 +6,11 @@
          cacheDirectory=".phpunit.cache"
 >
     <testsuites>
-        <testsuite name="SQLite">
+        <testsuite name="Main">
             <directory>tests</directory>
+        </testsuite>
+        <testsuite name="Modules">
+            <directory>modules/*/tests</directory>
         </testsuite>
     </testsuites>
     <source>

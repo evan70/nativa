@@ -105,10 +105,14 @@ class SettingsController
     #[Post(path: '/admin/cardboard/settings')]
     public function store(Request $request): Response
     {
-        $key = trim((string) $request->post('key', ''));
-        $value = trim((string) $request->post('value', ''));
-        $type = trim((string) $request->post('type', 'string'));
-        $group = trim((string) $request->post('group', 'general'));
+        $keyRaw = $request->post('key', '');
+        $key = is_string($keyRaw) ? trim($keyRaw) : '';
+        $valueRaw = $request->post('value', '');
+        $value = is_string($valueRaw) ? trim($valueRaw) : '';
+        $typeRaw = $request->post('type', 'string');
+        $type = is_string($typeRaw) ? trim($typeRaw) : 'string';
+        $groupRaw = $request->post('group', 'general');
+        $group = is_string($groupRaw) ? trim($groupRaw) : 'general';
 
         // Validation
         $this->errors = [];
@@ -164,9 +168,12 @@ class SettingsController
             return new Response('Setting not found', 404);
         }
 
-        $value = trim((string) $request->post('value', ''));
-        $type = trim((string) $request->post('type', 'string'));
-        $group = trim((string) $request->post('group', 'general'));
+        $valueRaw = $request->post('value', '');
+        $value = is_string($valueRaw) ? trim($valueRaw) : '';
+        $typeRaw = $request->post('type', 'string');
+        $type = is_string($typeRaw) ? trim($typeRaw) : 'string';
+        $groupRaw = $request->post('group', 'general');
+        $group = is_string($groupRaw) ? trim($groupRaw) : 'general';
 
         // Validation
         $this->errors = [];
@@ -230,9 +237,11 @@ class SettingsController
      */
     private function fetchAllSettings(): array
     {
-        return $this->getConnection()->query(
+        /** @var array<array{id: int, key: string, value: string, type: string, group: string, createdAt: string, updatedAt: string}> $results */
+        $results = $this->getConnection()->query(
             'SELECT * FROM "cardboard_settings" ORDER BY "group", "key"',
         );
+        return $results;
     }
 
     /**
@@ -242,6 +251,7 @@ class SettingsController
      */
     private function findSetting(int $id): ?array
     {
+        /** @var array<array{id: int, key: string, value: string, type: string, group: string, createdAt: string, updatedAt: string}> $results */
         $results = $this->getConnection()->query(
             'SELECT * FROM "cardboard_settings" WHERE "id" = ?',
             [$id],
@@ -273,7 +283,7 @@ class SettingsController
     {
         $items = [];
         foreach ($this->sectionRegistry->all() as $section) {
-            $slug = $section->getSlug();
+            $slug = $section->getId();
             $items[] = [
                 'url' => '/mark' . ($slug !== 'dashboard' ? '/' . $slug : ''),
                 'label' => $section->getLabel(),
@@ -284,7 +294,7 @@ class SettingsController
         return $items;
     }
 
-    private function getCurrentUser(): ?\Marko\Authentication\UserInterface
+    private function getCurrentUser(): ?\Marko\Authentication\AuthenticatableInterface
     {
         return $this->guard->user();
     }

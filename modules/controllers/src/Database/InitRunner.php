@@ -142,10 +142,12 @@ final class InitRunner
     private function splitSqlStatements(string $sql): array
     {
         // Remove single-line comments (-- ...)
-        $sql = preg_replace('/^--.*$/m', '', $sql);
+        $cleaned = preg_replace('/^--.*$/m', '', $sql);
+        $sql = is_string($cleaned) ? $cleaned : $sql;
 
         // Remove blank lines
-        $sql = preg_replace('/^\s*$/m', '', $sql);
+        $cleaned = preg_replace('/^\s*$/m', '', $sql);
+        $sql = is_string($cleaned) ? $cleaned : $sql;
 
         // Split by semicolons
         $parts = explode(';', $sql);

@@ -18,6 +18,9 @@ use Marko\View\ViewInterface;
 
 class RegisterController
 {
+    /**
+     * @param MarkRepositoryInterface<Mark> $repository
+     */
     public function __construct(
         private readonly ViewInterface $view,
         private readonly MarkRepositoryInterface $repository,
@@ -50,10 +53,14 @@ class RegisterController
             return Response::redirect('/mark');
         }
 
-        $name = trim((string) $request->post('name', ''));
-        $email = trim((string) $request->post('email', ''));
-        $password = (string) $request->post('password', '');
-        $passwordConfirmation = (string) $request->post('password_confirmation', '');
+        $nameRaw = $request->post('name', '');
+        $name = is_string($nameRaw) ? trim($nameRaw) : '';
+        $emailRaw = $request->post('email', '');
+        $email = is_string($emailRaw) ? trim($emailRaw) : '';
+        $passwordRaw = $request->post('password', '');
+        $password = is_string($passwordRaw) ? $passwordRaw : '';
+        $passwordConfirmationRaw = $request->post('password_confirmation', '');
+        $passwordConfirmation = is_string($passwordConfirmationRaw) ? $passwordConfirmationRaw : '';
 
         // --- Validation ---
         $errors = [];

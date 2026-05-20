@@ -10,6 +10,9 @@ use Marko\Database\Repository\RepositoryInterface;
 
 /**
  * Interface for Mark entity repository.
+ *
+ * @template TEntity of \Marko\Database\Entity\Entity
+ * @extends RepositoryInterface<TEntity>
  */
 interface MarkRepositoryInterface extends RepositoryInterface
 {

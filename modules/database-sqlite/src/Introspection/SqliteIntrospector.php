@@ -19,13 +19,18 @@ class SqliteIntrospector implements IntrospectorInterface
         private readonly ConnectionInterface $connection,
     ) {}
 
+    /**
+     * @return list<string>
+     */
     public function getTables(): array
     {
         $tables = $this->connection->query(
             "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name",
         );
 
-        return array_column($tables, 'name');
+        /** @var list<string> $names */
+        $names = array_column($tables, 'name');
+        return $names;
     }
 
     public function getTable(string $name): ?Table
@@ -79,8 +84,9 @@ class SqliteIntrospector implements IntrospectorInterface
         /** @var array{name: string, unique: int, origin: string, columns: string} $info */
         foreach ($this->connection->query("PRAGMA index_list($table)") as $info) {
             $columns = [];
+            /** @var array{name: string} $col */
             foreach ($this->connection->query("PRAGMA index_info({$info['name']})") as $col) {
-                $columns[] = $col['name'];
+                $columns[] = (string) $col['name'];
             }
 
             $indexes[] = new Index(

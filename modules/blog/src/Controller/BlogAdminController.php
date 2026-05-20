@@ -10,6 +10,7 @@ use App\Blog\Repository\ArticleRepository;
 use App\Middleware\AdminAuthMiddleware;
 use Marko\Admin\Contracts\AdminSectionRegistryInterface;
 use Marko\Authentication\Contracts\GuardInterface;
+use Marko\Authentication\AuthenticatableInterface;
 use Marko\Database\Connection\ConnectionInterface;
 use Marko\Session\Contracts\SessionInterface;
 use Marko\Routing\Attributes\Delete;
@@ -46,14 +47,15 @@ class BlogAdminController
 
         // Attach tags to each article
         foreach ($articles as $article) {
-            $article->tags = $this->fetchTagsForArticle((int) $article->id);
+            $article->tags = $this->fetchTagsForArticle((int) ($article->id ?? 0));
         }
 
         // Handle title search via SQLite FTS4
-        $searchQuery = trim($_GET['q'] ?? '');
+        $q = $_GET['q'] ?? '';
+        $searchQuery = trim(is_string($q) ? $q : '');
         if ($searchQuery !== '') {
             $matchingIds = $this->searchArticlesByFts($searchQuery);
-            $articles = array_values(array_filter($articles, function (Article $article) use ($matchingIds): bool {
+            $articles = array_values(array_filter(iterator_to_array($articles), function (Article $article) use ($matchingIds): bool {
                 return isset($article->id) && in_array((int) $article->id, $matchingIds, true);
             }));
         }
@@ -63,12 +65,9 @@ class BlogAdminController
         $tagFilterInput = $_GET['tag_id'] ?? '';
         if (is_numeric($tagFilterInput) && (int) $tagFilterInput > 0) {
             $selectedTagId = (int) $tagFilterInput;
-            $articles = array_values(array_filter($articles, function (Article $article) use ($selectedTagId): bool {
-                if (!isset($article->tags) || !is_array($article->tags)) {
-                    return false;
-                }
+            $articles = array_values(array_filter(is_array($articles) ? $articles : iterator_to_array($articles), function (Article $article) use ($selectedTagId): bool {
                 foreach ($article->tags as $tag) {
-                    if (isset($tag['id']) && (int) $tag['id'] === $selectedTagId) {
+                    if ((int) $tag['id'] === $selectedTagId) {
                         return true;
                     }
                 }
@@ -477,7 +476,11 @@ class BlogAdminController
      */
     private function fetchAllTags(): array
     {
-        return $this->getDbConnection()->query('SELECT * FROM "tags" ORDER BY "name"');
+        /** @var array<int, array{id: int, name: string, slug: string}> $results */
+        $results = $this->getDbConnection()->query(
+            'SELECT id, name, slug FROM tags ORDER BY name ASC'
+        );
+        return $results;
     }
 
     /**
@@ -487,16 +490,18 @@ class BlogAdminController
      */
     private function fetchTagsForArticle(int $articleId): array
     {
-        return $this->getDbConnection()->query(
-            'SELECT t.* FROM "tags" t INNER JOIN "article_tags" at ON t.id = at.tag_id WHERE at.article_id = ? ORDER BY t.name',
+        /** @var array<int, array{id: int, name: string, slug: string}> $results */
+        $results = $this->getDbConnection()->query(
+            'SELECT t.id, t.name, t.slug FROM tags t INNER JOIN article_tags at ON t.id = at.tag_id WHERE at.article_id = ? ORDER BY t.name',
             [$articleId],
         );
+        return $results;
     }
 
     /**
-     * Search articles using SQLite FTS4 full-text index.
+     * Search articles by title using FTS4.
      *
-     * @return array<int, int> Matching article IDs.
+     * @return array<int> Matching article IDs.
      */
     private function searchArticlesByFts(string $query): array
     {
@@ -525,7 +530,7 @@ class BlogAdminController
             [$ftsQuery],
         );
 
-        return array_map(fn (array $row): int => (int) $row['docid'], $rows);
+        return array_map(fn (array $row): int => is_numeric($row['docid'] ?? null) ? (int) $row['docid'] : 0, $rows);
     }
 
     /**
@@ -554,12 +559,12 @@ class BlogAdminController
     {
         $items = [];
         foreach ($this->sectionRegistry->all() as $section) {
-            $slug = $section->getSlug();
+            $id = $section->getId();
             $items[] = [
-                'url' => '/mark' . ($slug !== 'dashboard' ? '/' . $slug : ''),
+                'url' => '/mark' . ($id !== 'dashboard' ? '/' . $id : ''),
                 'label' => $section->getLabel(),
                 'icon' => $section->getIcon(),
-                'active' => $slug === $currentSlug,
+                'active' => $id === $currentSlug,
             ];
         }
         return $items;
@@ -568,7 +573,7 @@ class BlogAdminController
     /**
      * Get current authenticated user for the view.
      */
-    private function getCurrentUser(): ?\Marko\Authentication\UserInterface
+    private function getCurrentUser(): ?AuthenticatableInterface
     {
         return $this->guard->user();
     }

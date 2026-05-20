@@ -4,17 +4,24 @@ parameters:
     paths:
         - app
         - modules/blog/src
+        - modules/cardboard/src
+        - modules/controllers/src
         - modules/database-modular/src
+        - modules/database-sqlite/src
+        - modules/htmx/src
+        - modules/init/src
+        - modules/mark/src
+        - modules/portfolio/src
+        - modules/view-simple/src
     excludePaths:
         - vendor
         - packages
         - modules/blog/Seed
         - modules/blog/tests
+        - modules/blog/Seed
+        - modules/blog/tests
+        - modules/database-modular/tests
+        - modules/database-sqlite/tests
+        - modules/init/tests
+        - modules/portfolio/Seed
     reportUnmatchedIgnoredErrors: false
-    ignoreErrors:
-        - '#Class Marko\\Authentication\\DefaultUserProvider not found#'
-        - '#Offset.*always exists#'
-        - '#Variable \$_POST on left side of \?\?#'
-        - '#Parameter.*storagePath.*implicitly nullable#'
-        - '#Property.*ModuleConnection.*pdo#'
-        - '#comparison.*PDO and null#'

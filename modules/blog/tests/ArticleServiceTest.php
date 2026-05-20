@@ -10,6 +10,7 @@ use App\Blog\DTO\CreateArticleRequest;
 use App\Blog\DTO\UpdateArticleRequest;
 use App\Blog\Entity\Article;
 use App\Blog\Repository\ArticleRepository;
+use Marko\Database\Entity\EntityCollection;
 
 class ArticleServiceTest extends TestCase
 {
@@ -35,6 +36,10 @@ class ArticleServiceTest extends TestCase
             title: 'Test Article',
             content: 'Test content',
             slug: 'test-article',
+            excerpt: '',
+            image: '',
+            published: true,
+            categoryId: null,
         );
 
         $article = new Article();
@@ -69,6 +74,10 @@ class ArticleServiceTest extends TestCase
             title: 'Test Article',
             content: 'Test content',
             slug: 'existing-slug',
+            excerpt: '',
+            image: '',
+            published: true,
+            categoryId: null,
         );
 
         $existingArticle = new Article();
@@ -93,6 +102,12 @@ class ArticleServiceTest extends TestCase
         // Arrange
         $request = new UpdateArticleRequest(
             title: 'Updated Title',
+            content: null,
+            slug: null,
+            excerpt: null,
+            image: null,
+            published: null,
+            categoryId: null,
         );
 
         $article = new Article();
@@ -120,7 +135,15 @@ class ArticleServiceTest extends TestCase
     public function testUpdateArticleThrowsOnNotFound(): void
     {
         // Arrange
-        $request = new UpdateArticleRequest(title: 'New Title');
+        $request = new UpdateArticleRequest(
+            title: 'New Title',
+            content: null,
+            slug: null,
+            excerpt: null,
+            image: null,
+            published: null,
+            categoryId: null,
+        );
 
         $this->repository->expects($this->once())
             ->method('find')
@@ -224,7 +247,7 @@ class ArticleServiceTest extends TestCase
 
         $this->repository->expects($this->once())
             ->method('findAll')
-            ->willReturn([$article1, $article2]);
+            ->willReturn(new EntityCollection([$article1, $article2]));
 
         // Act
         $results = $this->service->findPublished();
@@ -244,7 +267,7 @@ class ArticleServiceTest extends TestCase
 
         $this->repository->expects($this->once())
             ->method('findAll')
-            ->willReturn([$article]);
+            ->willReturn(new EntityCollection([$article]));
 
         // Act
         $results = $this->service->findByCategory(5);

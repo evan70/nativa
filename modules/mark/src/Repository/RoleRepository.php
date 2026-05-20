@@ -16,6 +16,7 @@ use Marko\Database\Repository\Repository;
 
 /**
  * @extends Repository<Role>
+ * @implements RoleRepositoryInterface<Role>
  */
 class RoleRepository extends Repository implements RoleRepositoryInterface
 {

@@ -13,8 +13,13 @@ use Marko\Authentication\Contracts\UserProviderInterface;
 
 readonly class MarkProvider implements UserProviderInterface
 {
+    /**
+     * @param MarkRepositoryInterface<Mark> $userRepository
+     * @param RoleRepositoryInterface<\Marko\Mark\Entity\Role> $roleRepository
+     */
     public function __construct(
         private MarkRepositoryInterface $userRepository,
+        /** @var RoleRepositoryInterface<\Marko\Mark\Entity\Role> */
         private RoleRepositoryInterface $roleRepository,
         private PasswordHasherInterface $passwordHasher,
     ) {}
@@ -40,7 +45,8 @@ readonly class MarkProvider implements UserProviderInterface
     public function retrieveByCredentials(
         array $credentials,
     ): ?AuthenticatableInterface {
-        $email = $credentials['email'] ?? null;
+        $emailRaw = $credentials['email'] ?? null;
+        $email = is_string($emailRaw) ? $emailRaw : null;
 
         if ($email === null) {
             return null;
@@ -65,7 +71,8 @@ readonly class MarkProvider implements UserProviderInterface
         AuthenticatableInterface $user,
         array $credentials,
     ): bool {
-        $password = $credentials['password'] ?? '';
+        $passwordRaw = $credentials['password'] ?? '';
+        $password = is_string($passwordRaw) ? $passwordRaw : '';
 
         return $this->passwordHasher->verify($password, $user->getAuthPassword());
     }
@@ -109,7 +116,7 @@ readonly class MarkProvider implements UserProviderInterface
     private function loadRolesAndPermissions(
         Mark $user,
     ): void {
-        $roles = $this->userRepository->getRolesForUser($user->id);
+        $roles = $this->userRepository->getRolesForUser($user->id ?? 0);
 
         $permissionKeys = [];
 

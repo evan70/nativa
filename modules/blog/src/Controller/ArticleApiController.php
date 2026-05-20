@@ -24,15 +24,13 @@ class ArticleApiController
     #[Post('/api/articles')]
     public function create(): Response
     {
-        $input = $_POST ?? [];
-        
-        $title = $input['title'] ?? '';
-        $content = $input['content'] ?? '';
-        $slug = $input['slug'] ?? '';
-        $excerpt = $input['excerpt'] ?? '';
-        $image = $input['image'] ?? '';
-        $publishedInput = $input['published'] ?? 'false';
-        $categoryIdInput = $input['category_id'] ?? null;
+        $title = $_POST['title'] ?? '';
+        $content = $_POST['content'] ?? '';
+        $slug = $_POST['slug'] ?? '';
+        $excerpt = $_POST['excerpt'] ?? '';
+        $image = $_POST['image'] ?? '';
+        $publishedInput = $_POST['published'] ?? 'false';
+        $categoryIdInput = $_POST['category_id'] ?? null;
 
         if (!is_string($title) || $title === '' || !is_string($content) || $content === '' || !is_string($slug) || $slug === '') {
             throw new ArticleValidationException('Title, content, and slug are required');
@@ -63,10 +61,8 @@ class ArticleApiController
     #[Put('/api/articles/{id}')]
     public function update(int $id): Response
     {
-        $input = $_POST ?? [];
-
         /** @var array<string, mixed> $validatedInput */
-        $validatedInput = (array) $input;
+        $validatedInput = $_POST;
 
         try {
             $request = UpdateArticleRequest::fromArray($validatedInput);

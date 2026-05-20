@@ -34,8 +34,10 @@ class ArticleController
         $page = is_numeric($pageInput) ? (int) $pageInput : 1;
         $page = max(1, $page);
 
-        $searchQuery = trim($_GET['q'] ?? '');
-        $tagSlug = trim((string) ($_GET['tag'] ?? ''));
+        $q = $_GET['q'] ?? '';
+        $searchQuery = trim(is_string($q) ? $q : '');
+        $tag = $_GET['tag'] ?? '';
+        $tagSlug = trim(is_string($tag) ? $tag : '');
 
         // If HTMX swap request targeting article-list, return partial
         if ($htmx !== null && $htmx->target() === 'article-list') {
@@ -161,7 +163,7 @@ class ArticleController
     /**
      * Get article IDs that have a tag with the given slug.
      *
-     * @return array<int, int>
+     * @return array<int>
      */
     private function getArticleIdsByTagSlug(string $tagSlug): array
     {
@@ -169,7 +171,7 @@ class ArticleController
             'SELECT at.article_id FROM article_tags at INNER JOIN tags t ON t.id = at.tag_id WHERE t.slug = ?',
             [$tagSlug],
         );
-        return array_map(fn (array $row): int => (int) $row['article_id'], $rows);
+        return array_map(fn (array $row): int => is_numeric($row['article_id'] ?? null) ? (int) $row['article_id'] : 0, $rows);
     }
 
     /**
@@ -182,8 +184,10 @@ class ArticleController
         $page = is_numeric($pageInput) ? (int) $pageInput : 2;
         $page = max(1, $page);
 
-        $searchQuery = trim($_GET['q'] ?? '');
-        $tagSlug = trim((string) ($_GET['tag'] ?? ''));
+        $q = $_GET['q'] ?? '';
+        $searchQuery = trim(is_string($q) ? $q : '');
+        $tag = $_GET['tag'] ?? '';
+        $tagSlug = trim(is_string($tag) ? $tag : '');
 
         return $this->renderPartial($page, $searchQuery, $tagSlug);
     }
@@ -524,9 +528,11 @@ class ArticleController
      */
     private function fetchAllTags(): array
     {
-        return $this->getDbConnection()->query(
+        /** @var array<int, array{id: int, name: string, slug: string, article_count: int}> $results */
+        $results = $this->getDbConnection()->query(
             'SELECT t.*, (SELECT COUNT(*) FROM article_tags WHERE tag_id = t.id) as article_count FROM "tags" t ORDER BY "article_count" DESC, "name" ASC'
         );
+        return $results;
     }
 
     /**
@@ -562,10 +568,12 @@ class ArticleController
      */
     private function fetchTagsForArticle(int $articleId): array
     {
-        return $this->getDbConnection()->query(
+        /** @var array<int, array{id: int, name: string, slug: string}> $results */
+        $results = $this->getDbConnection()->query(
             'SELECT t.* FROM "tags" t INNER JOIN "article_tags" at ON t.id = at.tag_id WHERE at.article_id = ? ORDER BY t.name',
             [$articleId],
         );
+        return $results;
     }
 
     // ---- FTS search ----
@@ -606,9 +614,9 @@ class ArticleController
         $ids = [];
         $snippets = [];
         foreach ($rows as $row) {
-            $id = (int) $row['docid'];
+            $id = is_numeric($row['docid'] ?? null) ? (int) $row['docid'] : 0;
             $ids[] = $id;
-            $raw = $row['snippet'] ?? null;
+            $raw = (isset($row['snippet']) && is_string($row['snippet'])) ? $row['snippet'] : null;
             if ($raw !== null) {
                 // Escape all HTML, then restore only safe <mark> tags
                 $escaped = htmlspecialchars($raw, ENT_QUOTES | ENT_HTML5, 'UTF-8');

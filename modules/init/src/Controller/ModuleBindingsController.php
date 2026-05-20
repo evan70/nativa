@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Init\Container\Container;
+use App\Init\Module\ModuleGroupManagerInterface;
 use Marko\Core\Attributes\Command;
 use Marko\Core\Command\CommandInterface;
 use Marko\Core\Command\Input;
 use Marko\Core\Command\Output;
-use App\Init\Module\ModuleGroupManagerInterface;
 
 #[Command(name: 'module:bindings', description: 'Show module bindings and groups')]
 readonly class ModuleBindingsCommand implements CommandInterface
 {
     public function __construct(
-        private \Marko\Core\Container\ContainerInterface $container,
+        private Container $container,
     ) {}
 
     public function execute(Input $input, Output $output): int
@@ -35,6 +36,7 @@ readonly class ModuleBindingsCommand implements CommandInterface
 
         // Get module groups
         if ($this->container->has(ModuleGroupManagerInterface::class)) {
+            /** @var ModuleGroupManagerInterface $manager */
             $manager = $this->container->get(ModuleGroupManagerInterface::class);
             $groups = $manager->getGroups();
 
@@ -46,10 +48,10 @@ readonly class ModuleBindingsCommand implements CommandInterface
             foreach ($groups as $name => $group) {
                 $isCore = $group->isCore ? ' [core]' : '';
                 $isActive = $manager->isGroupActive($name) ? ' [active]' : '';
-                $timeout = $group->idleTimeout ? " ({$group->idleTimeout})" : '';
+                $timeout = $group->idleTimeout !== null ? " ({$group->idleTimeout})" : '';
                 $output->writeLine("  $name$isCore$isActive$timeout");
                 $output->writeLine("    module: {$group->moduleName}");
-                if ($group->routes) {
+                if ($group->routes !== []) {
                     $output->writeLine('    routes: ' . implode(', ', $group->routes));
                 }
                 $output->writeLine('');

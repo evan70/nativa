@@ -7,6 +7,7 @@ namespace App\Blog\Controller;
 use App\Blog\Database\BlogConnection;
 use App\Middleware\AdminAuthMiddleware;
 use Marko\Admin\Contracts\AdminSectionRegistryInterface;
+use Marko\Authentication\AuthenticatableInterface;
 use Marko\Authentication\Contracts\GuardInterface;
 use Marko\Routing\Attributes\Delete;
 use Marko\Routing\Attributes\Get;
@@ -43,7 +44,7 @@ class TagAdminController
         error_log('[TagAdmin] Index - showing ' . count($tags) . ' tags');
 
         return $this->view->render('pages/mark/tags', [
-            'title' => 'Tags',
+            'title' => 'Tags Administration',
             'tags' => $tags,
             'flashMessages' => $this->session->flash()->all(),
             'menuItems' => $this->buildMenuItems('tags'),
@@ -105,8 +106,9 @@ class TagAdminController
     #[Post(path: '/mark/tags')]
     public function store(Request $request): Response
     {
-        $name = trim((string) $request->post('name', ''));
-        $slug = trim((string) $request->post('slug', ''));
+        $post = $request->post();
+        $name = isset($post['name']) && is_string($post['name']) ? trim($post['name']) : '';
+        $slug = isset($post['slug']) && is_string($post['slug']) ? trim($post['slug']) : '';
 
         // Validation
         $this->errors = [];
@@ -159,8 +161,9 @@ class TagAdminController
             return new Response('Tag not found', 404);
         }
 
-        $name = trim((string) $request->post('name', ''));
-        $slug = trim((string) $request->post('slug', ''));
+        $post = $request->post();
+        $name = isset($post['name']) && is_string($post['name']) ? trim($post['name']) : '';
+        $slug = isset($post['slug']) && is_string($post['slug']) ? trim($post['slug']) : '';
 
         // Validation
         $this->errors = [];
@@ -214,17 +217,19 @@ class TagAdminController
         }
 
         // Check if any articles reference this tag
-        $articleCount = $this->getConnection()->query(
+        $articleCountResult = $this->getConnection()->query(
             'SELECT COUNT(*) as cnt FROM "article_tags" WHERE "tag_id" = ?',
             [$id],
         );
+        $cnt = is_numeric($articleCountResult[0]['cnt'] ?? null) ? (int) $articleCountResult[0]['cnt'] : 0;
 
-        if (($articleCount[0]['cnt'] ?? 0) > 0) {
+        if ($cnt > 0) {
+            $tagName = $tag['name'];
             $this->session->flash()->add(
                 'error',
-                'Cannot delete tag "' . $tag['name'] . '": ' . $articleCount[0]['cnt'] . ' article(s) use it.',
+                'Cannot delete tag "' . $tagName . '": ' . $cnt . ' article(s) use it.',
             );
-            error_log('[TagAdmin] Delete blocked - tag used by ' . $articleCount[0]['cnt'] . ' articles');
+            error_log('[TagAdmin] Delete blocked - tag used by ' . $cnt . ' articles');
 
             return new Response('', 302, ['Location' => '/mark/tags']);
         }
@@ -248,9 +253,11 @@ class TagAdminController
      */
     private function fetchAllTags(): array
     {
-        return $this->getConnection()->query(
+        /** @var array<array{id: int, name: string, slug: string, article_count: int}> $results */
+        $results = $this->getConnection()->query(
             'SELECT t.*, (SELECT COUNT(*) FROM article_tags WHERE tag_id = t.id) as article_count FROM "tags" t ORDER BY "name"',
         );
+        return $results;
     }
 
     /**
@@ -264,7 +271,9 @@ class TagAdminController
             'SELECT * FROM "tags" WHERE "id" = ?',
             [$id],
         );
-        return $results[0] ?? null;
+        /** @var array{id: int, name: string, slug: string}|null $result */
+        $result = $results[0] ?? null;
+        return $result;
     }
 
     /**
@@ -276,7 +285,8 @@ class TagAdminController
             'SELECT COUNT(*) as cnt FROM "tags" WHERE "slug" = ?',
             [$slug],
         );
-        return ($results[0]['cnt'] ?? 0) > 0;
+        $cnt = is_numeric($results[0]['cnt'] ?? null) ? (int) $results[0]['cnt'] : 0;
+        return $cnt > 0;
     }
 
     private function getConnection(): \Marko\Database\Connection\ConnectionInterface
@@ -291,8 +301,8 @@ class TagAdminController
     {
         $slug = strtolower($name);
         $cleaned = preg_replace('/[^a-z0-9\s-]/', '', $slug);
-        $withDashes = preg_replace('/[\s-]+/', '-', $cleaned ?? '');
-        return trim($withDashes ?? '', '-');
+        $withDashes = preg_replace('/[\s-]+/', '-', (string) ($cleaned ?? ''));
+        return trim((string) ($withDashes ?? ''), '-');
     }
 
     /**
@@ -302,18 +312,18 @@ class TagAdminController
     {
         $items = [];
         foreach ($this->sectionRegistry->all() as $section) {
-            $slug = $section->getSlug();
+            $id = $section->getId();
             $items[] = [
-                'url' => '/mark' . ($slug !== 'dashboard' ? '/' . $slug : ''),
+                'url' => '/mark' . ($id !== 'dashboard' ? '/' . $id : ''),
                 'label' => $section->getLabel(),
                 'icon' => $section->getIcon(),
-                'active' => $slug === $currentSlug,
+                'active' => $id === $currentSlug,
             ];
         }
         return $items;
     }
 
-    private function getCurrentUser(): ?\Marko\Authentication\UserInterface
+    private function getCurrentUser(): ?AuthenticatableInterface
     {
         return $this->guard->user();
     }

@@ -66,7 +66,6 @@ readonly class ModuleGroup
                 'm' => new \DateInterval("PT{$value}M"),
                 'h' => new \DateInterval("PT{$value}H"),
                 'd' => new \DateInterval("P{$value}D"),
-                default => new \DateInterval("PT{$value}M"),
             };
         }
 
@@ -77,7 +76,7 @@ readonly class ModuleGroup
     /**
      * Get effective idle timeout (group-specific or default).
      */
-    public function getEffectiveTimeout(?string $default = '5m'): string
+    public function getEffectiveTimeout(string $default = '5m'): string
     {
         return $this->idleTimeout ?? $default;
     }

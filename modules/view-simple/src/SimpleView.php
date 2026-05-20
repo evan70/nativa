@@ -13,6 +13,7 @@ use Marko\View\Exceptions\TemplateNotFoundException;
 class SimpleView implements ViewInterface
 {
     private ?string $layout = null;
+    /** @var array<string, string> */
     private array $sections = [];
     private ?string $currentSection = null;
     /** @var array<string, mixed> */
@@ -20,6 +21,7 @@ class SimpleView implements ViewInterface
 
     public function __construct(
         private TemplateResolverInterface $resolver,
+        // @phpstan-ignore-next-line property.unused
         private ViewConfig $config,
     ) {}
 
@@ -49,6 +51,7 @@ class SimpleView implements ViewInterface
             if ($content === false) {
                 $content = '';
             }
+            // @phpstan-ignore notIdentical.alwaysFalse (layout set via include)
             if ($this->layout !== null) {
                 return $this->renderLayout($this->layout);
             }
@@ -83,6 +86,7 @@ class SimpleView implements ViewInterface
         return $this->sections[$name] ?? '';
     }
 
+    /** @param array<string, mixed> $data */
     public function include(string $template, array $data = []): string
     {
         $path = $this->resolver->resolve($template);

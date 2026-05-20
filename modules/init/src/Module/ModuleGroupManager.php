@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Init\Module;
 
-use Marko\Core\Container\ContainerInterface;
+use App\Init\Container\Container;
 use Marko\Core\Module\ModuleManifest;
 use Marko\Core\Path\ProjectPaths;
 use Psr\Log\LoggerInterface;
@@ -28,8 +28,10 @@ class ModuleGroupManager implements ModuleGroupManagerInterface
     private ?LoggerInterface $logger = null;
 
     public function __construct(
-        private ContainerInterface $container,
+        private Container $container,
+        // @phpstan-ignore-next-line property.unused
         private ?string $defaultIdleTimeout = '5m',
+        // @phpstan-ignore-next-line property.unused
         private bool $evictionEnabled = true,
     ) {}
 
@@ -73,11 +75,12 @@ class ModuleGroupManager implements ModuleGroupManagerInterface
     /**
      * Read extra.marko metadata from a module's composer.json.
      *
-     * @return array{group: string|null, routes: array, idleTimeout: int|null, isCore: bool}
+     * @return array{group: string|null, routes: array<string>, idleTimeout: string|null, isCore: bool}
      */
     private function readModuleMetadata(string $modulePath): array
     {
         $composerPath = $modulePath . '/composer.json';
+        /** @var array<string, mixed> $data */
         $data = [];
 
         if (is_file($composerPath)) {
@@ -90,20 +93,31 @@ class ModuleGroupManager implements ModuleGroupManagerInterface
             }
         }
 
-        $marko = $data['extra']['marko'] ?? [];
+        /** @var array<string, mixed> $marko */
+        $marko = is_array($data['extra'] ?? null) ? ($data['extra']['marko'] ?? []) : [];
+
+        $groupVal = $marko['group'] ?? null;
+        /** @var array<string> $routesVal */
+        $routesVal = $marko['routes'] ?? [];
+        $timeoutVal = $marko['idleTimeout'] ?? null;
+        $isCoreVal = $marko['isCore'] ?? false;
 
         return [
-            'group' => $marko['group'] ?? null,
-            'routes' => $marko['routes'] ?? [],
-            'idleTimeout' => $marko['idleTimeout'] ?? null,
-            'isCore' => $marko['isCore'] ?? false,
+            'group' => is_string($groupVal) ? $groupVal : null,
+            'routes' => $routesVal,
+            'idleTimeout' => is_string($timeoutVal) ? $timeoutVal : null,
+            'isCore' => is_bool($isCoreVal) ? $isCoreVal : false,
         ];
     }
 
+    /**
+     * @return array<string>
+     */
     private function loadRemovedGroups(): array
     {
         // Lazy init state file path
         if ($this->stateFile === null) {
+            /** @var ProjectPaths $paths */
             $paths = $this->container->get(ProjectPaths::class);
             $this->stateFile = $paths->base . '/storage/framework/module-groups.json';
         }
@@ -113,14 +127,22 @@ class ModuleGroupManager implements ModuleGroupManagerInterface
         }
         
         $content = file_get_contents($this->stateFile);
+        if ($content === false) {
+            return [];
+        }
+        /** @var array{removed?: array<string>}|null $data */
         $data = json_decode($content, true);
         
-        return $data['removed'] ?? [];
+        return is_array($data) ? ($data['removed'] ?? []) : [];
     }
 
+    /**
+     * @param array<string> $removed
+     */
     private function saveRemovedGroups(array $removed): void
     {
         if ($this->stateFile === null) {
+            /** @var ProjectPaths $paths */
             $paths = $this->container->get(ProjectPaths::class);
             $this->stateFile = $paths->base . '/storage/framework/module-groups.json';
         }
@@ -204,6 +226,10 @@ class ModuleGroupManager implements ModuleGroupManagerInterface
         return $evicted;
     }
     public function isCoreGroup(string $groupName): bool { return $this->groups[$groupName]->isCore ?? false; }
+
+    /**
+     * @return array<string, ModuleGroup>
+     */
     public function getGroups(): array { return $this->groups; }
     public function getGroup(string $name): ?ModuleGroup { return $this->groups[$name] ?? null; }
     public function isGroupActive(string $groupName): bool { return $this->activeGroups[$groupName] ?? false; }
@@ -212,8 +238,10 @@ class ModuleGroupManager implements ModuleGroupManagerInterface
     {
         if (!isset($this->manifests[$groupName])) return;
         $manifest = $this->manifests[$groupName];
-        foreach ($manifest->bindings as $interface => $implementation) {
-            if (is_string($implementation)) $this->container->bind($interface, $implementation);
+        /** @var array<string, string> $bindings */
+        $bindings = $manifest->bindings;
+        foreach ($bindings as $interface => $implementation) {
+            $this->container->bind($interface, $implementation);
         }
         $this->activeGroups[$groupName] = true;
         $this->markUsed($groupName);
@@ -223,14 +251,22 @@ class ModuleGroupManager implements ModuleGroupManagerInterface
     {
         if (!isset($this->manifests[$groupName])) return;
         $manifest = $this->manifests[$groupName];
-        foreach ($manifest->bindings as $interface => $implementation) {
-            if (is_string($interface)) $this->container->unbind($interface);
+        /** @var array<string, string> $bindings */
+        $bindings = $manifest->bindings;
+        foreach ($bindings as $interface => $implementation) {
+            $this->container->unbind($interface);
         }
         unset($this->activeGroups[$groupName]);
     }
 
+    /**
+     * @param array<string, mixed> $config
+     */
     public function configureEviction(array $config): void {}
 
+    /**
+     * @return array<int, array{name: string, module: string, routes: array<string>, isCore: bool, isActive: bool, lastUsed: string, idleTimeout: string|null}>
+     */
     public function getSummary(): array
     {
         $summary = [];

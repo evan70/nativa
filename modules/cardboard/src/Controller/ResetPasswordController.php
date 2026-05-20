@@ -7,6 +7,7 @@ namespace Marko\Cardboard\Controller;
 use Marko\Authentication\Contracts\GuardInterface;
 use Marko\Authentication\Contracts\PasswordHasherInterface;
 use Marko\Cardboard\Service\PasswordResetService;
+use Marko\Mark\Entity\Mark;
 use Marko\Mark\Repository\MarkRepositoryInterface;
 use Marko\Routing\Attributes\Get;
 use Marko\Routing\Attributes\Post;
@@ -16,6 +17,9 @@ use Marko\View\ViewInterface;
 
 class ResetPasswordController
 {
+    /**
+     * @param MarkRepositoryInterface<Mark> $repository
+     */
     public function __construct(
         private readonly ViewInterface $view,
         private readonly GuardInterface $guard,
@@ -55,9 +59,12 @@ class ResetPasswordController
             return Response::redirect('/mark');
         }
 
-        $email = trim((string) $request->post('email', ''));
-        $password = (string) $request->post('password', '');
-        $passwordConfirmation = (string) $request->post('password_confirmation', '');
+        $emailRaw = $request->post('email', '');
+        $email = is_string($emailRaw) ? trim($emailRaw) : '';
+        $passwordRaw = $request->post('password', '');
+        $password = is_string($passwordRaw) ? $passwordRaw : '';
+        $passwordConfirmationRaw = $request->post('password_confirmation', '');
+        $passwordConfirmation = is_string($passwordConfirmationRaw) ? $passwordConfirmationRaw : '';
         $errors = [];
 
         // Validate email

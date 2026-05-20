@@ -49,7 +49,7 @@ class ForgotPasswordTest extends TestCase
         $this->view
             ->expects($this->once())
             ->method('render')
-            ->with('pages/auth/forgot-password', $this->isType('array'))
+            ->with('pages/auth/forgot-password', $this->isArray())
             ->willReturn(new Response(body: 'form'));
 
         $response = $this->controller->showForgotForm($this->makeRequest());

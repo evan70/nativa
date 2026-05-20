@@ -13,20 +13,33 @@ class SqliteStatement implements StatementInterface
         private readonly PDOStatement $statement,
     ) {}
 
+    /**
+     * @param array<string, mixed> $bindings
+     */
     public function execute(array $bindings = []): bool
     {
         return $this->statement->execute($bindings);
     }
 
+    /**
+     * @return list<array<string, mixed>>
+     */
     public function fetchAll(): array
     {
-        return $this->statement->fetchAll() ?: [];
+        /** @var list<array<string, mixed>> $result */
+        $result = $this->statement->fetchAll() ?: [];
+        return $result;
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function fetch(): ?array
     {
         $row = $this->statement->fetch();
-        return $row !== false ? $row : null;
+        /** @var array<string, mixed>|null $result */
+        $result = $row !== false ? $row : null;
+        return $result;
     }
 
     public function rowCount(): int

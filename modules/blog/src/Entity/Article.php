@@ -40,4 +40,7 @@ class Article extends Entity
 
     #[Column('created_at')]
     public ?string $createdAt = null;
+
+    /** @var array<int, array{id: int, name: string, slug: string}> */
+    public array $tags = [];
 }

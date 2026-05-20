@@ -63,7 +63,7 @@ class PortfolioAdminTest extends TestCase
         $this->view
             ->expects($this->once())
             ->method('render')
-            ->with('pages/mark/admin-portfolio-items', $this->isType('array'))
+            ->with('pages/mark/admin-portfolio-items', $this->isArray())
             ->willReturn(new Response(body: 'items'));
 
         $response = $this->controller->index();
@@ -76,7 +76,7 @@ class PortfolioAdminTest extends TestCase
         $this->view
             ->expects($this->once())
             ->method('render')
-            ->with('pages/mark/portfolio-item-form', $this->isType('array'))
+            ->with('pages/mark/portfolio-item-form', $this->isArray())
             ->willReturn(new Response(body: 'form'));
 
         $response = $this->controller->create();
@@ -98,7 +98,7 @@ class PortfolioAdminTest extends TestCase
         $this->view
             ->expects($this->once())
             ->method('renderToString')
-            ->with('pages/errors/404', $this->isType('array'))
+            ->with('pages/errors/404', $this->isArray())
             ->willReturn('404');
 
         $response = $this->controller->edit(99999);

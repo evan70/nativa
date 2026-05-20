@@ -62,7 +62,7 @@ class CategoryAdminTest extends TestCase
         $this->view
             ->expects($this->once())
             ->method('render')
-            ->with('pages/mark/admin-categories', $this->isType('array'))
+            ->with('pages/mark/admin-categories', $this->isArray())
             ->willReturn(new Response(body: 'categories'));
 
         $response = $this->controller->index();
@@ -75,7 +75,7 @@ class CategoryAdminTest extends TestCase
         $this->view
             ->expects($this->once())
             ->method('render')
-            ->with('pages/mark/category-form', $this->isType('array'))
+            ->with('pages/mark/category-form', $this->isArray())
             ->willReturn(new Response(body: 'form'));
 
         $response = $this->controller->create();
@@ -97,7 +97,7 @@ class CategoryAdminTest extends TestCase
         $this->view
             ->expects($this->once())
             ->method('renderToString')
-            ->with('pages/errors/404', $this->isType('array'))
+            ->with('pages/errors/404', $this->isArray())
             ->willReturn('404');
 
         $response = $this->controller->edit(99999);

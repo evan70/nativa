@@ -7,6 +7,7 @@ namespace App\Blog\Controller;
 use App\Blog\Database\BlogConnection;
 use App\Middleware\AdminAuthMiddleware;
 use Marko\Admin\Contracts\AdminSectionRegistryInterface;
+use Marko\Authentication\AuthenticatableInterface;
 use Marko\Authentication\Contracts\GuardInterface;
 use Marko\Routing\Attributes\Delete;
 use Marko\Routing\Attributes\Get;
@@ -105,9 +106,10 @@ class CategoryAdminController
     #[Post(path: '/mark/categories')]
     public function store(Request $request): Response
     {
-        $name = trim((string) $request->post('name', ''));
-        $slug = trim((string) $request->post('slug', ''));
-        $description = trim((string) $request->post('description', ''));
+        $post = $request->post();
+        $name = isset($post['name']) && is_string($post['name']) ? trim($post['name']) : '';
+        $slug = isset($post['slug']) && is_string($post['slug']) ? trim($post['slug']) : '';
+        $description = isset($post['description']) && is_string($post['description']) ? trim($post['description']) : '';
 
         // Validation
         $this->errors = [];
@@ -118,8 +120,7 @@ class CategoryAdminController
             $slug = $this->generateSlug($name);
         }
 
-        // Check slug uniqueness
-        if ($this->errors === [] && $this->slugExists($slug)) {
+        if ($this->slugExists($slug)) {
             $this->errors['slug'] = 'A category with this slug already exists';
         }
 
@@ -129,6 +130,7 @@ class CategoryAdminController
                 'title' => 'Create New Category',
                 'category' => null,
                 'errors' => $this->errors,
+                'flashMessages' => $this->session->flash()->all(),
                 'menuItems' => $this->buildMenuItems('categories'),
                 'currentUser' => $this->getCurrentUser(),
                 'activeSection' => 'categories',
@@ -160,9 +162,10 @@ class CategoryAdminController
             return new Response('Category not found', 404);
         }
 
-        $name = trim((string) $request->post('name', ''));
-        $slug = trim((string) $request->post('slug', ''));
-        $description = trim((string) $request->post('description', ''));
+        $post = $request->post();
+        $name = isset($post['name']) && is_string($post['name']) ? trim($post['name']) : '';
+        $slug = isset($post['slug']) && is_string($post['slug']) ? trim($post['slug']) : '';
+        $description = isset($post['description']) && is_string($post['description']) ? trim($post['description']) : '';
 
         // Validation
         $this->errors = [];
@@ -184,6 +187,7 @@ class CategoryAdminController
                 'title' => 'Edit Category',
                 'category' => $category,
                 'errors' => $this->errors,
+                'flashMessages' => $this->session->flash()->all(),
                 'menuItems' => $this->buildMenuItems('categories'),
                 'currentUser' => $this->getCurrentUser(),
                 'activeSection' => 'categories',
@@ -216,14 +220,19 @@ class CategoryAdminController
         }
 
         // Check if any articles reference this category
-        $articleCount = $this->getConnection()->query(
+        $articleCountResult = $this->getConnection()->query(
             'SELECT COUNT(*) as cnt FROM "articles" WHERE "category_id" = ?',
             [$id],
         );
+        $cnt = is_numeric($articleCountResult[0]['cnt'] ?? null) ? (int) $articleCountResult[0]['cnt'] : 0;
 
-        if (($articleCount[0]['cnt'] ?? 0) > 0) {
-            $this->session->flash()->add('error', 'Cannot delete category "' . $category['name'] . '": ' . $articleCount[0]['cnt'] . ' article(s) reference it.');
-            error_log('[CategoryAdmin] Delete blocked - category has ' . $articleCount[0]['cnt'] . ' articles');
+        if ($cnt > 0) {
+            $catName = $category['name'];
+            $this->session->flash()->add(
+                'error',
+                'Cannot delete category "' . $catName . '": ' . $cnt . ' article(s) reference it.',
+            );
+            error_log('[CategoryAdmin] Delete blocked - category has ' . $cnt . ' articles');
 
             return new Response('', 302, ['Location' => '/mark/categories']);
         }
@@ -247,9 +256,11 @@ class CategoryAdminController
      */
     private function fetchAllCategories(): array
     {
-        return $this->getConnection()->query(
+        /** @var array<array{id: int, name: string, slug: string, description: string, article_count: int}> $results */
+        $results = $this->getConnection()->query(
             'SELECT c.*, (SELECT COUNT(*) FROM articles WHERE category_id = c.id) as article_count FROM "categories" c ORDER BY "name"',
         );
+        return $results;
     }
 
     /**
@@ -263,7 +274,9 @@ class CategoryAdminController
             'SELECT * FROM "categories" WHERE "id" = ?',
             [$id],
         );
-        return $results[0] ?? null;
+        /** @var array{id: int, name: string, slug: string, description: string}|null $result */
+        $result = $results[0] ?? null;
+        return $result;
     }
 
     /**
@@ -275,7 +288,8 @@ class CategoryAdminController
             'SELECT COUNT(*) as cnt FROM "categories" WHERE "slug" = ?',
             [$slug],
         );
-        return ($results[0]['cnt'] ?? 0) > 0;
+        $cnt = is_numeric($results[0]['cnt'] ?? null) ? (int) $results[0]['cnt'] : 0;
+        return $cnt > 0;
     }
 
     private function getConnection(): \Marko\Database\Connection\ConnectionInterface
@@ -290,8 +304,8 @@ class CategoryAdminController
     {
         $slug = strtolower($name);
         $cleaned = preg_replace('/[^a-z0-9\s-]/', '', $slug);
-        $withDashes = preg_replace('/[\s-]+/', '-', $cleaned ?? '');
-        return trim($withDashes ?? '', '-');
+        $withDashes = preg_replace('/[\s-]+/', '-', (string) ($cleaned ?? ''));
+        return trim((string) ($withDashes ?? ''), '-');
     }
 
     /**
@@ -301,18 +315,18 @@ class CategoryAdminController
     {
         $items = [];
         foreach ($this->sectionRegistry->all() as $section) {
-            $slug = $section->getSlug();
+            $id = $section->getId();
             $items[] = [
-                'url' => '/mark' . ($slug !== 'dashboard' ? '/' . $slug : ''),
+                'url' => '/mark' . ($id !== 'dashboard' ? '/' . $id : ''),
                 'label' => $section->getLabel(),
                 'icon' => $section->getIcon(),
-                'active' => $slug === $currentSlug,
+                'active' => $id === $currentSlug,
             ];
         }
         return $items;
     }
 
-    private function getCurrentUser(): ?\Marko\Authentication\UserInterface
+    private function getCurrentUser(): ?AuthenticatableInterface
     {
         return $this->guard->user();
     }

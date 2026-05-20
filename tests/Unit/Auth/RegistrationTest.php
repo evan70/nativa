@@ -50,7 +50,7 @@ class RegistrationTest extends TestCase
         $this->view
             ->expects($this->once())
             ->method('render')
-            ->with('pages/auth/register', $this->isType('array'))
+            ->with('pages/auth/register', $this->isArray())
             ->willReturn(new Response(body: 'form'));
 
         $response = $this->controller->showRegistrationForm($this->makeRequest());

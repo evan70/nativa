@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Init\Container\Container;
+use App\Init\Module\ModuleGroupManagerInterface;
 use Marko\Core\Attributes\Command;
 use Marko\Core\Command\CommandInterface;
 use Marko\Core\Command\Input;
 use Marko\Core\Command\Output;
-use App\Init\Module\ModuleGroupManagerInterface;
 
 #[Command(name: 'module:unbind', description: 'Unbind a module group')]
 readonly class ModuleUnbindCommand implements CommandInterface
 {
     public function __construct(
-        private \Marko\Core\Container\ContainerInterface $container,
+        private Container $container,
     ) {}
 
     public function execute(Input $input, Output $output): int
@@ -31,6 +32,7 @@ readonly class ModuleUnbindCommand implements CommandInterface
             $output->writeLine('Available groups:');
 
             if ($this->container->has(ModuleGroupManagerInterface::class)) {
+                /** @var ModuleGroupManagerInterface $manager */
                 $manager = $this->container->get(ModuleGroupManagerInterface::class);
                 foreach ($manager->getGroups() as $name => $group) {
                     $isCore = $group->isCore ? ' [core]' : '';
@@ -47,6 +49,7 @@ readonly class ModuleUnbindCommand implements CommandInterface
             return 1;
         }
 
+        /** @var ModuleGroupManagerInterface $manager */
         $manager = $this->container->get(ModuleGroupManagerInterface::class);
         $group = $manager->getGroup($groupName);
 
@@ -71,7 +74,7 @@ readonly class ModuleUnbindCommand implements CommandInterface
             // Force remove from registry
             $manager->removeGroup($groupName);
             $output->writeLine("OK: Removed group '$groupName' from registry");
-        } elseif ($force && $isActive) {
+        } elseif ($force) {
             $manager->deactivateGroup($groupName);
             $manager->removeGroup($groupName);
             $output->writeLine("OK: Removed group '$groupName'");

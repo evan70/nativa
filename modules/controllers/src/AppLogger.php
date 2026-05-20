@@ -33,6 +33,8 @@ final class AppLogger
 
     /**
      * Log a message with timestamp
+     *
+     * @param array<string, mixed> $context
      */
     private static function log(string $level, string $message, array $context = []): void
     {
@@ -53,6 +55,8 @@ final class AppLogger
 
     /**
      * Debug level log
+     *
+     * @param array<string, mixed> $context
      */
     public static function debug(string $message, array $context = []): void
     {
@@ -61,6 +65,8 @@ final class AppLogger
 
     /**
      * Info level log
+     *
+     * @param array<string, mixed> $context
      */
     public static function info(string $message, array $context = []): void
     {
@@ -69,6 +75,8 @@ final class AppLogger
 
     /**
      * Warning level log
+     *
+     * @param array<string, mixed> $context
      */
     public static function warning(string $message, array $context = []): void
     {
@@ -77,6 +85,8 @@ final class AppLogger
 
     /**
      * Error level log
+     *
+     * @param array<string, mixed> $context
      */
     public static function error(string $message, array $context = []): void
     {

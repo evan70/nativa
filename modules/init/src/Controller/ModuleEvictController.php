@@ -27,6 +27,7 @@ readonly class ModuleEvictCommand implements CommandInterface
             return 1;
         }
 
+        /** @var ModuleGroupManagerInterface $manager */
         $manager = $this->container->get(ModuleGroupManagerInterface::class);
         $groups = $manager->getGroups();
 
@@ -63,7 +64,7 @@ readonly class ModuleEvictCommand implements CommandInterface
             }
         }
 
-        if ($evicted) {
+        if ($evicted !== []) {
             $output->writeLine('Evicted: ' . implode(', ', $evicted));
         } else {
             $output->writeLine('No idle groups to evict');
