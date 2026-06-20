@@ -14,7 +14,7 @@
     "@fontsource/inter": "^5.2.8",
     "@fontsource/jetbrains-mono": "^5.2.8",
     "@fontsource/press-start-2p": "^5.2.7",
-    "astro": "^6.3.1",
+    "astro": "^6.4.8",
     "sharp": "^0.34.2"
   }
 }
